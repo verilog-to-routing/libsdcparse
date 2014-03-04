@@ -1,0 +1,41 @@
+#
+# Project Related Files
+#
+
+#Executables
+
+#Generated files
+
+#ctags
+tags
+
+#
+# VIM related files
+#
+*.s[a-w][a-z]
+*.un~
+Session.vim
+.netrwhist
+*~
+
+
+#
+# C++ related files
+#
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+
+# Dependency files
+*.d
