@@ -3,8 +3,14 @@
 #
 
 #Executables
+sdc_parse
+a.out
 
 #Generated files
+lex.yy.c
+sdc.tab.h
+sdc.tab.c
+core
 
 #ctags
 tags
