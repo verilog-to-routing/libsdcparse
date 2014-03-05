@@ -20,8 +20,9 @@ typedef struct s_sdc_string_group t_sdc_string_group;
  * Enumerations to describe specific SDC command types
  */
 typedef enum e_io_delay_type {INPUT_DELAY, OUTPUT_DELAY} t_sdc_io_delay_type;
-typedef enum e_clock_group_type {EXCLUSIVE} t_sdc_clock_group_type;
-typedef enum e_mcp_type {SETUP} t_sdc_mcp_type;
+typedef enum e_clock_groups_type {CG_NONE, CG_EXCLUSIVE} t_sdc_clock_groups_type;
+typedef enum e_clock_group_dir {TO, FROM} t_sdc_clock_group_dir;
+typedef enum e_mcp_type {MCP_NONE, MCP_SETUP} t_sdc_mcp_type;
 
 /*
  * Collection of SDC commands
@@ -91,9 +92,9 @@ struct s_sdc_set_io_delay {
 };
 
 struct s_sdc_set_clock_groups {
-    t_sdc_clock_group_type type;     //The type of clock group relation being specified
-    int num_groups;                  //The number of clock groups (must be >= 2)  
-    t_sdc_clock_group* clock_groups; //The array of clock groups [0..num_groups-1]
+    t_sdc_clock_groups_type type;     //The type of clock group relation being specified
+    int num_clock_groups;                  //The number of clock groups (must be >= 2)  
+    t_sdc_clock_group** clock_groups; //The array of clock groups [0..num_clock_groups-1]
 };
 
 struct s_sdc_set_false_path {
@@ -104,15 +105,15 @@ struct s_sdc_set_false_path {
 struct s_sdc_set_max_delay {
     double max_delay;               //The maximum allowed delay between the from
                                     //and to clocks
-    t_sdc_clock_group* from_clocks;  //The source clock group
-    t_sdc_clock_group* to_clocks;    //The target clock group
+    t_sdc_clock_group* from_clocks; //The source clock group
+    t_sdc_clock_group* to_clocks;   //The target clock group
 };
 
 struct s_sdc_set_multicycle_path {
+    t_sdc_mcp_type type;            //The type of the mcp
     double mcp_value;               //The number of cycles specifed
-    t_sdc_mcp_type type;                //The type of the mcp
-    t_sdc_clock_group* from_clocks;  //The source clock group
-    t_sdc_clock_group* to_clocks;    //The target clock group
+    t_sdc_clock_group* from_clocks; //The source clock group
+    t_sdc_clock_group* to_clocks;   //The target clock group
 };
 
 /*
@@ -146,6 +147,35 @@ t_sdc_set_io_delay* sdc_set_io_delay_set_clock(t_sdc_set_io_delay* sdc_set_io_de
 t_sdc_set_io_delay* sdc_set_io_delay_set_max_delay(t_sdc_set_io_delay* sdc_set_io_delay, double max_delay);
 t_sdc_set_io_delay* sdc_set_io_delay_set_ports(t_sdc_set_io_delay* sdc_set_io_delay, t_sdc_port_group* ports);
 t_sdc_commands* add_sdc_set_io_delay(t_sdc_commands* sdc_commands, t_sdc_set_io_delay* sdc_set_io_delay);
+
+//set_clock_groups
+t_sdc_set_clock_groups* alloc_sdc_set_clock_groups();
+void free_sdc_set_clock_groups(t_sdc_set_clock_groups* sdc_set_clock_groups);
+t_sdc_set_clock_groups* sdc_set_clock_groups_set_type(t_sdc_set_clock_groups* sdc_set_clock_groups, t_sdc_clock_groups_type type);
+t_sdc_set_clock_groups* sdc_set_clock_groups_add_group(t_sdc_set_clock_groups* sdc_set_clock_groups, t_sdc_clock_group* clock_group);
+t_sdc_commands* add_sdc_set_clock_groups(t_sdc_commands* sdc_commands, t_sdc_set_clock_groups* sdc_set_clock_groups);
+
+//set_false_path
+t_sdc_set_false_path* alloc_sdc_set_false_path();
+void free_sdc_set_false_path(t_sdc_set_false_path* sdc_set_false_path);
+t_sdc_set_false_path* sdc_set_false_path_add_group(t_sdc_set_false_path* sdc_set_false_path, t_sdc_clock_group* clock_group, t_sdc_clock_group_dir clock_group_dir);
+t_sdc_commands* add_sdc_set_false_path(t_sdc_commands* sdc_commands, t_sdc_set_false_path* sdc_set_false_path);
+
+//set_max_delay
+t_sdc_set_max_delay* alloc_sdc_set_max_delay();
+void free_sdc_set_max_delay(t_sdc_set_max_delay* sdc_set_max_delay);
+t_sdc_set_max_delay* sdc_set_max_delay_set_max_delay(t_sdc_set_max_delay* sdc_set_max_delay, double max_delay);
+t_sdc_set_max_delay* sdc_set_max_delay_add_group(t_sdc_set_max_delay* sdc_set_max_delay, t_sdc_clock_group* clock_group, t_sdc_clock_group_dir clock_group_dir);
+t_sdc_commands* add_sdc_set_max_delay(t_sdc_commands* sdc_commands, t_sdc_set_max_delay* sdc_set_max_delay);
+
+//set_multicycle_path
+t_sdc_set_multicycle_path* alloc_sdc_set_multicycle_path();
+void free_sdc_set_multicycle_path(t_sdc_set_multicycle_path* sdc_set_multicycle_path);
+t_sdc_set_multicycle_path* sdc_set_multicycle_path_set_type(t_sdc_set_multicycle_path* sdc_set_multicycle_path, t_sdc_mcp_type type);
+t_sdc_set_multicycle_path* sdc_set_multicycle_path_set_mcp_value(t_sdc_set_multicycle_path* sdc_set_multicycle_path, double mcp_value);
+t_sdc_set_multicycle_path* sdc_set_multicycle_path_add_group(t_sdc_set_multicycle_path* sdc_set_multicycle_path, t_sdc_clock_group* clock_group, t_sdc_clock_group_dir clock_group_dir);
+t_sdc_commands* add_sdc_set_multicycle_path(t_sdc_commands* sdc_commands, t_sdc_set_multicycle_path* sdc_set_multicycle_path);
+
 
 
 //get_ports

@@ -271,6 +271,319 @@ t_sdc_commands* add_sdc_set_io_delay(t_sdc_commands* sdc_commands, t_sdc_set_io_
 }
 
 /*
+ * Functions for set_clock_groups
+ */
+t_sdc_set_clock_groups* alloc_sdc_set_clock_groups() {
+    //Allocate
+    t_sdc_set_clock_groups* sdc_set_clock_groups = (t_sdc_set_clock_groups*) malloc(sizeof(t_sdc_set_clock_groups));
+    assert(sdc_set_clock_groups != NULL);
+
+    //Initialize
+    sdc_set_clock_groups->type = CG_NONE;
+    sdc_set_clock_groups->num_clock_groups = 0;
+    sdc_set_clock_groups->clock_groups = NULL;
+
+    return sdc_set_clock_groups;
+}
+
+void free_sdc_set_clock_groups(t_sdc_set_clock_groups* sdc_set_clock_groups) {
+    for(int i = 0; i < sdc_set_clock_groups->num_clock_groups; i++) {
+        free_sdc_clock_group(sdc_set_clock_groups->clock_groups[i]);
+    }
+    free(sdc_set_clock_groups);
+}
+
+t_sdc_set_clock_groups* sdc_set_clock_groups_set_type(t_sdc_set_clock_groups* sdc_set_clock_groups, t_sdc_clock_groups_type type) {
+    if(sdc_set_clock_groups->type != CG_NONE) {
+        sdc_error("SDC Error: can only specify a single clock groups relation type (e.g. '-exclusive') at line %d near '%s'\n", yylineno, yytext); 
+    }
+    sdc_set_clock_groups->type = type;
+    return sdc_set_clock_groups;
+}
+
+t_sdc_set_clock_groups* sdc_set_clock_groups_add_group(t_sdc_set_clock_groups* sdc_set_clock_groups, t_sdc_clock_group* clock_group) {
+    //Allocate space
+    sdc_set_clock_groups->num_clock_groups++;
+    sdc_set_clock_groups->clock_groups = (t_sdc_clock_group**) realloc(sdc_set_clock_groups->clock_groups, sdc_set_clock_groups->num_clock_groups*sizeof(*sdc_set_clock_groups->clock_groups));
+    assert(sdc_set_clock_groups->clock_groups != NULL);
+
+    //Duplicate and insert the clock group
+    sdc_set_clock_groups->clock_groups[sdc_set_clock_groups->num_clock_groups-1] = duplicate_clock_group(clock_group);
+
+    return sdc_set_clock_groups;
+}
+
+t_sdc_commands* add_sdc_set_clock_groups(t_sdc_commands* sdc_commands, t_sdc_set_clock_groups* sdc_set_clock_groups) {
+    /*
+     * Error checks
+     */
+    if(sdc_set_clock_groups->type == CG_NONE) {
+        sdc_error("SDC Error: must specify clock relation type as '-exclusive' at line %d near '%s'\n", yylineno, yytext); 
+    }
+
+    if(sdc_set_clock_groups->num_clock_groups < 2) {
+        sdc_error("SDC Error: must specify at least 2 clock groups at line %d near '%s'\n", yylineno, yytext); 
+    }
+
+    /*
+     * Add command
+     */
+    sdc_commands->num_set_clock_groups_cmds++;
+    sdc_commands->set_clock_groups_cmds = (t_sdc_set_clock_groups**) realloc(sdc_commands->set_clock_groups_cmds, sdc_commands->num_set_clock_groups_cmds*sizeof(*sdc_commands->set_clock_groups_cmds));
+    sdc_commands->set_clock_groups_cmds[sdc_commands->num_set_clock_groups_cmds-1] = sdc_set_clock_groups;
+
+    return sdc_commands;
+}
+
+/*
+ * Functions for set_false_path
+ */
+t_sdc_set_false_path* alloc_sdc_set_false_path() {
+    //Allocate
+    t_sdc_set_false_path* sdc_set_false_path = (t_sdc_set_false_path*) malloc(sizeof(t_sdc_set_false_path));
+
+    //Initialize
+    sdc_set_false_path->from_clocks = NULL;
+    sdc_set_false_path->to_clocks = NULL;
+
+    return sdc_set_false_path;
+}
+
+void free_sdc_set_false_path(t_sdc_set_false_path* sdc_set_false_path) {
+    free_sdc_clock_group(sdc_set_false_path->from_clocks);
+    free_sdc_clock_group(sdc_set_false_path->to_clocks);
+    free(sdc_set_false_path);
+}
+
+t_sdc_set_false_path* sdc_set_false_path_add_group(t_sdc_set_false_path* sdc_set_false_path, t_sdc_clock_group* clock_group, t_sdc_clock_group_dir clock_group_dir) {
+    assert(sdc_set_false_path != NULL);
+
+    //Error checking
+    if(clock_group_dir == FROM) {
+        //Check that we haven't already defined the from path    
+        if(sdc_set_false_path->from_clocks != NULL) {
+            sdc_error("SDC Error: only a single '-from' option is supported at line %d near '%s'\n", yylineno, yytext); 
+        }
+    } else {
+        assert(clock_group_dir == TO);
+        //Check that we haven't already defined the from path    
+        if(sdc_set_false_path->to_clocks != NULL) {
+            sdc_error("SDC Error: only a single '-to' option is supported at line %d near '%s'\n", yylineno, yytext); 
+        }
+    }
+
+    //Add the clock group
+    if(clock_group_dir == FROM) {
+        sdc_set_false_path->from_clocks = duplicate_clock_group(clock_group);
+    } else {
+        assert(clock_group_dir == TO);
+        sdc_set_false_path->to_clocks = duplicate_clock_group(clock_group);
+    }
+
+    return sdc_set_false_path;
+}
+
+t_sdc_commands* add_sdc_set_false_path(t_sdc_commands* sdc_commands, t_sdc_set_false_path* sdc_set_false_path) {
+    /*
+     * Error checks
+     */
+    if(sdc_set_false_path->from_clocks == NULL) {
+        sdc_error("SDC Error: must specify source clock(s) with the '-from' option at line %d near '%s'\n", yylineno, yytext); 
+    }
+
+    if(sdc_set_false_path->to_clocks == NULL) {
+        sdc_error("SDC Error: must specify source clock(s) with the '-to' option at line %d near '%s'\n", yylineno, yytext); 
+    }
+
+    /*
+     * Add command
+     */
+    sdc_commands->num_set_false_path_cmds++;
+    sdc_commands->set_false_path_cmds = (t_sdc_set_false_path**) realloc(sdc_commands->set_false_path_cmds, sdc_commands->num_set_false_path_cmds*sizeof(*sdc_commands->set_false_path_cmds));
+    sdc_commands->set_false_path_cmds[sdc_commands->num_set_false_path_cmds-1] = sdc_set_false_path;
+
+    return sdc_commands;
+}
+
+/*
+ * Functions for set_max_delay
+ */
+t_sdc_set_max_delay* alloc_sdc_set_max_delay() {
+    //Allocate
+    t_sdc_set_max_delay* sdc_set_max_delay = (t_sdc_set_max_delay*) malloc(sizeof(t_sdc_set_max_delay));
+
+    //Initialize
+    sdc_set_max_delay->max_delay = UNINITIALIZED_FLOAT;
+    sdc_set_max_delay->from_clocks = NULL;
+    sdc_set_max_delay->to_clocks = NULL;
+
+    return sdc_set_max_delay;
+}
+
+void free_sdc_set_max_delay(t_sdc_set_max_delay* sdc_set_max_delay) {
+    free_sdc_clock_group(sdc_set_max_delay->from_clocks);
+    free_sdc_clock_group(sdc_set_max_delay->to_clocks);
+    free(sdc_set_max_delay);
+}
+
+t_sdc_set_max_delay* sdc_set_max_delay_set_max_delay(t_sdc_set_max_delay* sdc_set_max_delay, double max_delay) {
+    if(sdc_set_max_delay->max_delay != UNINITIALIZED_FLOAT) {
+        sdc_error("SDC Error: must specify max delay value only once at line %d near '%s'\n", yylineno, yytext); 
+    }
+    sdc_set_max_delay->max_delay = max_delay;
+    return sdc_set_max_delay;
+}
+
+t_sdc_set_max_delay* sdc_set_max_delay_add_group(t_sdc_set_max_delay* sdc_set_max_delay, t_sdc_clock_group* clock_group, t_sdc_clock_group_dir clock_group_dir) {
+    assert(sdc_set_max_delay != NULL);
+
+    //Error checking
+    if(clock_group_dir == FROM) {
+        //Check that we haven't already defined the from path    
+        if(sdc_set_max_delay->from_clocks != NULL) {
+            sdc_error("SDC Error: only a single '-from' option is supported at line %d near '%s'\n", yylineno, yytext); 
+        }
+    } else {
+        assert(clock_group_dir == TO);
+        //Check that we haven't already defined the from path    
+        if(sdc_set_max_delay->to_clocks != NULL) {
+            sdc_error("SDC Error: only a single '-to' option is supported at line %d near '%s'\n", yylineno, yytext); 
+        }
+    }
+
+    //Add the clock group
+    if(clock_group_dir == FROM) {
+        sdc_set_max_delay->from_clocks = duplicate_clock_group(clock_group);
+    } else {
+        assert(clock_group_dir == TO);
+        sdc_set_max_delay->to_clocks = duplicate_clock_group(clock_group);
+    }
+
+    return sdc_set_max_delay;
+}
+
+t_sdc_commands* add_sdc_set_max_delay(t_sdc_commands* sdc_commands, t_sdc_set_max_delay* sdc_set_max_delay) {
+    /*
+     * Error checks
+     */
+    if(sdc_set_max_delay->max_delay == UNINITIALIZED_FLOAT) {
+        sdc_error("SDC Error: must specify the max delay value at line %d near '%s'\n", yylineno, yytext); 
+    }
+
+    if(sdc_set_max_delay->from_clocks == NULL) {
+        sdc_error("SDC Error: must specify source clock(s) with the '-from' option at line %d near '%s'\n", yylineno, yytext); 
+    }
+
+    if(sdc_set_max_delay->to_clocks == NULL) {
+        sdc_error("SDC Error: must specify source clock(s) with the '-to' option at line %d near '%s'\n", yylineno, yytext); 
+    }
+
+    /*
+     * Add command
+     */
+    sdc_commands->num_set_max_delay_cmds++;
+    sdc_commands->set_max_delay_cmds = (t_sdc_set_max_delay**) realloc(sdc_commands->set_max_delay_cmds, sdc_commands->num_set_max_delay_cmds*sizeof(*sdc_commands->set_max_delay_cmds));
+    sdc_commands->set_max_delay_cmds[sdc_commands->num_set_max_delay_cmds-1] = sdc_set_max_delay;
+
+    return sdc_commands;
+
+}
+/*
+ * Functions for set_multicycle_path
+ */
+t_sdc_set_multicycle_path* alloc_sdc_set_multicycle_path() {
+    //Allocate
+    t_sdc_set_multicycle_path* sdc_set_multicycle_path = (t_sdc_set_multicycle_path*) malloc(sizeof(t_sdc_set_multicycle_path));
+
+    //Initialize
+    sdc_set_multicycle_path->mcp_value = UNINITIALIZED_FLOAT;
+    sdc_set_multicycle_path->from_clocks = NULL;
+    sdc_set_multicycle_path->to_clocks = NULL;
+
+    return sdc_set_multicycle_path;
+
+}
+void free_sdc_set_multicycle_path(t_sdc_set_multicycle_path* sdc_set_multicycle_path) {
+    free_sdc_clock_group(sdc_set_multicycle_path->from_clocks);
+    free_sdc_clock_group(sdc_set_multicycle_path->to_clocks);
+    free(sdc_set_multicycle_path);
+}
+
+t_sdc_set_multicycle_path* sdc_set_multicycle_path_set_type(t_sdc_set_multicycle_path* sdc_set_multicycle_path, t_sdc_mcp_type type) {
+    if(sdc_set_multicycle_path->type != MCP_NONE) {
+        sdc_error("SDC Error: must specify the type (e.g. '-setup') only once at line %d near '%s'\n", yylineno, yytext); 
+    }
+    sdc_set_multicycle_path->type = type;
+    return sdc_set_multicycle_path;
+}
+
+t_sdc_set_multicycle_path* sdc_set_multicycle_path_set_mcp_value(t_sdc_set_multicycle_path* sdc_set_multicycle_path, double mcp_value) {
+    if(sdc_set_multicycle_path->mcp_value != UNINITIALIZED_FLOAT) {
+        sdc_error("SDC Error: must specify multicycle path value only once at line %d near '%s'\n", yylineno, yytext); 
+    }
+    sdc_set_multicycle_path->mcp_value = mcp_value;
+    return sdc_set_multicycle_path;
+}
+
+t_sdc_set_multicycle_path* sdc_set_multicycle_path_add_group(t_sdc_set_multicycle_path* sdc_set_multicycle_path, t_sdc_clock_group* clock_group, t_sdc_clock_group_dir clock_group_dir) {
+    assert(sdc_set_multicycle_path != NULL);
+
+    //Error checking
+    if(clock_group_dir == FROM) {
+        //Check that we haven't already defined the from path    
+        if(sdc_set_multicycle_path->from_clocks != NULL) {
+            sdc_error("SDC Error: only a single '-from' option is supported at line %d near '%s'\n", yylineno, yytext); 
+        }
+    } else {
+        assert(clock_group_dir == TO);
+        //Check that we haven't already defined the from path    
+        if(sdc_set_multicycle_path->to_clocks != NULL) {
+            sdc_error("SDC Error: only a single '-to' option is supported at line %d near '%s'\n", yylineno, yytext); 
+        }
+    }
+
+    //Add the clock group
+    if(clock_group_dir == FROM) {
+        sdc_set_multicycle_path->from_clocks = duplicate_clock_group(clock_group);
+    } else {
+        assert(clock_group_dir == TO);
+        sdc_set_multicycle_path->to_clocks = duplicate_clock_group(clock_group);
+    }
+
+    return sdc_set_multicycle_path;
+}
+
+t_sdc_commands* add_sdc_set_multicycle_path(t_sdc_commands* sdc_commands, t_sdc_set_multicycle_path* sdc_set_multicycle_path) {
+    /*
+     * Error checks
+     */
+    if(sdc_set_multicycle_path->type != MCP_SETUP) {
+        sdc_error("SDC Error: must specify the multicycle path type as '-setup' at line %d near '%s'\n", yylineno, yytext); 
+    }
+
+    if(sdc_set_multicycle_path->mcp_value == UNINITIALIZED_FLOAT) {
+        sdc_error("SDC Error: must specify the multicycle path value at line %d near '%s'\n", yylineno, yytext); 
+    }
+
+    if(sdc_set_multicycle_path->from_clocks == NULL) {
+        sdc_error("SDC Error: must specify source clock(s) with the '-from' option at line %d near '%s'\n", yylineno, yytext); 
+    }
+
+    if(sdc_set_multicycle_path->to_clocks == NULL) {
+        sdc_error("SDC Error: must specify source clock(s) with the '-to' option at line %d near '%s'\n", yylineno, yytext); 
+    }
+
+    /*
+     * Add command
+     */
+    sdc_commands->num_set_multicycle_path_cmds++;
+    sdc_commands->set_multicycle_path_cmds = (t_sdc_set_multicycle_path**) realloc(sdc_commands->set_multicycle_path_cmds, sdc_commands->num_set_multicycle_path_cmds*sizeof(*sdc_commands->set_multicycle_path_cmds));
+    sdc_commands->set_multicycle_path_cmds[sdc_commands->num_set_multicycle_path_cmds-1] = sdc_set_multicycle_path;
+
+    return sdc_commands;
+}
+
+/*
  * Functions for get_clocks
  */
 t_sdc_clock_group* alloc_sdc_get_clocks() {
