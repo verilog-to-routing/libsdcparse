@@ -46,8 +46,14 @@ cmdlist: /*empty*/
 cmd: cmd_create_clock
     ;
 
-cmd_create_clock: CMD_CREATE_CLOCK ARG_PERIOD number ARG_NAME string { printf("P: create_clock %f %s\n", $3, $5); }
+cmd_create_clock: CMD_CREATE_CLOCK                          { printf("P: create_clock\n"); }
+    | cmd_create_clock ARG_PERIOD number                    { printf("P:\t-period %f\n", $3); }
+    | cmd_create_clock ARG_NAME string                      { printf("P:\t-name %s\n", $3); }
+    | cmd_create_clock ARG_WAVEFORM '{' number number '}'   { printf("P:\t-waveform %f %f\n", $4, $5); }
+    | cmd_create_clock string                               { printf("P:\t target %s\n", $2); }
     ;
+
+cmd_set_input_delay: CMD_SET_INPUT_DELAY
 
 string: BARE_STRING { $$ = $1; }
     | '"' BARE_STRING '"' { $$ = $2; }
