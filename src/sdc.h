@@ -115,4 +115,10 @@ struct s_sdc_set_multicycle_path {
     t_sdc_clock_group* from_clocks; //The source clock group
     t_sdc_clock_group* to_clocks;   //The target clock group
 };
+
+/*
+ *  Externally useful functions
+ */
+t_sdc_commands* sdc_parse_file(char* filename);
+
 #endif

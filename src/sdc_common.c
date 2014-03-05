@@ -14,13 +14,6 @@
 t_sdc_commands* g_sdc_commands;
 
 /*
- * Local Function declarations
- */
-
-//Error reporting
-void sdc_error(char* fmt, ...);
-
-/*
  * Functions for SDC Command List
  */
 t_sdc_commands* alloc_sdc_commands() {

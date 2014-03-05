@@ -11,14 +11,12 @@ extern char* yytext;
 
 extern t_sdc_commands* g_sdc_commands;
 
-extern "C" {
-    extern int yyparse();
-    extern int yylex(void);
-}
-
 /*
  * Function Declarations
  */
+//Error reporting
+void sdc_error(char* fmt, ...);
+
 //SDC Command List manipulation
 t_sdc_commands* alloc_sdc_commands();
 void free_sdc_commands(t_sdc_commands* sdc_commands);

@@ -19,7 +19,7 @@ main_src = $(SRC_DIR)/main.c
 main_obj := $(patsubst %.c, %.o, $(main_src))
 main_obj := $(foreach obj, $(main_obj), $(patsubst $(SRC_DIR)/%.o, $(OBJ_DIR)/%.o, $(obj)))
 
-lib_src = $(SRC_DIR)/sdc_common.c
+lib_src = $(SRC_DIR)/sdc_common.c $(SRC_DIR)/sdc.c
 lib_obj := $(patsubst %.c, %.o, $(lib_src))
 lib_obj := $(foreach obj, $(lib_obj), $(patsubst $(SRC_DIR)/%.o, $(OBJ_DIR)/%.o, $(obj)))
 
@@ -63,7 +63,7 @@ $(PARSER_GEN_OBJ): $(PARSER_GEN_SRC)
 	@echo "Compiling Parser $<..."
 	@$(CXX) $(CFLAGS) -c $< -o $@
 
-$(lib_obj): $(OBJ_DIR)/%.o:$(SRC_DIR)/%.c $(OBJ_DIR)
+$(lib_obj): $(OBJ_DIR)/%.o:$(SRC_DIR)/%.c $(OBJ_DIR) $(PARSER_GEN_SRC)
 	@echo "Compiling Source $<..."
 	@$(CXX) $(CFLAGS) -c $< -o $@
 

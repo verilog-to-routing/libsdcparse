@@ -3,9 +3,9 @@
 
 #include <stdio.h>
 #include "sdc_common.h"
-extern "C" {
-    int yyerror(const char *msg);
-}
+
+int yyerror(const char *msg);
+extern int yylex(void);
 
 %}
 
