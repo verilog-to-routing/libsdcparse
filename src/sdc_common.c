@@ -21,9 +21,6 @@ t_sdc_commands* alloc_sdc_commands() {
     //Alloc and initialize to empty
     t_sdc_commands* sdc_commands = (t_sdc_commands*) calloc(1, sizeof(t_sdc_commands));
 
-    //Save the pointer for use outside the parser
-    g_sdc_commands = sdc_commands;
-
     assert(sdc_commands != NULL);
 
     return sdc_commands;
