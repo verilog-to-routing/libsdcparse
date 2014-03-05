@@ -82,28 +82,28 @@ sdc_commands: /*empty*/                      { $$ = alloc_sdc_commands(); }
     | sdc_commands cmd_set_multicycle_path   { $$ = add_sdc_set_multicycle_path($1, $2); }
     ;
 
-cmd_create_clock: CMD_CREATE_CLOCK                          { printf("P: create_clock\n"); $$ = alloc_sdc_create_clock(); }
-    | cmd_create_clock ARG_PERIOD number                    { printf("P:\t-period %f\n", $3); $$ = sdc_create_clock_set_period($1, $3); }
-    | cmd_create_clock ARG_NAME string                      { printf("P:\t-name %s\n", $3); $$ = sdc_create_clock_set_name($1, $3); }
-    | cmd_create_clock ARG_WAVEFORM '{' number number '}'   { printf("P:\t-waveform %f %f\n", $4, $5); $$ = sdc_create_clock_set_waveform($1, $4, $5); }
-    | cmd_create_clock string                               { printf("P:\t target %s\n", $2); $$ = sdc_create_clock_set_target($1, $2); }
+cmd_create_clock: CMD_CREATE_CLOCK                          { $$ = alloc_sdc_create_clock(); }
+    | cmd_create_clock ARG_PERIOD number                    { $$ = sdc_create_clock_set_period($1, $3); }
+    | cmd_create_clock ARG_NAME string                      { $$ = sdc_create_clock_set_name($1, $3); }
+    | cmd_create_clock ARG_WAVEFORM '{' number number '}'   { $$ = sdc_create_clock_set_waveform($1, $4, $5); }
+    | cmd_create_clock string                               { $$ = sdc_create_clock_set_target($1, $2); }
     ;
 
-cmd_set_input_delay: CMD_SET_INPUT_DELAY        { printf("P: set_input_delay\n"); $$ = alloc_sdc_set_io_delay(INPUT_DELAY); }
-    | cmd_set_input_delay ARG_CLOCK string      { printf("P:\t-clock %s\n", $3); $$ = sdc_set_io_delay_set_clock($1, $3); }
-    | cmd_set_input_delay ARG_MAX number        { printf("P:\t-max %f\n", $3); $$ = sdc_set_io_delay_set_max_delay($1, $3); }
-    | cmd_set_input_delay '[' cmd_get_ports ']' { printf("P:\tget_ports ?\n"); $$ = sdc_set_io_delay_set_ports($1, $3); }
+cmd_set_input_delay: CMD_SET_INPUT_DELAY        { $$ = alloc_sdc_set_io_delay(INPUT_DELAY); }
+    | cmd_set_input_delay ARG_CLOCK string      { $$ = sdc_set_io_delay_set_clock($1, $3); }
+    | cmd_set_input_delay ARG_MAX number        { $$ = sdc_set_io_delay_set_max_delay($1, $3); }
+    | cmd_set_input_delay '[' cmd_get_ports ']' { $$ = sdc_set_io_delay_set_ports($1, $3); }
     ;
 
-cmd_set_output_delay: CMD_SET_OUTPUT_DELAY       { printf("P: set_output_delay\n");  $$ = alloc_sdc_set_io_delay(OUTPUT_DELAY); }
-    | cmd_set_output_delay ARG_CLOCK string      { printf("P:\t-clock %s\n", $3); $$ = sdc_set_io_delay_set_clock($1, $3); }
-    | cmd_set_output_delay ARG_MAX number        { printf("P:\t-max %f\n", $3); $$ = sdc_set_io_delay_set_max_delay($1, $3); }
-    | cmd_set_output_delay '[' cmd_get_ports ']' { printf("P:\tget_ports ?\n"); $$ = sdc_set_io_delay_set_ports($1, $3); }
+cmd_set_output_delay: CMD_SET_OUTPUT_DELAY       { $$ = alloc_sdc_set_io_delay(OUTPUT_DELAY); }
+    | cmd_set_output_delay ARG_CLOCK string      { $$ = sdc_set_io_delay_set_clock($1, $3); }
+    | cmd_set_output_delay ARG_MAX number        { $$ = sdc_set_io_delay_set_max_delay($1, $3); }
+    | cmd_set_output_delay '[' cmd_get_ports ']' { $$ = sdc_set_io_delay_set_ports($1, $3); }
     ;
 
-cmd_set_clock_groups: CMD_SET_CLOCK_GROUPS                  { printf("P: set_clock_groups\n"); $$ = alloc_sdc_set_clock_groups(); }
-    | cmd_set_clock_groups ARG_EXCLUSIVE                    { printf("P:\t-exclusive\n"); $$ = sdc_set_clock_groups_set_type($1, CG_EXCLUSIVE); }
-    | cmd_set_clock_groups ARG_GROUP '{' stringGroup '}'    { printf("P:\t-group ?\n"); 
+cmd_set_clock_groups: CMD_SET_CLOCK_GROUPS                  { $$ = alloc_sdc_set_clock_groups(); }
+    | cmd_set_clock_groups ARG_EXCLUSIVE                    { $$ = sdc_set_clock_groups_set_type($1, CG_EXCLUSIVE); }
+    | cmd_set_clock_groups ARG_GROUP '{' stringGroup '}'    { 
                                                               //Convert the stringGroup in to a clock group
                                                               t_sdc_clock_group* tmp_clock_group = alloc_sdc_get_clocks();
                                                               tmp_clock_group = sdc_get_clocks_add_clocks(tmp_clock_group, $4);
@@ -114,8 +114,7 @@ cmd_set_clock_groups: CMD_SET_CLOCK_GROUPS                  { printf("P: set_clo
                                                               //Clean-up temporaries
                                                               free_sdc_clock_group(tmp_clock_group);
                                                             }
-    | cmd_set_clock_groups ARG_GROUP string                 { printf("P:\t-group %s\n", $3); 
-
+    | cmd_set_clock_groups ARG_GROUP string                 { 
                                                               //Convert the stringGroup in to a clock group
                                                               t_sdc_clock_group* tmp_clock_group = alloc_sdc_get_clocks();
                                                               tmp_clock_group = sdc_get_clocks_add_clock(tmp_clock_group, $3);
@@ -129,32 +128,32 @@ cmd_set_clock_groups: CMD_SET_CLOCK_GROUPS                  { printf("P: set_clo
     | cmd_set_clock_groups ARG_GROUP '[' cmd_get_clocks ']' { $$ = sdc_set_clock_groups_add_group($1, $4); }
     ;
 
-cmd_set_false_path: CMD_SET_FALSE_PATH                      { printf("P: set_false_path\n"); $$ = alloc_sdc_set_false_path(); }
-    | cmd_set_false_path ARG_FROM '[' cmd_get_clocks ']'    { printf("P:\t-from ?\n"); $$ = sdc_set_false_path_add_group($1, $4, FROM); }
-    | cmd_set_false_path ARG_TO '[' cmd_get_clocks ']'      { printf("P:\t-to ?\n"); $$ = sdc_set_false_path_add_group($1, $4, TO); }
+cmd_set_false_path: CMD_SET_FALSE_PATH                      { $$ = alloc_sdc_set_false_path(); }
+    | cmd_set_false_path ARG_FROM '[' cmd_get_clocks ']'    { $$ = sdc_set_false_path_add_group($1, $4, FROM); }
+    | cmd_set_false_path ARG_TO '[' cmd_get_clocks ']'      { $$ = sdc_set_false_path_add_group($1, $4, TO); }
     ;
 
-cmd_set_max_delay: CMD_SET_MAX_DELAY                        { printf("P: set_max_delay\n"); $$ = alloc_sdc_set_max_delay(); }
-    | cmd_set_max_delay number                              { printf("P:\tdelay %f\n", $2); $$ = sdc_set_max_delay_set_max_delay($1, $2); }
-    | cmd_set_max_delay ARG_FROM '[' cmd_get_clocks ']'     { printf("P:\t-from ?\n"); $$ = sdc_set_max_delay_add_group($1, $4, FROM); }
-    | cmd_set_max_delay ARG_TO '[' cmd_get_clocks ']'       { printf("P:\t-to ?\n"); $$ = sdc_set_max_delay_add_group($1, $4, TO); }
+cmd_set_max_delay: CMD_SET_MAX_DELAY                        { $$ = alloc_sdc_set_max_delay(); }
+    | cmd_set_max_delay number                              { $$ = sdc_set_max_delay_set_max_delay($1, $2); }
+    | cmd_set_max_delay ARG_FROM '[' cmd_get_clocks ']'     { $$ = sdc_set_max_delay_add_group($1, $4, FROM); }
+    | cmd_set_max_delay ARG_TO '[' cmd_get_clocks ']'       { $$ = sdc_set_max_delay_add_group($1, $4, TO); }
     ;
 
-cmd_set_multicycle_path: CMD_SET_MULTICYCLE_PATH                { printf("P: set_multicycle_path\n"); $$ = alloc_sdc_set_multicycle_path(); }
-    | cmd_set_multicycle_path number                            { printf("P:\tmcp_val %f\n", $2); $$ = sdc_set_multicycle_path_set_mcp_value($1, $2); }
-    | cmd_set_multicycle_path ARG_SETUP                         { printf("P:\t-setup\n"); $$ = sdc_set_multicycle_path_set_type($1, MCP_SETUP); }
-    | cmd_set_multicycle_path ARG_FROM '[' cmd_get_clocks ']'   { printf("P:\t-from ?\n"); $$ = sdc_set_multicycle_path_add_group($1, $4, FROM); }
-    | cmd_set_multicycle_path ARG_TO '[' cmd_get_clocks ']'     { printf("P:\t-to ?\n"); $$ = sdc_set_multicycle_path_add_group($1, $4, TO); }
+cmd_set_multicycle_path: CMD_SET_MULTICYCLE_PATH                { $$ = alloc_sdc_set_multicycle_path(); }
+    | cmd_set_multicycle_path number                            { $$ = sdc_set_multicycle_path_set_mcp_value($1, $2); }
+    | cmd_set_multicycle_path ARG_SETUP                         { $$ = sdc_set_multicycle_path_set_type($1, MCP_SETUP); }
+    | cmd_set_multicycle_path ARG_FROM '[' cmd_get_clocks ']'   { $$ = sdc_set_multicycle_path_add_group($1, $4, FROM); }
+    | cmd_set_multicycle_path ARG_TO '[' cmd_get_clocks ']'     { $$ = sdc_set_multicycle_path_add_group($1, $4, TO); }
     ;
 
-cmd_get_ports: CMD_GET_PORTS            { printf("P: get_ports\n"); $$ = alloc_sdc_get_ports(); }
-    | cmd_get_ports '{' stringGroup '}' { printf("P:\ttarget ?\n"); $$ = sdc_get_ports_add_ports($1, $3); }
-    | cmd_get_ports string              { printf("P:\ttarget ?\n"); $$ = sdc_get_ports_add_port($1, $2); }
+cmd_get_ports: CMD_GET_PORTS            { $$ = alloc_sdc_get_ports(); }
+    | cmd_get_ports '{' stringGroup '}' { $$ = sdc_get_ports_add_ports($1, $3); }
+    | cmd_get_ports string              { $$ = sdc_get_ports_add_port($1, $2); }
     ;
 
-cmd_get_clocks: CMD_GET_CLOCKS              { printf("P: get_clocks\n"); $$ = alloc_sdc_get_clocks(); }
-    | cmd_get_clocks '{' stringGroup '}'    { printf("P:\ttargets ?\n"); $$ = sdc_get_clocks_add_clocks($1, $3); }
-    | cmd_get_clocks string                 { printf("P:\ttargets ?\n"); $$ = sdc_get_clocks_add_clock($1, $2); }
+cmd_get_clocks: CMD_GET_CLOCKS              { $$ = alloc_sdc_get_clocks(); }
+    | cmd_get_clocks '{' stringGroup '}'    { $$ = sdc_get_clocks_add_clocks($1, $3); }
+    | cmd_get_clocks string                 { $$ = sdc_get_clocks_add_clock($1, $2); }
     ;
 
 stringGroup: /*empty*/   { $$ = alloc_sdc_string_group(); }
