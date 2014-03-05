@@ -43,7 +43,8 @@
 "-to"                           { return ARG_TO; }
 "-setup"                        { return ARG_SETUP; }
 
-[-+]?([0-9]*\.?[0-9]+|[0-9]+\.) { yylval.floatVal = atof(yytext); return BARE_NUMBER; }
+[-+]?[0-9]+                     { yylval.intVal = atoi(yytext); return BARE_INT_NUMBER; }
+[-+]?([0-9]*\.?[0-9]+|[0-9]+\.) { yylval.floatVal = atof(yytext); return BARE_FLOAT_NUMBER; }
 [-a-zA-Z0-9_~|:*]*              { yylval.strVal = strdup(yytext); return BARE_STRING; }
 .                               { return (int)(*yytext); /*Literal character to pass unrecognized stuff to parser (i.e. brackets) */ }
 %%

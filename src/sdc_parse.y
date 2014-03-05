@@ -12,6 +12,7 @@ extern int yylex(void);
 %union {
     char* strVal;
     double floatVal;
+    int intVal;
 
     t_sdc_commands* sdc_commands;
 
@@ -54,11 +55,14 @@ extern int yylex(void);
 /* declare variable tokens */
 %token <strVal> BARE_STRING
 %token <strVal> BARE_CHAR
-%token <floatVal> BARE_NUMBER
+%token <floatVal> BARE_FLOAT_NUMBER
+%token <intVal> BARE_INT_NUMBER
 
 /* declare types */
 %type <strVal> string
 %type <floatVal> number
+%type <floatVal> float_number
+%type <intVal> int_number
 
 %type <sdc_commands> sdc_commands
 %type <create_clock> cmd_create_clock
@@ -144,7 +148,7 @@ cmd_set_max_delay: CMD_SET_MAX_DELAY                        { $$ = alloc_sdc_set
     ;
 
 cmd_set_multicycle_path: CMD_SET_MULTICYCLE_PATH                { $$ = alloc_sdc_set_multicycle_path(); }
-    | cmd_set_multicycle_path number                            { $$ = sdc_set_multicycle_path_set_mcp_value($1, $2); }
+    | cmd_set_multicycle_path int_number                        { $$ = sdc_set_multicycle_path_set_mcp_value($1, $2); }
     | cmd_set_multicycle_path ARG_SETUP                         { $$ = sdc_set_multicycle_path_set_type($1, MCP_SETUP); }
     | cmd_set_multicycle_path ARG_FROM '[' cmd_get_clocks ']'   { $$ = sdc_set_multicycle_path_add_group($1, $4, FROM); }
     | cmd_set_multicycle_path ARG_TO '[' cmd_get_clocks ']'     { $$ = sdc_set_multicycle_path_add_group($1, $4, TO); }
@@ -168,7 +172,14 @@ string: BARE_STRING         { $$ = $1; }
     | '\'' BARE_STRING '\'' { $$ = $2; }
     ;
 
-number: BARE_NUMBER { $$ = $1; }
+number: float_number { $$ = $1; }
+    | int_number { $$ = $1; }
+    ;
+
+float_number: BARE_FLOAT_NUMBER { $$ = $1; }
+    ;
+
+int_number: BARE_INT_NUMBER { $$ = $1; }
     ;
 
 %%

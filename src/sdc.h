@@ -111,7 +111,7 @@ struct s_sdc_set_max_delay {
 
 struct s_sdc_set_multicycle_path {
     t_sdc_mcp_type type;            //The type of the mcp
-    double mcp_value;               //The number of cycles specifed
+    int mcp_value;               //The number of cycles specifed
     t_sdc_clock_group* from_clocks; //The source clock group
     t_sdc_clock_group* to_clocks;   //The target clock group
 };

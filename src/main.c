@@ -97,7 +97,7 @@ int main(int argc, char **argv) {
 
     for(int i = 0; i < sdc_commands->num_set_multicycle_path_cmds; i++) {
         t_sdc_set_multicycle_path* sdc_set_multicycle_path = sdc_commands->set_multicycle_path_cmds[i];
-        printf("set_multicycle_path %f -setup -from [get_clocks {", sdc_set_multicycle_path->mcp_value);
+        printf("set_multicycle_path %d -setup -from [get_clocks {", sdc_set_multicycle_path->mcp_value);
         for(int j = 0; j < sdc_set_multicycle_path->from_clocks->num_clocks; j++) {
             printf("%s ", sdc_set_multicycle_path->from_clocks->clocks[j]);
         }

@@ -7,6 +7,7 @@
 #include "sdc_common.h"
 
 #define UNINITIALIZED_FLOAT -1.0
+#define UNINITIALIZED_INT -1
 
 /*
  * Data structure to store the SDC Commands
@@ -484,7 +485,7 @@ t_sdc_set_multicycle_path* alloc_sdc_set_multicycle_path() {
     t_sdc_set_multicycle_path* sdc_set_multicycle_path = (t_sdc_set_multicycle_path*) malloc(sizeof(t_sdc_set_multicycle_path));
 
     //Initialize
-    sdc_set_multicycle_path->mcp_value = UNINITIALIZED_FLOAT;
+    sdc_set_multicycle_path->mcp_value = UNINITIALIZED_INT;
     sdc_set_multicycle_path->from_clocks = NULL;
     sdc_set_multicycle_path->to_clocks = NULL;
 
@@ -505,8 +506,8 @@ t_sdc_set_multicycle_path* sdc_set_multicycle_path_set_type(t_sdc_set_multicycle
     return sdc_set_multicycle_path;
 }
 
-t_sdc_set_multicycle_path* sdc_set_multicycle_path_set_mcp_value(t_sdc_set_multicycle_path* sdc_set_multicycle_path, double mcp_value) {
-    if(sdc_set_multicycle_path->mcp_value != UNINITIALIZED_FLOAT) {
+t_sdc_set_multicycle_path* sdc_set_multicycle_path_set_mcp_value(t_sdc_set_multicycle_path* sdc_set_multicycle_path, int mcp_value) {
+    if(sdc_set_multicycle_path->mcp_value != UNINITIALIZED_INT) {
         sdc_error("SDC Error: must specify multicycle path value only once at line %d near '%s'\n", yylineno, yytext); 
     }
     sdc_set_multicycle_path->mcp_value = mcp_value;
@@ -550,7 +551,7 @@ t_sdc_commands* add_sdc_set_multicycle_path(t_sdc_commands* sdc_commands, t_sdc_
     }
 
     if(sdc_set_multicycle_path->mcp_value == UNINITIALIZED_FLOAT) {
-        sdc_error("SDC Error: must specify the multicycle path value at line %d near '%s'\n", yylineno, yytext); 
+        sdc_error("SDC Error: must specify the multicycle path value as an integer at line %d near '%s'\n", yylineno, yytext); 
     }
 
     if(sdc_set_multicycle_path->from_clocks == NULL) {
