@@ -175,6 +175,6 @@ number: BARE_NUMBER { $$ = $1; }
 
 
 int yyerror(const char *msg) {
-    fprintf(stderr, "%s at line %d: %s\n", msg, yylineno, yytext);
+    sdc_error("SDC Error: %s at line %d near '%s'\n", msg, yylineno, yytext);
     return 1;
 }
