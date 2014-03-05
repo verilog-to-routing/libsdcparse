@@ -13,8 +13,7 @@ int yyerror(const char *msg);
     t_sdc_commands* sdc_commands;
 
     t_sdc_create_clock* create_clock;
-    t_sdc_set_input_delay* set_input_delay;
-    t_sdc_set_output_delay* set_output_delay;
+    t_sdc_set_io_delay* set_io_delay;
 
     t_sdc_port_group* port_group;
     t_sdc_clock_group* clock_group;
@@ -56,8 +55,7 @@ int yyerror(const char *msg);
 
 %type <sdc_commands> sdc_commands
 %type <create_clock> cmd_create_clock
-%type <set_input_delay> cmd_set_input_delay
-%type <set_output_delay> cmd_set_output_delay
+%type <set_io_delay> cmd_set_input_delay cmd_set_output_delay
 
 %type <string_group> stringGroup
 %type <port_group> cmd_get_ports
@@ -68,8 +66,8 @@ int yyerror(const char *msg);
 %%
 sdc_commands: /*empty*/                      { $$ = alloc_sdc_commands(); }
     | sdc_commands cmd_create_clock          { $$ = add_sdc_create_clock($1, $2); }
-    | sdc_commands cmd_set_input_delay       { $$ = add_sdc_set_input_delay($1, $2); }
-    | sdc_commands cmd_set_output_delay      { $$ = add_sdc_set_output_delay($1, $2); }
+    | sdc_commands cmd_set_input_delay       { $$ = add_sdc_set_io_delay($1, $2); }
+    | sdc_commands cmd_set_output_delay      { $$ = add_sdc_set_io_delay($1, $2); }
     | sdc_commands cmd_set_clock_groups      {}
     | sdc_commands cmd_set_false_path        {}
     | sdc_commands cmd_set_max_delay         {}
@@ -83,16 +81,16 @@ cmd_create_clock: CMD_CREATE_CLOCK                          { printf("P: create_
     | cmd_create_clock string                               { printf("P:\t target %s\n", $2); $$ = sdc_create_clock_set_target($1, $2); }
     ;
 
-cmd_set_input_delay: CMD_SET_INPUT_DELAY        { printf("P: set_input_delay\n"); $$ = alloc_sdc_set_input_delay(); }
-    | cmd_set_input_delay ARG_CLOCK string      { printf("P:\t-clock %s\n", $3); $$ = sdc_set_input_delay_set_clock($1, $3); }
-    | cmd_set_input_delay ARG_MAX number        { printf("P:\t-max %f\n", $3); $$ = sdc_set_input_delay_set_max_delay($1, $3); }
-    | cmd_set_input_delay '[' cmd_get_ports ']' { printf("P:\tget_ports ?\n"); $$ = sdc_set_input_delay_set_ports($1, $3); }
+cmd_set_input_delay: CMD_SET_INPUT_DELAY        { printf("P: set_input_delay\n"); $$ = alloc_sdc_set_io_delay(INPUT_DELAY); }
+    | cmd_set_input_delay ARG_CLOCK string      { printf("P:\t-clock %s\n", $3); $$ = sdc_set_io_delay_set_clock($1, $3); }
+    | cmd_set_input_delay ARG_MAX number        { printf("P:\t-max %f\n", $3); $$ = sdc_set_io_delay_set_max_delay($1, $3); }
+    | cmd_set_input_delay '[' cmd_get_ports ']' { printf("P:\tget_ports ?\n"); $$ = sdc_set_io_delay_set_ports($1, $3); }
     ;
 
-cmd_set_output_delay: CMD_SET_OUTPUT_DELAY       { printf("P: set_output_delay\n");  $$ = alloc_sdc_set_output_delay(); }
-    | cmd_set_output_delay ARG_CLOCK string      { printf("P:\t-clock %s\n", $3); $$ = sdc_set_output_delay_set_clock($1, $3); }
-    | cmd_set_output_delay ARG_MAX number        { printf("P:\t-max %f\n", $3); $$ = sdc_set_output_delay_set_max_delay($1, $3); }
-    | cmd_set_output_delay '[' cmd_get_ports ']' { printf("P:\tget_ports ?\n"); $$ = sdc_set_output_delay_set_ports($1, $3); }
+cmd_set_output_delay: CMD_SET_OUTPUT_DELAY       { printf("P: set_output_delay\n");  $$ = alloc_sdc_set_io_delay(OUTPUT_DELAY); }
+    | cmd_set_output_delay ARG_CLOCK string      { printf("P:\t-clock %s\n", $3); $$ = sdc_set_io_delay_set_clock($1, $3); }
+    | cmd_set_output_delay ARG_MAX number        { printf("P:\t-max %f\n", $3); $$ = sdc_set_io_delay_set_max_delay($1, $3); }
+    | cmd_set_output_delay '[' cmd_get_ports ']' { printf("P:\tget_ports ?\n"); $$ = sdc_set_io_delay_set_ports($1, $3); }
     ;
 
 cmd_set_clock_groups: CMD_SET_CLOCK_GROUPS                  { printf("P: set_clock_groups\n"); }
@@ -163,7 +161,7 @@ int main(int argc, char **argv) {
     }
 
     for(int i = 0; i < g_sdc_commands->num_set_input_delay_cmds; i++) {
-        t_sdc_set_input_delay* sdc_set_input_delay = g_sdc_commands->set_input_delay_cmds[i];
+        t_sdc_set_io_delay* sdc_set_input_delay = g_sdc_commands->set_input_delay_cmds[i];
         printf("set_input_delay -clock %s -max %f [get_ports {", 
                     sdc_set_input_delay->clock_name,
                     sdc_set_input_delay->max_delay);
@@ -174,7 +172,7 @@ int main(int argc, char **argv) {
     }
 
     for(int i = 0; i < g_sdc_commands->num_set_output_delay_cmds; i++) {
-        t_sdc_set_output_delay* sdc_set_output_delay = g_sdc_commands->set_output_delay_cmds[i];
+        t_sdc_set_io_delay* sdc_set_output_delay = g_sdc_commands->set_output_delay_cmds[i];
         printf("set_output_delay -clock %s -max %f [get_ports {", 
                     sdc_set_output_delay->clock_name,
                     sdc_set_output_delay->max_delay);

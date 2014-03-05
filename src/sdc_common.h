@@ -6,8 +6,7 @@
 typedef struct s_sdc_commands t_sdc_commands;
 
 typedef struct s_sdc_create_clock t_sdc_create_clock;
-typedef struct s_sdc_set_input_delay t_sdc_set_input_delay;
-typedef struct s_sdc_set_output_delay t_sdc_set_output_delay;
+typedef struct s_sdc_set_io_delay t_sdc_set_io_delay;
 typedef struct s_sdc_set_clock_groups t_sdc_set_clock_groups;
 typedef struct s_sdc_set_false_path t_sdc_set_false_path;
 typedef struct s_sdc_set_max_delay t_sdc_set_max_delay;
@@ -20,6 +19,7 @@ typedef struct s_sdc_string_group t_sdc_string_group;
 /*
  * Enumerations to describe specific SDC command types
  */
+typedef enum e_io_delay_type {INPUT_DELAY, OUTPUT_DELAY} t_sdc_io_delay_type;
 typedef enum e_clock_group_type {EXCLUSIVE} t_sdc_clock_group_type;
 typedef enum e_mcp_type {SETUP} t_sdc_mcp_type;
 
@@ -32,10 +32,10 @@ struct s_sdc_commands {
     t_sdc_create_clock** create_clock_cmds;                 //Array of create_clock commands [0..num_create_clock_cmds-1]
 
     int num_set_input_delay_cmds;                           //Number of set_input_delay commands
-    t_sdc_set_input_delay** set_input_delay_cmds;           //Array of set_input_delay commands [0..num_set_input_delay_cmds-1]
+    t_sdc_set_io_delay** set_input_delay_cmds;              //Array of set_input_delay commands [0..num_set_input_delay_cmds-1]
 
     int num_set_output_delay_cmds;                          //Number of set_output_delay commands
-    t_sdc_set_output_delay** set_output_delay_cmds;         //Array of set_output_delay commands [0..num_set_output_delay_cmds-1]
+    t_sdc_set_io_delay** set_output_delay_cmds;             //Array of set_output_delay commands [0..num_set_output_delay_cmds-1]
 
     int num_set_clock_groups_cmds;                          //Number of set_clock_groups commands
     t_sdc_set_clock_groups** set_clock_groups_cmds;         //Array of set_clock_groups commands [0..num_set_clock_groups_cmds-1]
@@ -83,15 +83,10 @@ struct s_sdc_create_clock {
     bool is_virtual;    //Identifies this as a virtual (non-netlist) clock
 };
 
-struct s_sdc_set_input_delay {
+struct s_sdc_set_io_delay {
+    t_sdc_io_delay_type type;
     char* clock_name;   //Name of the clock this constraint is associated with
     double max_delay;   //The maximum input delay allowed on the target ports
-    t_sdc_port_group* target_ports; //The target ports
-};
-
-struct s_sdc_set_output_delay {
-    char* clock_name;   //Name of the clock this constraint is associated with
-    double max_delay;   //The maximum output delay allowed on the target ports
     t_sdc_port_group* target_ports; //The target ports
 };
 
@@ -144,21 +139,14 @@ t_sdc_create_clock* sdc_create_clock_set_waveform(t_sdc_create_clock* sdc_create
 t_sdc_create_clock* sdc_create_clock_set_target(t_sdc_create_clock* sdc_create_clock, char* target);
 t_sdc_commands* add_sdc_create_clock(t_sdc_commands* sdc_commands, t_sdc_create_clock* sdc_create_clock);
 
-//set_input_delay
-t_sdc_set_input_delay* alloc_sdc_set_input_delay();
-void free_sdc_set_input_delay(t_sdc_set_input_delay* sdc_set_input_delay);
-t_sdc_set_input_delay* sdc_set_input_delay_set_clock(t_sdc_set_input_delay* sdc_set_input_delay, char* clock_name);
-t_sdc_set_input_delay* sdc_set_input_delay_set_max_delay(t_sdc_set_input_delay* sdc_set_input_delay, double max_delay);
-t_sdc_set_input_delay* sdc_set_input_delay_set_ports(t_sdc_set_input_delay* sdc_set_input_delay, t_sdc_port_group* ports);
-t_sdc_commands* add_sdc_set_input_delay(t_sdc_commands* sdc_commands, t_sdc_set_input_delay* sdc_set_input_delay);
+//set_input_delay & set_output_delay
+t_sdc_set_io_delay* alloc_sdc_set_io_delay(t_sdc_io_delay_type type);
+void free_sdc_set_io_delay(t_sdc_set_io_delay* sdc_set_io_delay);
+t_sdc_set_io_delay* sdc_set_io_delay_set_clock(t_sdc_set_io_delay* sdc_set_io_delay, char* clock_name);
+t_sdc_set_io_delay* sdc_set_io_delay_set_max_delay(t_sdc_set_io_delay* sdc_set_io_delay, double max_delay);
+t_sdc_set_io_delay* sdc_set_io_delay_set_ports(t_sdc_set_io_delay* sdc_set_io_delay, t_sdc_port_group* ports);
+t_sdc_commands* add_sdc_set_io_delay(t_sdc_commands* sdc_commands, t_sdc_set_io_delay* sdc_set_io_delay);
 
-//set_output_delay
-t_sdc_set_output_delay* alloc_sdc_set_output_delay();
-void free_sdc_set_output_delay(t_sdc_set_output_delay* sdc_set_output_delay);
-t_sdc_set_output_delay* sdc_set_output_delay_set_clock(t_sdc_set_output_delay* sdc_set_output_delay, char* clock_name);
-t_sdc_set_output_delay* sdc_set_output_delay_set_max_delay(t_sdc_set_output_delay* sdc_set_output_delay, double max_delay);
-t_sdc_set_output_delay* sdc_set_output_delay_set_ports(t_sdc_set_output_delay* sdc_set_output_delay, t_sdc_port_group* ports);
-t_sdc_commands* add_sdc_set_output_delay(t_sdc_commands* sdc_commands, t_sdc_set_output_delay* sdc_set_output_delay);
 
 //get_ports
 t_sdc_port_group* alloc_sdc_get_ports();
