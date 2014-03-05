@@ -8,20 +8,8 @@
 
 #define UNINITIALIZED_FLOAT -1.0
 /*
- * Function declarations
+ * Local Function declarations
  */
-//SDC Command List manipulation
-t_sdc_commands* alloc_sdc_commands();
-void free_sdc_commands(t_sdc_commands* sdc_commands);
-
-//create_clock manipulation
-t_sdc_create_clock* alloc_sdc_create_clock();
-void sdc_create_clock_set_period(t_sdc_create_clock* sdc_create_clock, double period);
-void sdc_create_clock_set_name(t_sdc_create_clock* sdc_create_clock, char* name);
-void sdc_create_clock_set_waveform(t_sdc_create_clock* sdc_create_clock, double rise_time, double fall_time);
-void sdc_create_clock_set_target(t_sdc_create_clock* sdc_create_clock, char* target);
-void add_sdc_create_clock(t_sdc_commands* sdc_commands, t_sdc_create_clock* sdc_create_clock);
-void free_sdc_create_clock(t_sdc_create_clock* sdc_create_clock);
 
 //Error reporting
 void sdc_error(char* fmt, ...);
@@ -91,25 +79,35 @@ t_sdc_create_clock* alloc_sdc_create_clock() {
     return sdc_create_clock;
 }
 
-void sdc_create_clock_set_period(t_sdc_create_clock* sdc_create_clock, double period) {
+void free_sdc_create_clock(t_sdc_create_clock* sdc_create_clock) {
+    free(sdc_create_clock->name);
+    free(sdc_create_clock->target);
+    free(sdc_create_clock);
+}
+
+t_sdc_create_clock* sdc_create_clock_set_period(t_sdc_create_clock* sdc_create_clock, double period) {
     assert(sdc_create_clock != NULL);
     if(sdc_create_clock->period != UNINITIALIZED_FLOAT) {
         sdc_error("SDC Error: can only define a single clock period at line %d near '%s'\n", yylineno, yytext); 
     } else {
         sdc_create_clock->period = period;
     }
+
+    return sdc_create_clock;
 }
 
-void sdc_create_clock_set_name(t_sdc_create_clock* sdc_create_clock, char* name) {
+t_sdc_create_clock* sdc_create_clock_set_name(t_sdc_create_clock* sdc_create_clock, char* name) {
     assert(sdc_create_clock != NULL);
     if(sdc_create_clock->name != NULL) {
         sdc_error("SDC Error: can only define a single clock name at line %d near '%s'\n", yylineno, yytext);
     } else {
         sdc_create_clock->name = strdup(name);
     }
+
+    return sdc_create_clock;
 }
 
-void sdc_create_clock_set_waveform(t_sdc_create_clock* sdc_create_clock, double rise_time, double fall_time) {
+t_sdc_create_clock* sdc_create_clock_set_waveform(t_sdc_create_clock* sdc_create_clock, double rise_time, double fall_time) {
     assert(sdc_create_clock != NULL);
     if(sdc_create_clock->rise_time != UNINITIALIZED_FLOAT || sdc_create_clock->fall_time != UNINITIALIZED_FLOAT) {
         sdc_error("SDC Error: can only define a single waveform at line %d near '%s'\n", yylineno, yytext); 
@@ -117,18 +115,22 @@ void sdc_create_clock_set_waveform(t_sdc_create_clock* sdc_create_clock, double 
         sdc_create_clock->rise_time = rise_time;
         sdc_create_clock->fall_time = fall_time;
     }
+
+    return sdc_create_clock;
 }
 
-void sdc_create_clock_set_target(t_sdc_create_clock* sdc_create_clock, char* target) {
+t_sdc_create_clock* sdc_create_clock_set_target(t_sdc_create_clock* sdc_create_clock, char* target) {
     assert(sdc_create_clock != NULL);
     if(sdc_create_clock->target != NULL) {
         sdc_error("SDC Error: can only define a single clock target at line %d near '%s'\n", yylineno, yytext);
     } else {
         sdc_create_clock->target = strdup(target);
     }
+
+    return sdc_create_clock;
 }
 
-void add_sdc_create_clock(t_sdc_commands* sdc_commands, t_sdc_create_clock* sdc_create_clock) {
+t_sdc_commands* add_sdc_create_clock(t_sdc_commands* sdc_commands, t_sdc_create_clock* sdc_create_clock) {
     /*
      * Error Checking
      */
@@ -175,12 +177,8 @@ void add_sdc_create_clock(t_sdc_commands* sdc_commands, t_sdc_create_clock* sdc_
     sdc_commands->num_create_clock_cmds++;
     sdc_commands->create_clock_cmds = (t_sdc_create_clock**) realloc(sdc_commands->create_clock_cmds, sdc_commands->num_create_clock_cmds*sizeof(*sdc_commands->create_clock_cmds));
     sdc_commands->create_clock_cmds[sdc_commands->num_create_clock_cmds-1] = sdc_create_clock;
-}
 
-void free_sdc_create_clock(t_sdc_create_clock* sdc_create_clock) {
-    free(sdc_create_clock->name);
-    free(sdc_create_clock->target);
-    free(sdc_create_clock);
+    return sdc_commands;
 }
 
 void sdc_error(char* fmt, ...) {

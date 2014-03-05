@@ -3,6 +3,7 @@
 /*
  * Include Files
  */
+#include "sdc_common.h"
 #include "sdc_parse.tab.h"
 %}
 

@@ -119,4 +119,20 @@ struct s_sdc_set_multicycle_path {
  */
 extern int yylineno;
 extern char* yytext;
+
+/*
+ * Function Declarations
+ */
+//SDC Command List manipulation
+t_sdc_commands* alloc_sdc_commands();
+void free_sdc_commands(t_sdc_commands* sdc_commands);
+
+//create_clock manipulation
+t_sdc_create_clock* alloc_sdc_create_clock();
+void free_sdc_create_clock(t_sdc_create_clock* sdc_create_clock);
+t_sdc_create_clock* sdc_create_clock_set_period(t_sdc_create_clock* sdc_create_clock, double period);
+t_sdc_create_clock* sdc_create_clock_set_name(t_sdc_create_clock* sdc_create_clock, char* name);
+t_sdc_create_clock* sdc_create_clock_set_waveform(t_sdc_create_clock* sdc_create_clock, double rise_time, double fall_time);
+t_sdc_create_clock* sdc_create_clock_set_target(t_sdc_create_clock* sdc_create_clock, char* target);
+t_sdc_commands* add_sdc_create_clock(t_sdc_commands* sdc_commands, t_sdc_create_clock* sdc_create_clock);
 #endif

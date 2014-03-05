@@ -9,6 +9,10 @@ int yyerror(const char *msg);
 %union {
     char* strVal;
     double floatVal;
+
+    t_sdc_commands* sdc_commands;
+    t_sdc_create_clock* create_clock;
+
 }
 
 /* declare constant */
@@ -40,26 +44,26 @@ int yyerror(const char *msg);
 %token <floatVal> BARE_NUMBER
 %type <strVal> string cmd_get_ports cmd_get_clocks cmd_set_output_delay
 %type <floatVal> number
+%type <create_clock> cmd_create_clock
+%type <sdc_commands> sdc_commands
 
 
 %%
-cmdlist: /*empty*/
-    | cmdlist cmd;
-
-cmd: cmd_create_clock           {}
-    | cmd_set_input_delay       {}
-    | cmd_set_output_delay      {}
-    | cmd_set_clock_groups      {}
-    | cmd_set_false_path        {}
-    | cmd_set_max_delay         {}
-    | cmd_set_multicycle_path   {}
+sdc_commands: /*empty*/                      { $$ = alloc_sdc_commands(); }
+    | sdc_commands cmd_create_clock          { $$ = add_sdc_create_clock($1, $2); }
+    | sdc_commands cmd_set_input_delay       {}
+    | sdc_commands cmd_set_output_delay      {}
+    | sdc_commands cmd_set_clock_groups      {}
+    | sdc_commands cmd_set_false_path        {}
+    | sdc_commands cmd_set_max_delay         {}
+    | sdc_commands cmd_set_multicycle_path   {}
     ;
 
-cmd_create_clock: CMD_CREATE_CLOCK                          { printf("P: create_clock\n"); }
-    | cmd_create_clock ARG_PERIOD number                    { printf("P:\t-period %f\n", $3); }
-    | cmd_create_clock ARG_NAME string                      { printf("P:\t-name %s\n", $3); }
-    | cmd_create_clock ARG_WAVEFORM '{' number number '}'   { printf("P:\t-waveform %f %f\n", $4, $5); }
-    | cmd_create_clock string                               { printf("P:\t target %s\n", $2); }
+cmd_create_clock: CMD_CREATE_CLOCK                          { printf("P: create_clock\n"); $$ = alloc_sdc_create_clock(); }
+    | cmd_create_clock ARG_PERIOD number                    { printf("P:\t-period %f\n", $3); $$ = sdc_create_clock_set_period($1, $3); }
+    | cmd_create_clock ARG_NAME string                      { printf("P:\t-name %s\n", $3); $$ = sdc_create_clock_set_name($1, $3); }
+    | cmd_create_clock ARG_WAVEFORM '{' number number '}'   { printf("P:\t-waveform %f %f\n", $4, $5); $$ = sdc_create_clock_set_waveform($1, $4, $5); }
+    | cmd_create_clock string                               { printf("P:\t target %s\n", $2); $$ = sdc_create_clock_set_target($1, $2); }
     ;
 
 cmd_set_input_delay: CMD_SET_INPUT_DELAY        { printf("P: set_input_delay\n"); }

@@ -8,8 +8,8 @@ a.out
 
 #Generated files
 lex.yy.c
-sdc.tab.h
-sdc.tab.c
+*.tab.h
+*.tab.c
 core
 
 #ctags
