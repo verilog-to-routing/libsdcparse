@@ -41,31 +41,29 @@ void free_sdc_commands(t_sdc_commands* sdc_commands) {
         free_sdc_create_clock(sdc_commands->create_clock_cmds[i]);
     }
 
-/*
- *    for(int i = 0; i < sdc_commands->num_set_input_delay_cmds; i++) {
- *        free_sdc_set_input_delay(sdc_commands->set_input_delay_cmds[i]);
- *    }
- *
- *    for(int i = 0; i < sdc_commands->num_set_output_delay_cmds; i++) {
- *        free_sdc_set_output_delay(sdc_commands->set_output_delay_cmds[i]);
- *    }
- *
- *    for(int i = 0; i < sdc_commands->num_set_clock_groups_cmds; i++) {
- *        free_sdc_set_clock_groups(sdc_commands->set_clock_groups_cmds[i]);
- *    }
- *
- *    for(int i = 0; i < sdc_commands->num_set_false_path_cmds; i++) {
- *        free_sdc_set_false_path(sdc_commands->set_false_path_cmds[i]);
- *    }
- *
- *    for(int i = 0; i < sdc_commands->num_set_max_delay_cmds; i++) {
- *        free_sdc_set_max_delay(sdc_commands->set_max_delay_cmds[i]);
- *    }
- *
- *    for(int i = 0; i < sdc_commands->num_set_multicycle_path_cmds; i++) {
- *        free_sdc_set_multicycle_path(sdc_commands->set_multicycle_path_cmds[i]);
- *    }
- */
+    for(int i = 0; i < sdc_commands->num_set_input_delay_cmds; i++) {
+        free_sdc_set_io_delay(sdc_commands->set_input_delay_cmds[i]);
+    }
+
+    for(int i = 0; i < sdc_commands->num_set_output_delay_cmds; i++) {
+        free_sdc_set_io_delay(sdc_commands->set_output_delay_cmds[i]);
+    }
+
+    for(int i = 0; i < sdc_commands->num_set_clock_groups_cmds; i++) {
+        free_sdc_set_clock_groups(sdc_commands->set_clock_groups_cmds[i]);
+    }
+
+    for(int i = 0; i < sdc_commands->num_set_false_path_cmds; i++) {
+        free_sdc_set_false_path(sdc_commands->set_false_path_cmds[i]);
+    }
+
+    for(int i = 0; i < sdc_commands->num_set_max_delay_cmds; i++) {
+        free_sdc_set_max_delay(sdc_commands->set_max_delay_cmds[i]);
+    }
+
+    for(int i = 0; i < sdc_commands->num_set_multicycle_path_cmds; i++) {
+        free_sdc_set_multicycle_path(sdc_commands->set_multicycle_path_cmds[i]);
+    }
 
     free(sdc_commands);
 }
@@ -221,11 +219,11 @@ t_sdc_set_io_delay* sdc_set_io_delay_set_clock(t_sdc_set_io_delay* sdc_set_io_de
     return sdc_set_io_delay;
 }
 
-t_sdc_set_io_delay* sdc_set_io_delay_set_max_delay(t_sdc_set_io_delay* sdc_set_io_delay, double max_delay) {
+t_sdc_set_io_delay* sdc_set_io_delay_set_max_value(t_sdc_set_io_delay* sdc_set_io_delay, double max_value) {
     if(sdc_set_io_delay->max_delay != UNINITIALIZED_FLOAT) {
         sdc_error("SDC Error: max delay can only specified once at line %d near '%s'\n", yylineno, yytext); 
     }
-    sdc_set_io_delay->max_delay = max_delay;
+    sdc_set_io_delay->max_delay = max_value;
     return sdc_set_io_delay;
 }
 

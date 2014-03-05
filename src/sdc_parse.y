@@ -69,6 +69,7 @@ int yyerror(const char *msg);
 %type <port_group> cmd_get_ports
 %type <clock_group> cmd_get_clocks
 
+/* Top level rule */
 %start sdc_commands
 
 %%
@@ -91,13 +92,13 @@ cmd_create_clock: CMD_CREATE_CLOCK                          { $$ = alloc_sdc_cre
 
 cmd_set_input_delay: CMD_SET_INPUT_DELAY        { $$ = alloc_sdc_set_io_delay(INPUT_DELAY); }
     | cmd_set_input_delay ARG_CLOCK string      { $$ = sdc_set_io_delay_set_clock($1, $3); }
-    | cmd_set_input_delay ARG_MAX number        { $$ = sdc_set_io_delay_set_max_delay($1, $3); }
+    | cmd_set_input_delay ARG_MAX number        { $$ = sdc_set_io_delay_set_max_value($1, $3); }
     | cmd_set_input_delay '[' cmd_get_ports ']' { $$ = sdc_set_io_delay_set_ports($1, $3); }
     ;
 
 cmd_set_output_delay: CMD_SET_OUTPUT_DELAY       { $$ = alloc_sdc_set_io_delay(OUTPUT_DELAY); }
     | cmd_set_output_delay ARG_CLOCK string      { $$ = sdc_set_io_delay_set_clock($1, $3); }
-    | cmd_set_output_delay ARG_MAX number        { $$ = sdc_set_io_delay_set_max_delay($1, $3); }
+    | cmd_set_output_delay ARG_MAX number        { $$ = sdc_set_io_delay_set_max_value($1, $3); }
     | cmd_set_output_delay '[' cmd_get_ports ']' { $$ = sdc_set_io_delay_set_ports($1, $3); }
     ;
 
