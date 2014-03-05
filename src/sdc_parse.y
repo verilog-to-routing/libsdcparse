@@ -12,6 +12,9 @@ int yyerror(const char *msg);
 
     t_sdc_commands* sdc_commands;
     t_sdc_create_clock* create_clock;
+    t_sdc_string_group* string_group;
+    t_sdc_port_group* port_group;
+    t_sdc_clock_group* clock_group;
 
 }
 
@@ -42,11 +45,15 @@ int yyerror(const char *msg);
 %token <strVal> BARE_STRING
 %token <strVal> BARE_CHAR
 %token <floatVal> BARE_NUMBER
-%type <strVal> string cmd_get_ports cmd_get_clocks cmd_set_output_delay
+%type <strVal> string cmd_set_output_delay
 %type <floatVal> number
 %type <create_clock> cmd_create_clock
 %type <sdc_commands> sdc_commands
+%type <string_group> stringGroup
+%type <port_group> cmd_get_ports
+%type <clock_group> cmd_get_clocks
 
+%start sdc_commands
 
 %%
 sdc_commands: /*empty*/                      { $$ = alloc_sdc_commands(); }
@@ -80,7 +87,7 @@ cmd_set_output_delay: CMD_SET_OUTPUT_DELAY       { printf("P: set_output_delay\n
 
 cmd_set_clock_groups: CMD_SET_CLOCK_GROUPS                  { printf("P: set_clock_groups\n"); }
     | cmd_set_clock_groups ARG_EXCLUSIVE                    { printf("P:\t-exclusive\n"); }
-    | cmd_set_clock_groups ARG_GROUP '{' stringList '}'     { printf("P:\t-group ?\n"); }
+    | cmd_set_clock_groups ARG_GROUP '{' stringGroup '}'     { printf("P:\t-group ?\n"); }
     | cmd_set_clock_groups ARG_GROUP string                 { printf("P:\t-group %s\n", $3); }
     ;
 
@@ -102,18 +109,18 @@ cmd_set_multicycle_path: CMD_SET_MULTICYCLE_PATH                { printf("P: set
     | cmd_set_multicycle_path ARG_TO '[' cmd_get_clocks ']'     { printf("P:\t-to ?\n"); }
     ;
 
-cmd_get_ports: CMD_GET_PORTS            { printf("P: get_ports\n"); }
-    | cmd_get_ports '{' stringList '}'  { printf("P:\ttarget ?\n");}
-    | cmd_get_ports string              { printf("P:\ttarget ?\n");}
+cmd_get_ports: CMD_GET_PORTS            { printf("P: get_ports\n"); $$ = alloc_sdc_get_ports(); }
+    | cmd_get_ports '{' stringGroup '}' { printf("P:\ttarget ?\n"); $$ = sdc_get_ports_add_ports($1, $3); }
+    | cmd_get_ports string              { printf("P:\ttarget ?\n"); $$ = sdc_get_ports_add_port($1, $2); }
     ;
 
-cmd_get_clocks: CMD_GET_CLOCKS          { printf("P: get_clocks\n"); }
-    | cmd_get_clocks '{' stringList '}' { printf("P:\ttargets ?\n");}
-    | cmd_get_clocks string             { printf("P:\ttargets ?\n");}
+cmd_get_clocks: CMD_GET_CLOCKS              { printf("P: get_clocks\n"); $$ = alloc_sdc_get_clocks(); }
+    | cmd_get_clocks '{' stringGroup '}'    { printf("P:\ttargets ?\n"); $$ = sdc_get_clocks_add_clocks($1, $3); }
+    | cmd_get_clocks string                 { printf("P:\ttargets ?\n"); $$ = sdc_get_clocks_add_clock($1, $2); }
     ;
 
-stringList: /*empty*/
-    | stringList string             
+stringGroup: /*empty*/   { $$ = alloc_sdc_string_group(); }
+    | stringGroup string { $$ = sdc_string_group_add_string($1, $2); } 
 
 string: BARE_STRING         { $$ = $1; }
     | '"' BARE_STRING '"'   { $$ = $2; }
@@ -127,6 +134,24 @@ number: BARE_NUMBER { $$ = $1; }
 
 int main(int argc, char **argv) {
     yyparse();
+
+    for(int i = 0; i < g_sdc_commands->num_create_clock_cmds; i++) {
+        t_sdc_create_clock* sdc_create_clock = g_sdc_commands->create_clock_cmds[i];
+        if(sdc_create_clock->is_virtual) {
+            printf("create_clock -period %f -waveform {%f %f} -name %s\n",
+                    sdc_create_clock->period,
+                    sdc_create_clock->rise_time,
+                    sdc_create_clock->fall_time,
+                    sdc_create_clock->name);
+        } else {
+            printf("create_clock -period %f -waveform {%f %f} %s\n",
+                    sdc_create_clock->period,
+                    sdc_create_clock->rise_time,
+                    sdc_create_clock->fall_time,
+                    sdc_create_clock->target);
+        }
+    }
+
     return 0;
 }
 

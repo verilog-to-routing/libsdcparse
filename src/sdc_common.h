@@ -15,6 +15,7 @@ typedef struct s_sdc_set_multicycle_path t_sdc_set_multicycle_path;
 
 typedef struct s_sdc_clock_group t_sdc_clock_group;
 typedef struct s_sdc_port_group t_sdc_port_group;
+typedef struct s_sdc_string_group t_sdc_string_group;
 
 /*
  * Enumerations to describe specific SDC command types
@@ -50,7 +51,7 @@ struct s_sdc_commands {
 };
 
 /*
- * Common SDC command data structures
+ * Common SDC data structures
  */
 struct s_sdc_clock_group {
     int num_clocks; //Number of clocks in this group
@@ -64,6 +65,11 @@ struct s_sdc_port_group {
                       //May be exact string matches or regexs.
 };
 
+struct s_sdc_string_group {
+    int num_strings;    //Number of strings in this group
+    char** strings;     //Array of ports names [0..num_strings-1]. 
+                        //May be exact string matches or regexs.
+};
 
 /*
  * Structures defining different SDC commands
@@ -80,13 +86,13 @@ struct s_sdc_create_clock {
 struct s_sdc_set_input_delay {
     char* clock_name;   //Name of the clock this constraint is associated with
     double max_delay;   //The maximum input delay allowed on the target ports
-    t_sdc_port_group target_ports; //The target ports
+    t_sdc_port_group* target_ports; //The target ports
 };
 
 struct s_sdc_set_output_delay {
     char* clock_name;   //Name of the clock this constraint is associated with
     double max_delay;   //The maximum output delay allowed on the target ports
-    t_sdc_port_group target_ports; //The target ports
+    t_sdc_port_group* target_ports; //The target ports
 };
 
 struct s_sdc_set_clock_groups {
@@ -96,22 +102,22 @@ struct s_sdc_set_clock_groups {
 };
 
 struct s_sdc_set_false_path {
-    t_sdc_clock_group from_clocks;  //The source clock group
-    t_sdc_clock_group to_clocks;    //The target clock group
+    t_sdc_clock_group* from_clocks;  //The source clock group
+    t_sdc_clock_group* to_clocks;    //The target clock group
 };
 
 struct s_sdc_set_max_delay {
     double max_delay;               //The maximum allowed delay between the from
                                     //and to clocks
-    t_sdc_clock_group from_clocks;  //The source clock group
-    t_sdc_clock_group to_clocks;    //The target clock group
+    t_sdc_clock_group* from_clocks;  //The source clock group
+    t_sdc_clock_group* to_clocks;    //The target clock group
 };
 
 struct s_sdc_set_multicycle_path {
     double mcp_value;               //The number of cycles specifed
     t_sdc_mcp_type type;                //The type of the mcp
-    t_sdc_clock_group from_clocks;  //The source clock group
-    t_sdc_clock_group to_clocks;    //The target clock group
+    t_sdc_clock_group* from_clocks;  //The source clock group
+    t_sdc_clock_group* to_clocks;    //The target clock group
 };
 
 /*
@@ -120,6 +126,8 @@ struct s_sdc_set_multicycle_path {
 extern int yylineno;
 extern char* yytext;
 
+extern t_sdc_commands* g_sdc_commands;
+
 /*
  * Function Declarations
  */
@@ -127,7 +135,7 @@ extern char* yytext;
 t_sdc_commands* alloc_sdc_commands();
 void free_sdc_commands(t_sdc_commands* sdc_commands);
 
-//create_clock manipulation
+//create_clock
 t_sdc_create_clock* alloc_sdc_create_clock();
 void free_sdc_create_clock(t_sdc_create_clock* sdc_create_clock);
 t_sdc_create_clock* sdc_create_clock_set_period(t_sdc_create_clock* sdc_create_clock, double period);
@@ -135,4 +143,22 @@ t_sdc_create_clock* sdc_create_clock_set_name(t_sdc_create_clock* sdc_create_clo
 t_sdc_create_clock* sdc_create_clock_set_waveform(t_sdc_create_clock* sdc_create_clock, double rise_time, double fall_time);
 t_sdc_create_clock* sdc_create_clock_set_target(t_sdc_create_clock* sdc_create_clock, char* target);
 t_sdc_commands* add_sdc_create_clock(t_sdc_commands* sdc_commands, t_sdc_create_clock* sdc_create_clock);
+
+//get_ports
+t_sdc_port_group* alloc_sdc_get_ports();
+void free_sdc_port_group(t_sdc_port_group* sdc_port_group);
+t_sdc_port_group* sdc_get_ports_add_ports(t_sdc_port_group* sdc_port_group, t_sdc_string_group* port_list);
+t_sdc_port_group* sdc_get_ports_add_port(t_sdc_port_group* sdc_port_group, char* port_name);
+
+//get_ports
+t_sdc_clock_group* alloc_sdc_get_clocks();
+void free_sdc_clock_group(t_sdc_clock_group* sdc_clock_group);
+t_sdc_clock_group* sdc_get_clocks_add_clocks(t_sdc_clock_group* sdc_clock_group, t_sdc_string_group* clock_list);
+t_sdc_clock_group* sdc_get_clocks_add_clock(t_sdc_clock_group* sdc_clock_group, char* clock_name);
+
+//string_group
+t_sdc_string_group* alloc_sdc_string_group();
+void free_sdc_string_group(t_sdc_string_group* sdc_string_group);
+t_sdc_string_group* sdc_string_group_add_string(t_sdc_string_group* sdc_string_group, char* string);
+
 #endif

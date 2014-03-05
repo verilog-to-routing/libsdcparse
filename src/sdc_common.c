@@ -7,6 +7,12 @@
 #include "sdc_common.h"
 
 #define UNINITIALIZED_FLOAT -1.0
+
+/*
+ * Data structure to store the SDC Commands
+ */
+t_sdc_commands* g_sdc_commands;
+
 /*
  * Local Function declarations
  */
@@ -21,6 +27,9 @@ t_sdc_commands* alloc_sdc_commands() {
 
     //Alloc and initialize to empty
     t_sdc_commands* sdc_commands = (t_sdc_commands*) calloc(1, sizeof(t_sdc_commands));
+
+    //Save the pointer for use outside the parser
+    g_sdc_commands = sdc_commands;
 
     assert(sdc_commands != NULL);
 
@@ -60,10 +69,10 @@ void free_sdc_commands(t_sdc_commands* sdc_commands) {
 
     free(sdc_commands);
 }
+
 /*
  * Functions for create_clock
  */
-
 t_sdc_create_clock* alloc_sdc_create_clock() {
     t_sdc_create_clock* sdc_create_clock = (t_sdc_create_clock*) malloc(sizeof(t_sdc_create_clock));
     assert(sdc_create_clock != NULL);
@@ -181,6 +190,151 @@ t_sdc_commands* add_sdc_create_clock(t_sdc_commands* sdc_commands, t_sdc_create_
     return sdc_commands;
 }
 
+/*
+ * Functions for get_clocks
+ */
+t_sdc_clock_group* alloc_sdc_get_clocks() {
+    //Allocate and initialize
+    t_sdc_clock_group* sdc_clock_group = (t_sdc_clock_group*) calloc(1, sizeof(t_sdc_clock_group)); 
+    assert(sdc_clock_group != NULL);
+
+    return sdc_clock_group;
+}
+
+void free_sdc_clock_group(t_sdc_clock_group* sdc_clock_group) {
+    assert(sdc_clock_group != NULL);
+
+    for(int i = 0; i < sdc_clock_group->num_clocks; i++) {
+        free(sdc_clock_group->clocks[i]);
+    }
+    free(sdc_clock_group);
+}
+
+t_sdc_clock_group* sdc_get_clocks_add_clocks(t_sdc_clock_group* sdc_clock_group, t_sdc_string_group* clock_list) {
+    assert(sdc_clock_group != NULL);
+    assert(clock_list != NULL);
+
+    //Save the old number of clocks so we know where to add from
+    int old_num_clocks = sdc_clock_group->num_clocks;
+
+    //Reallocat space
+    sdc_clock_group->num_clocks += clock_list->num_strings;
+    sdc_clock_group->clocks = (char**) realloc(sdc_clock_group->clocks, sdc_clock_group->num_clocks*sizeof(*sdc_clock_group->clocks));
+    assert(sdc_clock_group->clocks != NULL);
+
+    //Copy all the strings
+    for(int i = 0; i < clock_list->num_strings; i++) {
+        sdc_clock_group->clocks[old_num_clocks + i] = strdup(clock_list->strings[i]);
+    }
+
+    return sdc_clock_group;
+}
+
+t_sdc_clock_group* sdc_get_clocks_add_clock(t_sdc_clock_group* sdc_clock_group, char* clock_name) {
+    assert(sdc_clock_group != NULL);
+
+    //Allocate space
+    sdc_clock_group->num_clocks++;
+    sdc_clock_group->clocks = (char**) realloc(sdc_clock_group->clocks, sdc_clock_group->num_clocks*sizeof(*sdc_clock_group->clocks));
+    assert(sdc_clock_group->clocks != NULL);
+
+    //Insert the new string
+    sdc_clock_group->clocks[sdc_clock_group->num_clocks-1] = strdup(clock_name);
+    
+    return sdc_clock_group;
+}
+
+/*
+ * Functions for get_ports
+ */
+t_sdc_port_group* alloc_sdc_get_ports() {
+    //Allocate and initialize
+    t_sdc_port_group* sdc_port_group = (t_sdc_port_group*) calloc(1, sizeof(t_sdc_port_group)); 
+    assert(sdc_port_group != NULL);
+
+    return sdc_port_group;
+}
+
+void free_sdc_port_group(t_sdc_port_group* sdc_port_group) {
+    assert(sdc_port_group != NULL);
+
+    for(int i = 0; i < sdc_port_group->num_ports; i++) {
+        free(sdc_port_group->ports[i]);
+    }
+    free(sdc_port_group);
+}
+
+t_sdc_port_group* sdc_get_ports_add_ports(t_sdc_port_group* sdc_port_group, t_sdc_string_group* port_list) {
+    assert(sdc_port_group != NULL);
+    assert(port_list != NULL);
+
+    //Save the old number of ports so we know where to add from
+    int old_num_ports = sdc_port_group->num_ports;
+
+    //Reallocat space
+    sdc_port_group->num_ports += port_list->num_strings;
+    sdc_port_group->ports = (char**) realloc(sdc_port_group->ports, sdc_port_group->num_ports*sizeof(*sdc_port_group->ports));
+    assert(sdc_port_group->ports != NULL);
+
+    //Copy all the strings
+    for(int i = 0; i < port_list->num_strings; i++) {
+        sdc_port_group->ports[old_num_ports + i] = strdup(port_list->strings[i]);
+    }
+
+    return sdc_port_group;
+}
+
+t_sdc_port_group* sdc_get_ports_add_port(t_sdc_port_group* sdc_port_group, char* port_name) {
+    assert(sdc_port_group != NULL);
+
+    //Allocate space
+    sdc_port_group->num_ports++;
+    sdc_port_group->ports = (char**) realloc(sdc_port_group->ports, sdc_port_group->num_ports*sizeof(*sdc_port_group->ports));
+    assert(sdc_port_group->ports != NULL);
+
+    //Insert the new string
+    sdc_port_group->ports[sdc_port_group->num_ports-1] = strdup(port_name);
+    
+    return sdc_port_group;
+}
+
+/*
+ * Functions for string_group
+ */
+t_sdc_string_group* alloc_sdc_string_group() {
+    //Allocate and initialize
+    t_sdc_string_group* sdc_string_group = (t_sdc_string_group*) calloc(1, sizeof(t_sdc_string_group)); 
+    assert(sdc_string_group != NULL);
+
+    return sdc_string_group;
+}
+
+void free_sdc_string_group(t_sdc_string_group* sdc_string_group) {
+    assert(sdc_string_group != NULL);
+
+    for(int i = 0; i < sdc_string_group->num_strings; i++) {
+        free(sdc_string_group->strings[i]);
+    }
+    free(sdc_string_group);
+}
+
+t_sdc_string_group* sdc_string_group_add_string(t_sdc_string_group* sdc_string_group, char* string) {
+    assert(sdc_string_group != NULL);
+
+    //Allocate space
+    sdc_string_group->num_strings++;
+    sdc_string_group->strings = (char**) realloc(sdc_string_group->strings, sdc_string_group->num_strings*sizeof(*sdc_string_group->strings));
+    assert(sdc_string_group->strings != NULL);
+
+    //Insert the new string
+    sdc_string_group->strings[sdc_string_group->num_strings-1] = strdup(string);
+    
+    return sdc_string_group;
+}
+
+/*
+ * Error handling
+ */
 void sdc_error(char* fmt, ...) {
     va_list args;
     va_start(args, fmt);
