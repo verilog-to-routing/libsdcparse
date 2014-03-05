@@ -144,14 +144,32 @@ t_sdc_create_clock* sdc_create_clock_set_waveform(t_sdc_create_clock* sdc_create
 t_sdc_create_clock* sdc_create_clock_set_target(t_sdc_create_clock* sdc_create_clock, char* target);
 t_sdc_commands* add_sdc_create_clock(t_sdc_commands* sdc_commands, t_sdc_create_clock* sdc_create_clock);
 
+//set_input_delay
+t_sdc_set_input_delay* alloc_sdc_set_input_delay();
+void free_sdc_set_input_delay(t_sdc_set_input_delay* sdc_set_input_delay);
+t_sdc_set_input_delay* sdc_set_input_delay_set_clock(t_sdc_set_input_delay* sdc_set_input_delay, char* clock_name);
+t_sdc_set_input_delay* sdc_set_input_delay_set_max_delay(t_sdc_set_input_delay* sdc_set_input_delay, double max_delay);
+t_sdc_set_input_delay* sdc_set_input_delay_set_ports(t_sdc_set_input_delay* sdc_set_input_delay, t_sdc_port_group* ports);
+t_sdc_commands* add_sdc_set_input_delay(t_sdc_commands* sdc_commands, t_sdc_set_input_delay* sdc_set_input_delay);
+
+//set_output_delay
+t_sdc_set_output_delay* alloc_sdc_set_output_delay();
+void free_sdc_set_output_delay(t_sdc_set_output_delay* sdc_set_output_delay);
+t_sdc_set_output_delay* sdc_set_output_delay_set_clock(t_sdc_set_output_delay* sdc_set_output_delay, char* clock_name);
+t_sdc_set_output_delay* sdc_set_output_delay_set_max_delay(t_sdc_set_output_delay* sdc_set_output_delay, double max_delay);
+t_sdc_set_output_delay* sdc_set_output_delay_set_ports(t_sdc_set_output_delay* sdc_set_output_delay, t_sdc_port_group* ports);
+t_sdc_commands* add_sdc_set_output_delay(t_sdc_commands* sdc_commands, t_sdc_set_output_delay* sdc_set_output_delay);
+
 //get_ports
 t_sdc_port_group* alloc_sdc_get_ports();
+t_sdc_port_group* duplicate_port_group(t_sdc_port_group* port_group);
 void free_sdc_port_group(t_sdc_port_group* sdc_port_group);
 t_sdc_port_group* sdc_get_ports_add_ports(t_sdc_port_group* sdc_port_group, t_sdc_string_group* port_list);
 t_sdc_port_group* sdc_get_ports_add_port(t_sdc_port_group* sdc_port_group, char* port_name);
 
-//get_ports
+//get_clocks
 t_sdc_clock_group* alloc_sdc_get_clocks();
+t_sdc_clock_group* duplicate_clock_group(t_sdc_clock_group* clock_group);
 void free_sdc_clock_group(t_sdc_clock_group* sdc_clock_group);
 t_sdc_clock_group* sdc_get_clocks_add_clocks(t_sdc_clock_group* sdc_clock_group, t_sdc_string_group* clock_list);
 t_sdc_clock_group* sdc_get_clocks_add_clock(t_sdc_clock_group* sdc_clock_group, char* clock_name);

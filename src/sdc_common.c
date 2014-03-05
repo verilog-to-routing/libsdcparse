@@ -191,6 +191,150 @@ t_sdc_commands* add_sdc_create_clock(t_sdc_commands* sdc_commands, t_sdc_create_
 }
 
 /*
+ * Functions for set_input_delay
+ */
+t_sdc_set_input_delay* alloc_sdc_set_input_delay() {
+    //Allocate
+    t_sdc_set_input_delay* sdc_set_input_delay = (t_sdc_set_input_delay*) malloc(sizeof(t_sdc_set_input_delay));
+    assert(sdc_set_input_delay != NULL);
+
+    //Initialize
+    sdc_set_input_delay->clock_name = NULL;
+    sdc_set_input_delay->max_delay = UNINITIALIZED_FLOAT;
+    sdc_set_input_delay->target_ports = NULL;
+
+    return sdc_set_input_delay;
+}
+
+void free_sdc_set_input_delay(t_sdc_set_input_delay* sdc_set_input_delay) {
+    free(sdc_set_input_delay->clock_name);
+    free_sdc_port_group(sdc_set_input_delay->target_ports);
+    free(sdc_set_input_delay);
+}
+
+t_sdc_set_input_delay* sdc_set_input_delay_set_clock(t_sdc_set_input_delay* sdc_set_input_delay, char* clock_name) {
+    if(sdc_set_input_delay->clock_name != NULL) {
+        sdc_error("SDC Error: can only specify a single clock at line %d near '%s'\n", yylineno, yytext); 
+    }
+    sdc_set_input_delay->clock_name = strdup(clock_name);
+    return sdc_set_input_delay;
+}
+
+t_sdc_set_input_delay* sdc_set_input_delay_set_max_delay(t_sdc_set_input_delay* sdc_set_input_delay, double max_delay) {
+    if(sdc_set_input_delay->max_delay != UNINITIALIZED_FLOAT) {
+        sdc_error("SDC Error: max delay can only specified once at line %d near '%s'\n", yylineno, yytext); 
+    }
+    sdc_set_input_delay->max_delay = max_delay;
+    return sdc_set_input_delay;
+}
+
+t_sdc_set_input_delay* sdc_set_input_delay_set_ports(t_sdc_set_input_delay* sdc_set_input_delay, t_sdc_port_group* ports) {
+    if(sdc_set_input_delay->target_ports != NULL) {
+        sdc_error("SDC Error: currently on a single get_ports command is supported at line %d near '%s'\n", yylineno, yytext); 
+    }
+    sdc_set_input_delay->target_ports = duplicate_port_group(ports);
+    return sdc_set_input_delay;
+}
+
+t_sdc_commands* add_sdc_set_input_delay(t_sdc_commands* sdc_commands, t_sdc_set_input_delay* sdc_set_input_delay) {
+    /*
+     * Error checks
+     */
+    if(sdc_set_input_delay->clock_name == NULL) {
+        sdc_error("SDC Error: must specify clock name at line %d near '%s'\n", yylineno, yytext); 
+    }
+
+    if(sdc_set_input_delay->max_delay == UNINITIALIZED_FLOAT) {
+        sdc_error("SDC Error: must specify max delay value at line %d near '%s'\n", yylineno, yytext); 
+    }
+
+    if(sdc_set_input_delay->target_ports == NULL) {
+        sdc_error("SDC Error: must specify target ports using get_ports at line %d near '%s'\n", yylineno, yytext); 
+    }
+
+    /*
+     * Add command
+     */
+    sdc_commands->num_set_input_delay_cmds++;
+    sdc_commands->set_input_delay_cmds = (t_sdc_set_input_delay**) realloc(sdc_commands->set_input_delay_cmds, sdc_commands->num_set_input_delay_cmds*sizeof(*sdc_commands->set_input_delay_cmds));
+    sdc_commands->set_input_delay_cmds[sdc_commands->num_set_input_delay_cmds-1] = sdc_set_input_delay;
+
+    return sdc_commands;
+}
+
+/*
+ * Functions for set_output_delay
+ */
+t_sdc_set_output_delay* alloc_sdc_set_output_delay() {
+    //Allocate
+    t_sdc_set_output_delay* sdc_set_output_delay = (t_sdc_set_output_delay*) malloc(sizeof(t_sdc_set_output_delay));
+    assert(sdc_set_output_delay != NULL);
+
+    //Initialize
+    sdc_set_output_delay->clock_name = NULL;
+    sdc_set_output_delay->max_delay = UNINITIALIZED_FLOAT;
+    sdc_set_output_delay->target_ports = NULL;
+
+    return sdc_set_output_delay;
+}
+
+void free_sdc_set_output_delay(t_sdc_set_output_delay* sdc_set_output_delay) {
+    free(sdc_set_output_delay->clock_name);
+    free_sdc_port_group(sdc_set_output_delay->target_ports);
+    free(sdc_set_output_delay);
+}
+
+t_sdc_set_output_delay* sdc_set_output_delay_set_clock(t_sdc_set_output_delay* sdc_set_output_delay, char* clock_name) {
+    if(sdc_set_output_delay->clock_name != NULL) {
+        sdc_error("SDC Error: can only specify a single clock at line %d near '%s'\n", yylineno, yytext); 
+    }
+    sdc_set_output_delay->clock_name = strdup(clock_name);
+    return sdc_set_output_delay;
+}
+
+t_sdc_set_output_delay* sdc_set_output_delay_set_max_delay(t_sdc_set_output_delay* sdc_set_output_delay, double max_delay) {
+    if(sdc_set_output_delay->max_delay != UNINITIALIZED_FLOAT) {
+        sdc_error("SDC Error: max delay can only specified once at line %d near '%s'\n", yylineno, yytext); 
+    }
+    sdc_set_output_delay->max_delay = max_delay;
+    return sdc_set_output_delay;
+}
+
+t_sdc_set_output_delay* sdc_set_output_delay_set_ports(t_sdc_set_output_delay* sdc_set_output_delay, t_sdc_port_group* ports) {
+    if(sdc_set_output_delay->target_ports != NULL) {
+        sdc_error("SDC Error: currently on a single get_ports command is supported at line %d near '%s'\n", yylineno, yytext); 
+    }
+    sdc_set_output_delay->target_ports = duplicate_port_group(ports);
+    return sdc_set_output_delay;
+}
+
+t_sdc_commands* add_sdc_set_output_delay(t_sdc_commands* sdc_commands, t_sdc_set_output_delay* sdc_set_output_delay) {
+    /*
+     * Error checks
+     */
+    if(sdc_set_output_delay->clock_name == NULL) {
+        sdc_error("SDC Error: must specify clock name at line %d near '%s'\n", yylineno, yytext); 
+    }
+
+    if(sdc_set_output_delay->max_delay == UNINITIALIZED_FLOAT) {
+        sdc_error("SDC Error: must specify max delay value at line %d near '%s'\n", yylineno, yytext); 
+    }
+
+    if(sdc_set_output_delay->target_ports == NULL) {
+        sdc_error("SDC Error: must specify target ports using get_ports at line %d near '%s'\n", yylineno, yytext); 
+    }
+
+    /*
+     * Add command
+     */
+    sdc_commands->num_set_output_delay_cmds++;
+    sdc_commands->set_output_delay_cmds = (t_sdc_set_output_delay**) realloc(sdc_commands->set_output_delay_cmds, sdc_commands->num_set_output_delay_cmds*sizeof(*sdc_commands->set_output_delay_cmds));
+    sdc_commands->set_output_delay_cmds[sdc_commands->num_set_output_delay_cmds-1] = sdc_set_output_delay;
+
+    return sdc_commands;
+}
+
+/*
  * Functions for get_clocks
  */
 t_sdc_clock_group* alloc_sdc_get_clocks() {
@@ -199,6 +343,23 @@ t_sdc_clock_group* alloc_sdc_get_clocks() {
     assert(sdc_clock_group != NULL);
 
     return sdc_clock_group;
+}
+
+t_sdc_clock_group* duplicate_clock_group(t_sdc_clock_group* sdc_clock_group) {
+    //Allocate
+    t_sdc_clock_group* new_sdc_clock_group = (t_sdc_clock_group*) malloc(sizeof(t_sdc_clock_group));
+    assert(new_sdc_clock_group != NULL);
+
+    //Deep Copy
+    new_sdc_clock_group->num_clocks = sdc_clock_group->num_clocks;
+
+    new_sdc_clock_group->clocks = (char**) calloc(new_sdc_clock_group->num_clocks, sizeof(*new_sdc_clock_group->clocks));
+    assert(new_sdc_clock_group->clocks != NULL);
+    for(int i = 0; i < new_sdc_clock_group->num_clocks; i++) {
+        new_sdc_clock_group->clocks[i] = strdup(sdc_clock_group->clocks[i]);
+    }
+
+    return new_sdc_clock_group;
 }
 
 void free_sdc_clock_group(t_sdc_clock_group* sdc_clock_group) {
@@ -253,6 +414,23 @@ t_sdc_port_group* alloc_sdc_get_ports() {
     assert(sdc_port_group != NULL);
 
     return sdc_port_group;
+}
+
+t_sdc_port_group* duplicate_port_group(t_sdc_port_group* sdc_port_group) {
+    //Allocate
+    t_sdc_port_group* new_sdc_port_group = (t_sdc_port_group*) malloc(sizeof(t_sdc_port_group));
+    assert(new_sdc_port_group != NULL);
+
+    //Deep Copy
+    new_sdc_port_group->num_ports = sdc_port_group->num_ports;
+
+    new_sdc_port_group->ports = (char**) calloc(new_sdc_port_group->num_ports, sizeof(*new_sdc_port_group->ports));
+    assert(new_sdc_port_group->ports != NULL);
+    for(int i = 0; i < new_sdc_port_group->num_ports; i++) {
+        new_sdc_port_group->ports[i] = strdup(sdc_port_group->ports[i]);
+    }
+
+    return new_sdc_port_group;
 }
 
 void free_sdc_port_group(t_sdc_port_group* sdc_port_group) {
