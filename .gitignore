@@ -3,7 +3,7 @@
 #
 
 #Executables
-sdc_parse
+sdc_parse_test
 a.out
 
 #Generated files
@@ -11,6 +11,7 @@ lex.yy.c
 *.tab.h
 *.tab.c
 core
+obj/
 
 #ctags
 tags
