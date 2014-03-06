@@ -19,9 +19,11 @@ t_sdc_commands* sdc_parse_file(char* filename) {
         if(error) {
             sdc_error("SDC Error: file %s failed to parse!\n", filename);
         }
+        fclose(yyin);
     } else {
         sdc_error("SDC Error: Could not open file %s!\n", filename);
     }
+
 
     return g_sdc_commands;
 }

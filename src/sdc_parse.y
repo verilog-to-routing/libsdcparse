@@ -102,28 +102,31 @@ sdc_commands:                                   { g_sdc_commands = alloc_sdc_com
 
 cmd_create_clock: CMD_CREATE_CLOCK                          { $$ = alloc_sdc_create_clock(); }
     | cmd_create_clock ARG_PERIOD number                    { $$ = sdc_create_clock_set_period($1, $3); }
-    | cmd_create_clock ARG_NAME string                      { $$ = sdc_create_clock_set_name($1, $3); }
+    | cmd_create_clock ARG_NAME string                      { $$ = sdc_create_clock_set_name($1, $3); free($3); }
     | cmd_create_clock ARG_WAVEFORM '{' number number '}'   { $$ = sdc_create_clock_set_waveform($1, $4, $5); }
-    | cmd_create_clock string                               { $$ = sdc_create_clock_set_target($1, $2); }
+    | cmd_create_clock string                               { $$ = sdc_create_clock_set_target($1, $2); free($2); }
     | cmd_create_clock '{' stringGroup '}'                  { /* Handles special cases where we need to escape characters
                                                                * in the clock name */
                                                               t_sdc_string_group* string_group = $3;
                                                               assert(string_group->num_strings == 1);
 
                                                               $$ = sdc_create_clock_set_target($1, string_group->strings[0]); 
+
+                                                              //Clean-up reduced symbols
+                                                              free_sdc_string_group($3);
                                                             }
     ;
 
 cmd_set_input_delay: CMD_SET_INPUT_DELAY        { $$ = alloc_sdc_set_io_delay(INPUT_DELAY); }
-    | cmd_set_input_delay ARG_CLOCK string      { $$ = sdc_set_io_delay_set_clock($1, $3); }
+    | cmd_set_input_delay ARG_CLOCK string      { $$ = sdc_set_io_delay_set_clock($1, $3); free($3); }
     | cmd_set_input_delay ARG_MAX number        { $$ = sdc_set_io_delay_set_max_value($1, $3); }
-    | cmd_set_input_delay '[' cmd_get_ports ']' { $$ = sdc_set_io_delay_set_ports($1, $3); }
+    | cmd_set_input_delay '[' cmd_get_ports ']' { $$ = sdc_set_io_delay_set_ports($1, $3); free_sdc_port_group($3); }
     ;
 
 cmd_set_output_delay: CMD_SET_OUTPUT_DELAY       { $$ = alloc_sdc_set_io_delay(OUTPUT_DELAY); }
-    | cmd_set_output_delay ARG_CLOCK string      { $$ = sdc_set_io_delay_set_clock($1, $3); }
+    | cmd_set_output_delay ARG_CLOCK string      { $$ = sdc_set_io_delay_set_clock($1, $3); free($3); }
     | cmd_set_output_delay ARG_MAX number        { $$ = sdc_set_io_delay_set_max_value($1, $3); }
-    | cmd_set_output_delay '[' cmd_get_ports ']' { $$ = sdc_set_io_delay_set_ports($1, $3); }
+    | cmd_set_output_delay '[' cmd_get_ports ']' { $$ = sdc_set_io_delay_set_ports($1, $3); free_sdc_port_group($3); }
     ;
 
 cmd_set_clock_groups: CMD_SET_CLOCK_GROUPS                  { $$ = alloc_sdc_set_clock_groups(); }
@@ -138,6 +141,9 @@ cmd_set_clock_groups: CMD_SET_CLOCK_GROUPS                  { $$ = alloc_sdc_set
 
                                                               //Clean-up temporaries
                                                               free_sdc_clock_group(tmp_clock_group);
+
+                                                              //Clean-up reduced symbols
+                                                              free_sdc_string_group($4);
                                                             }
     | cmd_set_clock_groups ARG_GROUP string                 { 
                                                               //Convert the stringGroup in to a clock group
@@ -149,40 +155,43 @@ cmd_set_clock_groups: CMD_SET_CLOCK_GROUPS                  { $$ = alloc_sdc_set
 
                                                               //Clean-up temporaries
                                                               free_sdc_clock_group(tmp_clock_group);
+
+                                                              //Clean-up reduced symbols
+                                                              free($3);
                                                             }
-    | cmd_set_clock_groups ARG_GROUP '[' cmd_get_clocks ']' { $$ = sdc_set_clock_groups_add_group($1, $4); }
+    | cmd_set_clock_groups ARG_GROUP '[' cmd_get_clocks ']' { $$ = sdc_set_clock_groups_add_group($1, $4); free_sdc_clock_group($4); }
     ;
 
 cmd_set_false_path: CMD_SET_FALSE_PATH                      { $$ = alloc_sdc_set_false_path(); }
-    | cmd_set_false_path ARG_FROM '[' cmd_get_clocks ']'    { $$ = sdc_set_false_path_add_group($1, $4, FROM); }
-    | cmd_set_false_path ARG_TO '[' cmd_get_clocks ']'      { $$ = sdc_set_false_path_add_group($1, $4, TO); }
+    | cmd_set_false_path ARG_FROM '[' cmd_get_clocks ']'    { $$ = sdc_set_false_path_add_group($1, $4, FROM); free_sdc_clock_group($4); }
+    | cmd_set_false_path ARG_TO '[' cmd_get_clocks ']'      { $$ = sdc_set_false_path_add_group($1, $4, TO); free_sdc_clock_group($4); }
     ;
 
 cmd_set_max_delay: CMD_SET_MAX_DELAY                        { $$ = alloc_sdc_set_max_delay(); }
     | cmd_set_max_delay number                              { $$ = sdc_set_max_delay_set_max_delay($1, $2); }
-    | cmd_set_max_delay ARG_FROM '[' cmd_get_clocks ']'     { $$ = sdc_set_max_delay_add_group($1, $4, FROM); }
-    | cmd_set_max_delay ARG_TO '[' cmd_get_clocks ']'       { $$ = sdc_set_max_delay_add_group($1, $4, TO); }
+    | cmd_set_max_delay ARG_FROM '[' cmd_get_clocks ']'     { $$ = sdc_set_max_delay_add_group($1, $4, FROM); free_sdc_clock_group($4); }
+    | cmd_set_max_delay ARG_TO '[' cmd_get_clocks ']'       { $$ = sdc_set_max_delay_add_group($1, $4, TO); free_sdc_clock_group($4); }
     ;
 
 cmd_set_multicycle_path: CMD_SET_MULTICYCLE_PATH                { $$ = alloc_sdc_set_multicycle_path(); }
     | cmd_set_multicycle_path int_number                        { $$ = sdc_set_multicycle_path_set_mcp_value($1, $2); }
     | cmd_set_multicycle_path ARG_SETUP                         { $$ = sdc_set_multicycle_path_set_type($1, MCP_SETUP); }
-    | cmd_set_multicycle_path ARG_FROM '[' cmd_get_clocks ']'   { $$ = sdc_set_multicycle_path_add_group($1, $4, FROM); }
-    | cmd_set_multicycle_path ARG_TO '[' cmd_get_clocks ']'     { $$ = sdc_set_multicycle_path_add_group($1, $4, TO); }
+    | cmd_set_multicycle_path ARG_FROM '[' cmd_get_clocks ']'   { $$ = sdc_set_multicycle_path_add_group($1, $4, FROM); free_sdc_clock_group($4); }
+    | cmd_set_multicycle_path ARG_TO '[' cmd_get_clocks ']'     { $$ = sdc_set_multicycle_path_add_group($1, $4, TO); free_sdc_clock_group($4); }
     ;
 
 cmd_get_ports: CMD_GET_PORTS            { $$ = alloc_sdc_get_ports(); }
-    | cmd_get_ports '{' stringGroup '}' { $$ = sdc_get_ports_add_ports($1, $3); }
-    | cmd_get_ports string              { $$ = sdc_get_ports_add_port($1, $2); }
+    | cmd_get_ports '{' stringGroup '}' { $$ = sdc_get_ports_add_ports($1, $3); free_sdc_string_group($3); }
+    | cmd_get_ports string              { $$ = sdc_get_ports_add_port($1, $2); free($2); }
     ;
 
 cmd_get_clocks: CMD_GET_CLOCKS              { $$ = alloc_sdc_get_clocks(); }
-    | cmd_get_clocks '{' stringGroup '}'    { $$ = sdc_get_clocks_add_clocks($1, $3); }
-    | cmd_get_clocks string                 { $$ = sdc_get_clocks_add_clock($1, $2); }
+    | cmd_get_clocks '{' stringGroup '}'    { $$ = sdc_get_clocks_add_clocks($1, $3); free_sdc_string_group($3); }
+    | cmd_get_clocks string                 { $$ = sdc_get_clocks_add_clock($1, $2); free($2); }
     ;
 
 stringGroup: /*empty*/   { $$ = alloc_sdc_string_group(); }
-    | stringGroup string { $$ = sdc_string_group_add_string($1, $2); } 
+    | stringGroup string { $$ = sdc_string_group_add_string($1, $2); free($2); } 
 
 string: STRING         { $$ = $1; }
     | '"' STRING '"'   { $$ = $2; }

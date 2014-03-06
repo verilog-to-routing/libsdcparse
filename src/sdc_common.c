@@ -31,30 +31,37 @@ void free_sdc_commands(t_sdc_commands* sdc_commands) {
     for(int i = 0; i < sdc_commands->num_create_clock_cmds; i++) {
         free_sdc_create_clock(sdc_commands->create_clock_cmds[i]);
     }
+    free(sdc_commands->create_clock_cmds);
 
     for(int i = 0; i < sdc_commands->num_set_input_delay_cmds; i++) {
         free_sdc_set_io_delay(sdc_commands->set_input_delay_cmds[i]);
     }
+    free(sdc_commands->set_input_delay_cmds);
 
     for(int i = 0; i < sdc_commands->num_set_output_delay_cmds; i++) {
         free_sdc_set_io_delay(sdc_commands->set_output_delay_cmds[i]);
     }
+    free(sdc_commands->set_output_delay_cmds);
 
     for(int i = 0; i < sdc_commands->num_set_clock_groups_cmds; i++) {
         free_sdc_set_clock_groups(sdc_commands->set_clock_groups_cmds[i]);
     }
+    free(sdc_commands->set_clock_groups_cmds);
 
     for(int i = 0; i < sdc_commands->num_set_false_path_cmds; i++) {
         free_sdc_set_false_path(sdc_commands->set_false_path_cmds[i]);
     }
+    free(sdc_commands->set_false_path_cmds);
 
     for(int i = 0; i < sdc_commands->num_set_max_delay_cmds; i++) {
         free_sdc_set_max_delay(sdc_commands->set_max_delay_cmds[i]);
     }
+    free(sdc_commands->set_max_delay_cmds);
 
     for(int i = 0; i < sdc_commands->num_set_multicycle_path_cmds; i++) {
         free_sdc_set_multicycle_path(sdc_commands->set_multicycle_path_cmds[i]);
     }
+    free(sdc_commands->set_multicycle_path_cmds);
 
     free(sdc_commands);
 }
@@ -279,6 +286,7 @@ void free_sdc_set_clock_groups(t_sdc_set_clock_groups* sdc_set_clock_groups) {
     for(int i = 0; i < sdc_set_clock_groups->num_clock_groups; i++) {
         free_sdc_clock_group(sdc_set_clock_groups->clock_groups[i]);
     }
+    free(sdc_set_clock_groups->clock_groups);
     free(sdc_set_clock_groups);
 }
 
@@ -483,8 +491,10 @@ t_sdc_commands* add_sdc_set_max_delay(t_sdc_commands* sdc_commands, t_sdc_set_ma
 t_sdc_set_multicycle_path* alloc_sdc_set_multicycle_path() {
     //Allocate
     t_sdc_set_multicycle_path* sdc_set_multicycle_path = (t_sdc_set_multicycle_path*) malloc(sizeof(t_sdc_set_multicycle_path));
+    assert(sdc_set_multicycle_path != NULL);
 
     //Initialize
+    sdc_set_multicycle_path->type = MCP_NONE;
     sdc_set_multicycle_path->mcp_value = UNINITIALIZED_INT;
     sdc_set_multicycle_path->from_clocks = NULL;
     sdc_set_multicycle_path->to_clocks = NULL;
@@ -606,6 +616,7 @@ void free_sdc_clock_group(t_sdc_clock_group* sdc_clock_group) {
     for(int i = 0; i < sdc_clock_group->num_clocks; i++) {
         free(sdc_clock_group->clocks[i]);
     }
+    free(sdc_clock_group->clocks);
     free(sdc_clock_group);
 }
 
@@ -677,6 +688,7 @@ void free_sdc_port_group(t_sdc_port_group* sdc_port_group) {
     for(int i = 0; i < sdc_port_group->num_ports; i++) {
         free(sdc_port_group->ports[i]);
     }
+    free(sdc_port_group->ports);
     free(sdc_port_group);
 }
 
@@ -731,6 +743,7 @@ void free_sdc_string_group(t_sdc_string_group* sdc_string_group) {
     for(int i = 0; i < sdc_string_group->num_strings; i++) {
         free(sdc_string_group->strings[i]);
     }
+    free(sdc_string_group->strings);
     free(sdc_string_group);
 }
 
