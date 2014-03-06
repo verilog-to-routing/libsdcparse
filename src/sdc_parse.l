@@ -3,6 +3,7 @@
 /*
  * Include Files
  */
+#include "ctype.h"
 #include "sdc_common.h"
 #include "sdc_parse.tab.h"
 %}
@@ -45,6 +46,40 @@
 
 [-+]?[0-9]+                     { yylval.intVal = atoi(yytext); return BARE_INT_NUMBER; }
 [-+]?([0-9]*\.?[0-9]+|[0-9]+\.) { yylval.floatVal = atof(yytext); return BARE_FLOAT_NUMBER; }
+\{[ \t]*[^ \t]*[ \t]*\}         { 
+                                  /*
+                                   * Any continguous sequence of non-white space characters, 
+                                   * with optional leading and/or trailing whitespace that falls
+                                   * insde curly braces is interpreted as an escaped string.  
+                                   * However when we set the yylval, we need to be careful
+                                   * to avoid including the curly braces and the leading/trailing
+                                   * white-space.
+                                   */
+                                  size_t len = strlen(yytext);
+                                  char* tmp_str = strndup(yytext+1, len-2); //Duplicate and trim braces
+
+                                  char* modified_str = tmp_str; //Save the original tmp_str for freeing
+
+                                  //Remove leading whitespace
+                                  while(isspace(*modified_str)) modified_str++;
+
+                                  char* tmp_ptr = modified_str;
+                                  //Remove trailing whitespace
+                                  while(!isspace(*tmp_ptr) && *tmp_ptr != '\0') {
+                                      tmp_ptr++;
+                                  }
+                                  
+                                  //tmp_ptr is now at the first trailing white space character
+                                  //(or the existing null terminator), so we can write a '\0' 
+                                  //to terminate the string here.
+                                  *tmp_ptr = '\0';
+
+                                  //Copy the modified string
+                                  yylval.strVal = strdup(modified_str); 
+
+                                  free(tmp_str); //Clean-up
+                                  return ESCAPED_STRING; 
+                                }
 [-a-zA-Z0-9_~|:*]*              { yylval.strVal = strdup(yytext); return BARE_STRING; }
 .                               { return (int)(*yytext); /*Literal character to pass unrecognized stuff to parser (i.e. brackets) */ }
 %%

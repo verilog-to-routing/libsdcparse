@@ -2,7 +2,10 @@
 %{
 
 #include <stdio.h>
+#include "assert.h"
+
 #include "sdc_common.h"
+
 
 int yyerror(const char *msg);
 extern int yylex(void);
@@ -54,6 +57,7 @@ extern int yylex(void);
 
 /* declare variable tokens */
 %token <strVal> BARE_STRING
+%token <strVal> ESCAPED_STRING
 %token <strVal> BARE_CHAR
 %token <floatVal> BARE_FLOAT_NUMBER
 %token <intVal> BARE_INT_NUMBER
@@ -95,6 +99,13 @@ cmd_create_clock: CMD_CREATE_CLOCK                          { $$ = alloc_sdc_cre
     | cmd_create_clock ARG_NAME string                      { $$ = sdc_create_clock_set_name($1, $3); }
     | cmd_create_clock ARG_WAVEFORM '{' number number '}'   { $$ = sdc_create_clock_set_waveform($1, $4, $5); }
     | cmd_create_clock string                               { $$ = sdc_create_clock_set_target($1, $2); }
+    | cmd_create_clock '{' stringGroup '}'                  { /* Handles special cases where we need to escape characters
+                                                               * in the clock name */
+                                                              t_sdc_string_group* string_group = $3;
+                                                              assert(string_group->num_strings == 1);
+
+                                                              $$ = sdc_create_clock_set_target($1, string_group->strings[0]); 
+                                                            }
     ;
 
 cmd_set_input_delay: CMD_SET_INPUT_DELAY        { $$ = alloc_sdc_set_io_delay(INPUT_DELAY); }
@@ -170,6 +181,7 @@ stringGroup: /*empty*/   { $$ = alloc_sdc_string_group(); }
 string: BARE_STRING         { $$ = $1; }
     | '"' BARE_STRING '"'   { $$ = $2; }
     | '\'' BARE_STRING '\'' { $$ = $2; }
+    | ESCAPED_STRING        { $$ = $1; }
     ;
 
 number: float_number { $$ = $1; }

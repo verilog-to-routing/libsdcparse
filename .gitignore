@@ -19,7 +19,7 @@ tags
 #
 # VIM related files
 #
-*.s[a-w][a-z]
+*.s[a-ce-w][a-bd-z]
 *.un~
 Session.vim
 .netrwhist

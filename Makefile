@@ -41,7 +41,7 @@ all: $(EXE) $(STATIC_LIB)
 
 $(EXE): $(OBJECTS_EXE)
 	@echo "Linking executable: $@"
-	@$(CC) $(CFLAGS) -o $@ $(OBJECTS_EXE) -lfl
+	@$(CC) $(CFLAGS) -o $@ $(OBJECTS_EXE)
 
 $(STATIC_LIB): $(OBJECTS_LIB)
 	@echo "Linking static libarary: $@"
