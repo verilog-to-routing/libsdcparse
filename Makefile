@@ -2,7 +2,7 @@ CC = g++
 AR = ar
 
 EXE=sdc_parse_test
-STATIC_LIB=libsdc.a
+STATIC_LIB=libsdc_parse.a
 
 WARN_FLAGS = -Wall -Wpointer-arith -Wcast-qual -D__USE_FIXED_PROTOTYPES__ -ansi -pedantic -Wshadow -Wcast-align -D_POSIX_SOURCE -Wno-write-strings
 
