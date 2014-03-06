@@ -1,4 +1,3 @@
-/* simplest version of calculator */
 %{
 
 #include <stdio.h>
