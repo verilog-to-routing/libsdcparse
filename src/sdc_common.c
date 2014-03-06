@@ -551,7 +551,7 @@ t_sdc_commands* add_sdc_set_multicycle_path(t_sdc_commands* sdc_commands, t_sdc_
     }
 
     if(sdc_set_multicycle_path->mcp_value == UNINITIALIZED_FLOAT) {
-        sdc_error("SDC Error: must specify the multicycle path value as an integer at line %d near '%s'\n", yylineno, yytext); 
+        sdc_error("SDC Error: must specify the multicycle path value at line %d near '%s'\n", yylineno, yytext); 
     }
 
     if(sdc_set_multicycle_path->from_clocks == NULL) {

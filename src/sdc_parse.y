@@ -32,6 +32,9 @@ extern int yylex(void);
 
 }
 
+/* Verbose error reporting */
+%error-verbose
+
 /* declare constant */
 %token CMD_CREATE_CLOCK
 %token CMD_SET_CLOCK_GROUPS
@@ -55,12 +58,14 @@ extern int yylex(void);
 %token ARG_CLOCK
 %token ARG_MAX
 
+%token EOL
+
 /* declare variable tokens */
-%token <strVal> BARE_STRING
+%token <strVal> STRING
 %token <strVal> ESCAPED_STRING
-%token <strVal> BARE_CHAR
-%token <floatVal> BARE_FLOAT_NUMBER
-%token <intVal> BARE_INT_NUMBER
+%token <strVal> CHAR
+%token <floatVal> FLOAT_NUMBER
+%token <intVal> INT_NUMBER
 
 /* declare types */
 %type <strVal> string
@@ -85,13 +90,14 @@ extern int yylex(void);
 
 %%
 sdc_commands: /*empty*/                      { g_sdc_commands = alloc_sdc_commands(); $$ = g_sdc_commands; }
-    | sdc_commands cmd_create_clock          { $$ = add_sdc_create_clock($1, $2); }
-    | sdc_commands cmd_set_input_delay       { $$ = add_sdc_set_io_delay($1, $2); }
-    | sdc_commands cmd_set_output_delay      { $$ = add_sdc_set_io_delay($1, $2); }
-    | sdc_commands cmd_set_clock_groups      { $$ = add_sdc_set_clock_groups($1, $2); }
-    | sdc_commands cmd_set_false_path        { $$ = add_sdc_set_false_path($1, $2); }
-    | sdc_commands cmd_set_max_delay         { $$ = add_sdc_set_max_delay($1, $2); }
-    | sdc_commands cmd_set_multicycle_path   { $$ = add_sdc_set_multicycle_path($1, $2); }
+    | sdc_commands cmd_create_clock EOL         { $$ = add_sdc_create_clock($1, $2); }
+    | sdc_commands cmd_set_input_delay EOL      { $$ = add_sdc_set_io_delay($1, $2); }
+    | sdc_commands cmd_set_output_delay EOL     { $$ = add_sdc_set_io_delay($1, $2); }
+    | sdc_commands cmd_set_clock_groups EOL     { $$ = add_sdc_set_clock_groups($1, $2); }
+    | sdc_commands cmd_set_false_path EOL       { $$ = add_sdc_set_false_path($1, $2); }
+    | sdc_commands cmd_set_max_delay EOL        { $$ = add_sdc_set_max_delay($1, $2); }
+    | sdc_commands cmd_set_multicycle_path EOL  { $$ = add_sdc_set_multicycle_path($1, $2); }
+    | sdc_commands EOL                          { /* Eat stray EOL symbols */ $$ = $1; }
     ;
 
 cmd_create_clock: CMD_CREATE_CLOCK                          { $$ = alloc_sdc_create_clock(); }
@@ -178,9 +184,9 @@ cmd_get_clocks: CMD_GET_CLOCKS              { $$ = alloc_sdc_get_clocks(); }
 stringGroup: /*empty*/   { $$ = alloc_sdc_string_group(); }
     | stringGroup string { $$ = sdc_string_group_add_string($1, $2); } 
 
-string: BARE_STRING         { $$ = $1; }
-    | '"' BARE_STRING '"'   { $$ = $2; }
-    | '\'' BARE_STRING '\'' { $$ = $2; }
+string: STRING         { $$ = $1; }
+    | '"' STRING '"'   { $$ = $2; }
+    | '\'' STRING '\'' { $$ = $2; }
     | ESCAPED_STRING        { $$ = $1; }
     ;
 
@@ -188,10 +194,10 @@ number: float_number { $$ = $1; }
     | int_number { $$ = $1; }
     ;
 
-float_number: BARE_FLOAT_NUMBER { $$ = $1; }
+float_number: FLOAT_NUMBER { $$ = $1; }
     ;
 
-int_number: BARE_INT_NUMBER { $$ = $1; }
+int_number: INT_NUMBER { $$ = $1; }
     ;
 
 %%

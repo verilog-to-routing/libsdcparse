@@ -19,7 +19,7 @@
  */
 %%
 "#".*                           { /* skip comments */ }
-[\n\r]                          { /* skip EOL, (need \r to work with non-unix line endings) */ }
+[\n\r]+                         { return EOL; }
 [ \t]+                          { /* skip white space */ }
 
 "create_clock"                  { return CMD_CREATE_CLOCK; }
@@ -44,8 +44,8 @@
 "-to"                           { return ARG_TO; }
 "-setup"                        { return ARG_SETUP; }
 
-[-+]?[0-9]+                     { yylval.intVal = atoi(yytext); return BARE_INT_NUMBER; }
-[-+]?([0-9]*\.?[0-9]+|[0-9]+\.) { yylval.floatVal = atof(yytext); return BARE_FLOAT_NUMBER; }
+[-+]?[0-9]+                     { yylval.intVal = atoi(yytext); return INT_NUMBER; }
+[-+]?([0-9]*\.?[0-9]+|[0-9]+\.) { yylval.floatVal = atof(yytext); return FLOAT_NUMBER; }
 \{[ \t]*[^ \t]*[ \t]*\}         { 
                                   /*
                                    * Any continguous sequence of non-white space characters, 
@@ -63,12 +63,14 @@
                                   //Remove leading whitespace
                                   while(isspace(*modified_str)) modified_str++;
 
+                                  //Find trailing whitespace
                                   char* tmp_ptr = modified_str;
-                                  //Remove trailing whitespace
                                   while(!isspace(*tmp_ptr) && *tmp_ptr != '\0') {
                                       tmp_ptr++;
                                   }
                                   
+                                  //Remove trailing white space
+                                  //
                                   //tmp_ptr is now at the first trailing white space character
                                   //(or the existing null terminator), so we can write a '\0' 
                                   //to terminate the string here.
@@ -77,9 +79,22 @@
                                   //Copy the modified string
                                   yylval.strVal = strdup(modified_str); 
 
-                                  free(tmp_str); //Clean-up
+                                  //Clean-up the temporary string
+                                  free(tmp_str);
                                   return ESCAPED_STRING; 
                                 }
-[-a-zA-Z0-9_~|:*\\]*            { yylval.strVal = strdup(yytext); return BARE_STRING; }
-.                               { return (int)(*yytext); /*Literal character to pass unrecognized stuff to parser (i.e. brackets) */ }
+[-a-zA-Z0-9_~|:*\\]*            { yylval.strVal = strdup(yytext); return STRING; }
+.                               { /* Literal character to pass unrecognized stuff to parser
+                                     (i.e. brackets) */
+                                  return (int)(*yytext); 
+                                }
+<<EOF>>                         { /* If the file has no blank line at the end there will
+                                     not be the expected EOL following the last command. 
+                                     So first time through, return EOL, and subsequently 
+                                     return 0 (which indicated end of file). This ensures
+                                     there will always be an EOL provided to the parser. 
+                                     However it may also generate a stray EOL if the last
+                                     line IS blank - so the parse must handle those correclty. */
+                                  static int once = 0; return (once = !once) ? EOL : 0; 
+                                }
 %%
