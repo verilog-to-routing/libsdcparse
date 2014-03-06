@@ -108,5 +108,8 @@ int main(int argc, char **argv) {
         printf("}]\n");
     }
 
+    //Free sdc_parse related data, including g_sdc_commands
+    sdc_parse_cleanup();
+
     return 0;
 }

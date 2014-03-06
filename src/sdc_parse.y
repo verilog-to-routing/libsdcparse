@@ -89,7 +89,7 @@ extern int yylex(void);
 %start sdc_commands
 
 %%
-sdc_commands: /*empty*/                      { g_sdc_commands = alloc_sdc_commands(); $$ = g_sdc_commands; }
+sdc_commands:                                   { g_sdc_commands = alloc_sdc_commands(); $$ = g_sdc_commands; }
     | sdc_commands cmd_create_clock EOL         { $$ = add_sdc_create_clock($1, $2); }
     | sdc_commands cmd_set_input_delay EOL      { $$ = add_sdc_set_io_delay($1, $2); }
     | sdc_commands cmd_set_output_delay EOL     { $$ = add_sdc_set_io_delay($1, $2); }

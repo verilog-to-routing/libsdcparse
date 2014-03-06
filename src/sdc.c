@@ -25,3 +25,8 @@ t_sdc_commands* sdc_parse_file(char* filename) {
 
     return g_sdc_commands;
 }
+
+
+void sdc_parse_cleanup() {
+    free_sdc_commands(g_sdc_commands);
+}
