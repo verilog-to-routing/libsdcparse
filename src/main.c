@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
     }
 
     //Parse the file
-    t_sdc_commands* sdc_commands = sdc_parse_file(argv[1]);
+    t_sdc_commands* sdc_commands = sdc_parse_filename(argv[1]);
 
     //Print out the commands
     for(int i = 0; i < sdc_commands->num_create_clock_cmds; i++) {

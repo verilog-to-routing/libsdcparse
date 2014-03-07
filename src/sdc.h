@@ -94,6 +94,7 @@ typedef enum e_mcp_type {MCP_NONE, MCP_SETUP} t_sdc_mcp_type;
  * Collection of SDC commands
  */
 struct s_sdc_commands {
+    bool has_commands;                                      //Indicates whether any sdc commands were found
 
     int num_create_clock_cmds;                              //Number of create_clock commands
     t_sdc_create_clock** create_clock_cmds;                 //Array of create_clock commands [0..num_create_clock_cmds-1]
@@ -185,7 +186,8 @@ struct s_sdc_set_multicycle_path {
 /*
  *  Externally useful functions
  */
-t_sdc_commands* sdc_parse_file(char* filename);
+t_sdc_commands* sdc_parse_filename(char* filename);
+t_sdc_commands* sdc_parse_file(FILE* sdc);
 
 void sdc_parse_cleanup();
 
