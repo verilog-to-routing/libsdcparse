@@ -21,15 +21,18 @@ int main(int argc, char **argv) {
         if(sdc_create_clock->is_virtual) {
             printf("create_clock -period %f -waveform {%f %f} -name %s\n",
                     sdc_create_clock->period,
-                    sdc_create_clock->rise_time,
-                    sdc_create_clock->fall_time,
+                    sdc_create_clock->rise_edge,
+                    sdc_create_clock->fall_edge,
                     sdc_create_clock->name);
         } else {
-            printf("create_clock -period %f -waveform {%f %f} %s\n",
+            printf("create_clock -period %f -waveform {%f %f}",
                     sdc_create_clock->period,
-                    sdc_create_clock->rise_time,
-                    sdc_create_clock->fall_time,
-                    sdc_create_clock->target);
+                    sdc_create_clock->rise_edge,
+                    sdc_create_clock->fall_edge);
+            for(int j = 0; j < sdc_create_clock->targets->num_strings; j++) {
+                printf(" %s", sdc_create_clock->targets->strings[j]);
+            }
+            printf("\n");
         }
     }
 

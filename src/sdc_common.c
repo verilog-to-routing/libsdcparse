@@ -77,9 +77,9 @@ t_sdc_create_clock* alloc_sdc_create_clock() {
     //Initialize
     sdc_create_clock->period = UNINITIALIZED_FLOAT;
     sdc_create_clock->name = NULL;
-    sdc_create_clock->rise_time = UNINITIALIZED_FLOAT;
-    sdc_create_clock->fall_time = UNINITIALIZED_FLOAT;
-    sdc_create_clock->target = NULL;
+    sdc_create_clock->rise_edge = UNINITIALIZED_FLOAT;
+    sdc_create_clock->fall_edge = UNINITIALIZED_FLOAT;
+    sdc_create_clock->targets = alloc_sdc_string_group();
     sdc_create_clock->is_virtual = false;
 
     return sdc_create_clock;
@@ -87,7 +87,7 @@ t_sdc_create_clock* alloc_sdc_create_clock() {
 
 void free_sdc_create_clock(t_sdc_create_clock* sdc_create_clock) {
     free(sdc_create_clock->name);
-    free(sdc_create_clock->target);
+    free_sdc_string_group(sdc_create_clock->targets);
     free(sdc_create_clock);
 }
 
@@ -113,25 +113,22 @@ t_sdc_create_clock* sdc_create_clock_set_name(t_sdc_create_clock* sdc_create_clo
     return sdc_create_clock;
 }
 
-t_sdc_create_clock* sdc_create_clock_set_waveform(t_sdc_create_clock* sdc_create_clock, double rise_time, double fall_time) {
+t_sdc_create_clock* sdc_create_clock_set_waveform(t_sdc_create_clock* sdc_create_clock, double rise_edge, double fall_edge) {
     assert(sdc_create_clock != NULL);
-    if(sdc_create_clock->rise_time != UNINITIALIZED_FLOAT || sdc_create_clock->fall_time != UNINITIALIZED_FLOAT) {
+    if(sdc_create_clock->rise_edge != UNINITIALIZED_FLOAT || sdc_create_clock->fall_edge != UNINITIALIZED_FLOAT) {
         sdc_error("SDC Error: can only define a single waveform at line %d near '%s'\n", yylineno, yytext); 
     } else {
-        sdc_create_clock->rise_time = rise_time;
-        sdc_create_clock->fall_time = fall_time;
+        sdc_create_clock->rise_edge = rise_edge;
+        sdc_create_clock->fall_edge = fall_edge;
     }
 
     return sdc_create_clock;
 }
 
-t_sdc_create_clock* sdc_create_clock_set_target(t_sdc_create_clock* sdc_create_clock, char* target) {
+t_sdc_create_clock* sdc_create_clock_add_target(t_sdc_create_clock* sdc_create_clock, char* target) {
     assert(sdc_create_clock != NULL);
-    if(sdc_create_clock->target != NULL) {
-        sdc_error("SDC Error: can only define a single clock target at line %d near '%s'\n", yylineno, yytext);
-    } else {
-        sdc_create_clock->target = strdup(target);
-    }
+
+    sdc_create_clock->targets = sdc_string_group_add_string(sdc_create_clock->targets, target);
 
     return sdc_create_clock;
 }
@@ -149,12 +146,12 @@ t_sdc_commands* add_sdc_create_clock(t_sdc_commands* sdc_commands, t_sdc_create_
     }
 
     //Must have either a target (if a netlist clock), or a name (if a virtual clock) 
-    if(sdc_create_clock->target == NULL && sdc_create_clock->name == NULL) {
+    if(sdc_create_clock->targets->num_strings == 0 && sdc_create_clock->name == NULL) {
         sdc_error("SDC Error: Must define either a target (for netlist clock) or a name (for virtual clock) at line %d near '%s'\n", yylineno, yytext);
     }
 
     //Currently we do not support defining clock names that differ from the netlist target name
-    if(sdc_create_clock->target != NULL && sdc_create_clock->name != NULL) {
+    if(sdc_create_clock->targets->num_strings != 0 && sdc_create_clock->name != NULL) {
         sdc_error("SDC Error: Currently custom names for netlist clocks are unsupported, remove '-name' option at line %d near '%s', or create a virtual clock.\n", yylineno, yytext);
     }
 
@@ -162,19 +159,21 @@ t_sdc_commands* add_sdc_create_clock(t_sdc_commands* sdc_commands, t_sdc_create_
      * Set defaults
      */
     //Determine default rise/fall time for waveform
-    if(sdc_create_clock->rise_time == UNINITIALIZED_FLOAT && sdc_create_clock->fall_time == UNINITIALIZED_FLOAT) {
-        sdc_create_clock->rise_time = 0.0;
-        sdc_create_clock->fall_time = sdc_create_clock->period / 2;
+    if(sdc_create_clock->rise_edge == UNINITIALIZED_FLOAT && sdc_create_clock->fall_edge == UNINITIALIZED_FLOAT) {
+        sdc_create_clock->rise_edge = 0.0;
+        sdc_create_clock->fall_edge = sdc_create_clock->period / 2;
     }
-    assert(sdc_create_clock->rise_time != UNINITIALIZED_FLOAT);
-    assert(sdc_create_clock->fall_time != UNINITIALIZED_FLOAT);
+    assert(sdc_create_clock->rise_edge != UNINITIALIZED_FLOAT);
+    assert(sdc_create_clock->fall_edge != UNINITIALIZED_FLOAT);
     
     //Determine if clock is virtual or not
-    if(sdc_create_clock->target != NULL) {
+    if(sdc_create_clock->targets->num_strings == 0 && sdc_create_clock->name != NULL) {
+        //Have a virtual target if there is a name AND no target strings
+        sdc_create_clock->is_virtual = true;
+    } else {
+        assert(sdc_create_clock->targets->num_strings > 0);
         //Have a real target so this is not a virtual clock
         sdc_create_clock->is_virtual = false;
-    } else {
-        sdc_create_clock->is_virtual = true;
     }
 
     /*

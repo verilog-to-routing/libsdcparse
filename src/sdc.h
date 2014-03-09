@@ -145,9 +145,10 @@ struct s_sdc_string_group {
 struct s_sdc_create_clock {
     double period;      //Clock period
     char* name;         //Name of the clock
-    double rise_time;   //Rise time from waveform definition
-    double fall_time;   //Fall time from waveform definition
-    char* target;       //String or regex indicating clock source location
+    double rise_edge;   //Rise time from waveform definition
+    double fall_edge;   //Fall time from waveform definition
+    t_sdc_string_group* targets; //The set of strings indicating clock sources.
+                        //May be explicit strings or regexs.
     bool is_virtual;    //Identifies this as a virtual (non-netlist) clock
 };
 

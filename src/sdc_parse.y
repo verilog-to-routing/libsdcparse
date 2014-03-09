@@ -103,13 +103,13 @@ cmd_create_clock: CMD_CREATE_CLOCK                          { $$ = alloc_sdc_cre
     | cmd_create_clock ARG_PERIOD number                    { $$ = sdc_create_clock_set_period($1, $3); }
     | cmd_create_clock ARG_NAME string                      { $$ = sdc_create_clock_set_name($1, $3); free($3); }
     | cmd_create_clock ARG_WAVEFORM '{' number number '}'   { $$ = sdc_create_clock_set_waveform($1, $4, $5); }
-    | cmd_create_clock string                               { $$ = sdc_create_clock_set_target($1, $2); free($2); }
-    | cmd_create_clock '{' stringGroup '}'                  { /* Handles special cases where we need to escape characters
-                                                               * in the clock name */
+    | cmd_create_clock string                               { $$ = sdc_create_clock_add_target($1, $2); free($2); }
+    | cmd_create_clock '{' stringGroup '}'                  { /* Handles cases where a list is used to specify clocks */
                                                               t_sdc_string_group* string_group = $3;
-                                                              assert(string_group->num_strings == 1);
-
-                                                              $$ = sdc_create_clock_set_target($1, string_group->strings[0]); 
+                                                              for(int i = 0; i < string_group->num_strings; i++) {
+                                                                  $$ = sdc_create_clock_add_target($1, string_group->strings[i]); 
+                                                                  
+                                                              }
 
                                                               //Clean-up reduced symbols
                                                               free_sdc_string_group($3);

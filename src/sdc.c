@@ -35,6 +35,8 @@ t_sdc_commands* sdc_parse_file(FILE* sdc_file) {
     if(error) {
         sdc_error("SDC Error: file failed to parse!\n");
     }
+
+    return g_sdc_commands;
 }
 
 void sdc_parse_cleanup() {

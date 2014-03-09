@@ -27,7 +27,7 @@ void free_sdc_create_clock(t_sdc_create_clock* sdc_create_clock);
 t_sdc_create_clock* sdc_create_clock_set_period(t_sdc_create_clock* sdc_create_clock, double period);
 t_sdc_create_clock* sdc_create_clock_set_name(t_sdc_create_clock* sdc_create_clock, char* name);
 t_sdc_create_clock* sdc_create_clock_set_waveform(t_sdc_create_clock* sdc_create_clock, double rise_time, double fall_time);
-t_sdc_create_clock* sdc_create_clock_set_target(t_sdc_create_clock* sdc_create_clock, char* target);
+t_sdc_create_clock* sdc_create_clock_add_target(t_sdc_create_clock* sdc_create_clock, char* target);
 t_sdc_commands* add_sdc_create_clock(t_sdc_commands* sdc_commands, t_sdc_create_clock* sdc_create_clock);
 
 //set_input_delay & set_output_delay
