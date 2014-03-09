@@ -150,6 +150,8 @@ struct s_sdc_create_clock {
     t_sdc_string_group* targets; //The set of strings indicating clock sources.
                         //May be explicit strings or regexs.
     bool is_virtual;    //Identifies this as a virtual (non-netlist) clock
+
+    int file_line_number; //Line number where this command is defined
 };
 
 struct s_sdc_set_io_delay {
@@ -157,17 +159,23 @@ struct s_sdc_set_io_delay {
     char* clock_name;   //Name of the clock this constraint is associated with
     double max_delay;   //The maximum input delay allowed on the target ports
     t_sdc_port_group* target_ports; //The target ports
+
+    int file_line_number; //Line number where this command is defined
 };
 
 struct s_sdc_set_clock_groups {
     t_sdc_clock_groups_type type;     //The type of clock group relation being specified
     int num_clock_groups;                  //The number of clock groups (must be >= 2)  
     t_sdc_clock_group** clock_groups; //The array of clock groups [0..num_clock_groups-1]
+
+    int file_line_number; //Line number where this command is defined
 };
 
 struct s_sdc_set_false_path {
     t_sdc_clock_group* from_clocks;  //The source clock group
     t_sdc_clock_group* to_clocks;    //The target clock group
+
+    int file_line_number; //Line number where this command is defined
 };
 
 struct s_sdc_set_max_delay {
@@ -175,6 +183,8 @@ struct s_sdc_set_max_delay {
                                     //and to clocks
     t_sdc_clock_group* from_clocks; //The source clock group
     t_sdc_clock_group* to_clocks;   //The target clock group
+
+    int file_line_number; //Line number where this command is defined
 };
 
 struct s_sdc_set_multicycle_path {
@@ -182,6 +192,8 @@ struct s_sdc_set_multicycle_path {
     int mcp_value;                  //The number of cycles specifed
     t_sdc_clock_group* from_clocks; //The source clock group
     t_sdc_clock_group* to_clocks;   //The target clock group
+
+    int file_line_number; //Line number where this command is defined
 };
 
 /*

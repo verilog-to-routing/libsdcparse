@@ -82,6 +82,8 @@ t_sdc_create_clock* alloc_sdc_create_clock() {
     sdc_create_clock->targets = alloc_sdc_string_group();
     sdc_create_clock->is_virtual = false;
 
+    sdc_create_clock->file_line_number = UNINITIALIZED_INT;
+
     return sdc_create_clock;
 }
 
@@ -177,6 +179,11 @@ t_sdc_commands* add_sdc_create_clock(t_sdc_commands* sdc_commands, t_sdc_create_
     }
 
     /*
+     * Set line number
+     */
+    sdc_create_clock->file_line_number = yylineno;
+
+    /*
      * Add command
      */
     sdc_commands->has_commands = true;
@@ -200,6 +207,8 @@ t_sdc_set_io_delay* alloc_sdc_set_io_delay(t_sdc_io_delay_type type) {
     sdc_set_io_delay->clock_name = NULL;
     sdc_set_io_delay->max_delay = UNINITIALIZED_FLOAT;
     sdc_set_io_delay->target_ports = NULL;
+
+    sdc_set_io_delay->file_line_number = UNINITIALIZED_INT;
 
     return sdc_set_io_delay;
 }
@@ -251,6 +260,11 @@ t_sdc_commands* add_sdc_set_io_delay(t_sdc_commands* sdc_commands, t_sdc_set_io_
     }
 
     /*
+     * Set line number
+     */
+    sdc_set_io_delay->file_line_number = yylineno;
+
+    /*
      * Add command
      */
     if(sdc_set_io_delay->type == INPUT_DELAY) {
@@ -281,6 +295,8 @@ t_sdc_set_clock_groups* alloc_sdc_set_clock_groups() {
     sdc_set_clock_groups->type = CG_NONE;
     sdc_set_clock_groups->num_clock_groups = 0;
     sdc_set_clock_groups->clock_groups = NULL;
+
+    sdc_set_clock_groups->file_line_number = UNINITIALIZED_INT;
 
     return sdc_set_clock_groups;
 }
@@ -326,6 +342,11 @@ t_sdc_commands* add_sdc_set_clock_groups(t_sdc_commands* sdc_commands, t_sdc_set
     }
 
     /*
+     * Set line number
+     */
+    sdc_set_clock_groups->file_line_number = yylineno;
+
+    /*
      * Add command
      */
     sdc_commands->has_commands = true;
@@ -346,6 +367,8 @@ t_sdc_set_false_path* alloc_sdc_set_false_path() {
     //Initialize
     sdc_set_false_path->from_clocks = NULL;
     sdc_set_false_path->to_clocks = NULL;
+
+    sdc_set_false_path->file_line_number = UNINITIALIZED_INT;
 
     return sdc_set_false_path;
 }
@@ -397,6 +420,11 @@ t_sdc_commands* add_sdc_set_false_path(t_sdc_commands* sdc_commands, t_sdc_set_f
     }
 
     /*
+     * Set line number
+     */
+    sdc_set_false_path->file_line_number = yylineno;
+
+    /*
      * Add command
      */
     sdc_commands->has_commands = true;
@@ -418,6 +446,8 @@ t_sdc_set_max_delay* alloc_sdc_set_max_delay() {
     sdc_set_max_delay->max_delay = UNINITIALIZED_FLOAT;
     sdc_set_max_delay->from_clocks = NULL;
     sdc_set_max_delay->to_clocks = NULL;
+
+    sdc_set_max_delay->file_line_number = UNINITIALIZED_INT;
 
     return sdc_set_max_delay;
 }
@@ -481,6 +511,11 @@ t_sdc_commands* add_sdc_set_max_delay(t_sdc_commands* sdc_commands, t_sdc_set_ma
     }
 
     /*
+     * Set line number
+     */
+    sdc_set_max_delay->file_line_number = yylineno;
+
+    /*
      * Add command
      */
     sdc_commands->has_commands = true;
@@ -504,6 +539,8 @@ t_sdc_set_multicycle_path* alloc_sdc_set_multicycle_path() {
     sdc_set_multicycle_path->mcp_value = UNINITIALIZED_INT;
     sdc_set_multicycle_path->from_clocks = NULL;
     sdc_set_multicycle_path->to_clocks = NULL;
+
+    sdc_set_multicycle_path->file_line_number = UNINITIALIZED_INT;
 
     return sdc_set_multicycle_path;
 
@@ -577,6 +614,11 @@ t_sdc_commands* add_sdc_set_multicycle_path(t_sdc_commands* sdc_commands, t_sdc_
     if(sdc_set_multicycle_path->to_clocks == NULL) {
         sdc_error("SDC Error: must specify source clock(s) with the '-to' option at line %d near '%s'\n", yylineno, yytext); 
     }
+
+    /*
+     * Set line number
+     */
+    sdc_set_multicycle_path->file_line_number = yylineno;
 
     /*
      * Add command
