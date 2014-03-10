@@ -3,6 +3,38 @@
 #include <assert.h>
 #include "sdc.h"
 
+void print_string_group(t_sdc_string_group* group) {
+    const char *start_token, *end_token;
+    if(group->group_type == SDC_STRING) {
+        start_token = "{";
+        end_token   = "}";
+
+    } else if (group->group_type == SDC_CLOCK) {
+        start_token = "[get_clocks {";
+        end_token   = "}]";
+
+    } else if (group->group_type == SDC_PORT) {
+        start_token = "[get_ports {";
+        end_token   = "}]";
+
+    } else {
+        printf("Unsupported sdc string group type\n");
+        exit(1);
+    }
+
+    printf("%s", start_token);
+    for(int i = 0; i < group->num_strings; i++) {
+        printf("%s ", group->strings[i]);
+    }
+    printf("%s", end_token);
+}
+
+void print_from_to_group(t_sdc_string_group* from, t_sdc_string_group* to) {
+    printf("-from ");
+    print_string_group(from);
+    printf(" -to ");
+    print_string_group(to);
+}
 
 int main(int argc, char **argv) {
     if(argc != 2) {
@@ -30,13 +62,11 @@ int main(int argc, char **argv) {
                     sdc_create_clock->fall_edge,
                     sdc_create_clock->name);
         } else {
-            printf("create_clock -period %f -waveform {%f %f}",
+            printf("create_clock -period %f -waveform {%f %f} ",
                     sdc_create_clock->period,
                     sdc_create_clock->rise_edge,
                     sdc_create_clock->fall_edge);
-            for(int j = 0; j < sdc_create_clock->targets->num_strings; j++) {
-                printf(" %s", sdc_create_clock->targets->strings[j]);
-            }
+            print_string_group(sdc_create_clock->targets);
             printf("\n");
         }
     }
@@ -44,38 +74,33 @@ int main(int argc, char **argv) {
     for(int i = 0; i < sdc_commands->num_set_input_delay_cmds; i++) {
         t_sdc_set_io_delay* sdc_set_input_delay = sdc_commands->set_input_delay_cmds[i];
         printf("Line %3d: ", sdc_set_input_delay->file_line_number);
-        printf("set_input_delay -clock %s -max %f [get_ports {", 
+        printf("set_input_delay -clock %s -max %f ", 
                     sdc_set_input_delay->clock_name,
                     sdc_set_input_delay->max_delay);
-        for(int j = 0; j < sdc_set_input_delay->target_ports->num_ports; j++) {
-            printf("%s ", sdc_set_input_delay->target_ports->ports[j]);
-        }
-        printf("} ]\n");
+        print_string_group(sdc_set_input_delay->target_ports);
+        printf("\n");
     }
 
     for(int i = 0; i < sdc_commands->num_set_output_delay_cmds; i++) {
         t_sdc_set_io_delay* sdc_set_output_delay = sdc_commands->set_output_delay_cmds[i];
         printf("Line %3d: ", sdc_set_output_delay->file_line_number);
-        printf("set_output_delay -clock %s -max %f [get_ports {", 
+        printf("set_output_delay -clock %s -max %f ", 
                     sdc_set_output_delay->clock_name,
                     sdc_set_output_delay->max_delay);
-        for(int j = 0; j < sdc_set_output_delay->target_ports->num_ports; j++) {
-            printf("%s ", sdc_set_output_delay->target_ports->ports[j]);
-        }
-        printf("} ]\n");
+        print_string_group(sdc_set_output_delay->target_ports);
+        printf("\n");
     }
 
     for(int i = 0; i < sdc_commands->num_set_clock_groups_cmds; i++) {
         t_sdc_set_clock_groups* sdc_set_clock_groups = sdc_commands->set_clock_groups_cmds[i];
         printf("Line %3d: ", sdc_set_clock_groups->file_line_number);
-        printf("set_clock_groups -exclusive");
+        printf("set_clock_groups ");
+        if(sdc_set_clock_groups->type == SDC_CG_EXCLUSIVE) {
+            printf(" -exclusive");
+        }
         for(int j = 0; j < sdc_set_clock_groups->num_clock_groups; j++) {
-            t_sdc_clock_group* sdc_clock_group = sdc_set_clock_groups->clock_groups[j];
-            printf(" -group {");
-            for(int k = 0; k < sdc_clock_group->num_clocks; k++) {
-                printf("%s ", sdc_clock_group->clocks[k]);
-            }
-            printf("}");
+            printf(" -group ");
+            print_string_group(sdc_set_clock_groups->clock_groups[j]);
         }
         printf("\n");
     }
@@ -84,63 +109,27 @@ int main(int argc, char **argv) {
         t_sdc_set_false_path* sdc_set_false_path = sdc_commands->set_false_path_cmds[i];
         printf("Line %3d: ", sdc_set_false_path->file_line_number);
         printf("set_false_path ");
-        if(sdc_set_false_path->from_clocks) {
-            printf("-from [get_clocks {");
-            for(int j = 0; j < sdc_set_false_path->from_clocks->num_clocks; j++) {
-                printf("%s ", sdc_set_false_path->from_clocks->clocks[j]);
-            }
-            printf("}] ");
-        } else {
-            assert(sdc_set_false_path->from_objs != NULL);
-            printf("-from {");
-            for(int j = 0; j < sdc_set_false_path->from_objs->num_strings; j++) {
-                printf("%s ", sdc_set_false_path->from_objs->strings[j]);
-            }
-            printf("}  ");
-        }
-        if(sdc_set_false_path->to_clocks) {
-            printf("-to [get_clocks {");
-            for(int j = 0; j < sdc_set_false_path->to_clocks->num_clocks; j++) {
-                printf("%s ", sdc_set_false_path->to_clocks->clocks[j]);
-            }
-            printf("}] ");
-        } else {
-            assert(sdc_set_false_path->to_objs != NULL);
-            printf("-to {");
-            for(int j = 0; j < sdc_set_false_path->to_objs->num_strings; j++) {
-                printf("%s ", sdc_set_false_path->to_objs->strings[j]);
-            }
-            printf("} ");
-        }
+        print_from_to_group(sdc_set_false_path->from, sdc_set_false_path->to);
         printf("\n");
     }
 
     for(int i = 0; i < sdc_commands->num_set_max_delay_cmds; i++) {
         t_sdc_set_max_delay* sdc_set_max_delay = sdc_commands->set_max_delay_cmds[i];
         printf("Line %3d: ", sdc_set_max_delay->file_line_number);
-        printf("set_max_delay %f -from [get_clocks {", sdc_set_max_delay->max_delay);
-        for(int j = 0; j < sdc_set_max_delay->from_clocks->num_clocks; j++) {
-            printf("%s ", sdc_set_max_delay->from_clocks->clocks[j]);
-        }
-        printf("}] -to [get_clocks {");
-        for(int j = 0; j < sdc_set_max_delay->to_clocks->num_clocks; j++) {
-            printf("%s ", sdc_set_max_delay->to_clocks->clocks[j]);
-        }
-        printf("}]\n");
+        printf("set_max_delay %f ", sdc_set_max_delay->max_delay);
+        print_from_to_group(sdc_set_max_delay->from, sdc_set_max_delay->to);
+        printf("\n");
     }
 
     for(int i = 0; i < sdc_commands->num_set_multicycle_path_cmds; i++) {
         t_sdc_set_multicycle_path* sdc_set_multicycle_path = sdc_commands->set_multicycle_path_cmds[i];
         printf("Line %3d: ", sdc_set_multicycle_path->file_line_number);
-        printf("set_multicycle_path %d -setup -from [get_clocks {", sdc_set_multicycle_path->mcp_value);
-        for(int j = 0; j < sdc_set_multicycle_path->from_clocks->num_clocks; j++) {
-            printf("%s ", sdc_set_multicycle_path->from_clocks->clocks[j]);
+        printf("set_multicycle_path %d ", sdc_set_multicycle_path->mcp_value);
+        if(sdc_set_multicycle_path->type == SDC_MCP_SETUP) {
+            printf("-setup ");
         }
-        printf("}] -to [get_clocks {");
-        for(int j = 0; j < sdc_set_multicycle_path->to_clocks->num_clocks; j++) {
-            printf("%s ", sdc_set_multicycle_path->to_clocks->clocks[j]);
-        }
-        printf("}]\n");
+        print_from_to_group(sdc_set_multicycle_path->from, sdc_set_multicycle_path->to);
+        printf("\n");
     }
 
     //Free sdc_parse related data, including g_sdc_commands
