@@ -31,7 +31,7 @@ t_sdc_create_clock* sdc_create_clock_add_targets(t_sdc_create_clock* sdc_create_
 t_sdc_commands* add_sdc_create_clock(t_sdc_commands* sdc_commands, t_sdc_create_clock* sdc_create_clock);
 
 //set_input_delay & set_output_delay
-t_sdc_set_io_delay* alloc_sdc_set_io_delay(t_sdc_io_delay_type type);
+t_sdc_set_io_delay* alloc_sdc_set_io_delay(t_sdc_io_delay_type cmd_type);
 void free_sdc_set_io_delay(t_sdc_set_io_delay* sdc_set_io_delay);
 t_sdc_set_io_delay* sdc_set_io_delay_set_clock(t_sdc_set_io_delay* sdc_set_io_delay, char* clock_name);
 t_sdc_set_io_delay* sdc_set_io_delay_set_max_value(t_sdc_set_io_delay* sdc_set_io_delay, double max_value);

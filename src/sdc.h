@@ -12,14 +12,15 @@
  * USING THIS LIBRARY
  * --------------------------
  * Since this is NOT a full TCL interpreter, 'function calls' to get_ports or
- * get_clocks, are converted to t_sdc_port_group and t_sdc_clock_group 
- * respectively. That is, they are represetned as the sets of the strings passed
- * to those functions.  It is left up to the application to interpret them.
+ * get_clocks, are converted to t_sdc_string_group, with the group_type field set
+ * to either SDC_CLOCK or SDC_PORT respectively. That is, they are represented as 
+ * the sets of the strings passed to those functions.  It is left up to the 
+ * application to interpret them.
  *
  * After parsing, each SDC command is represented as a C struct.  Typically each
- * command is parsed into its unique struct, however some closely related commands
+ * command is parsed into a unique type of struct, however some closely related commands
  * (such as set_input_delay and set_output_delay) may share a struct and be identified
- * by a 'type' field in the struct.
+ * by a 'cmd_type' field in the struct.
  *
  * All supported SDC commands are collected into a t_sdc_commands struct which
  * represents the entire SDC file.
@@ -42,8 +43,8 @@
  *             modifications to the command's struct.  It likely that you will
  *             want to do this as a function call and put the function definition
  *             in sdc_common.c. If the option may conflict with others it is
- *             typically checked here, with errors reported using sdc_error().
- *          e) The command is automatically added using the appropriate add_sdc*()
+ *             typically checked at this point, with errors reported using sdc_error().
+ *          e) Command is automatically added using the appropriate add_sdc*()
  *             function, which also verifies the options.  Command level consistency
  *             checks (e.g. option required) typically go here.
  *
@@ -56,8 +57,8 @@
  *             (in sdc_common.c) that is called by the first rule e.g.:
  *                cmd_set_time_format: CMD_SET_INPUT_DELAY {$$ = alloc_sdc_set_time_units();}
  *          c) Add options to the command as outlined in (1)
- *          d) Create an add command and extend the s_sdc_commands struct to include the new
- *             command.  Call it in the top level sdc_commands rule e.g.:
+ *          d) Create an add_sdc*() command and extend the s_sdc_commands struct to include 
+ *             the new command.  Call it in the top level sdc_commands rule e.g.:
  *
  *                sdc_commands: ...
  *                   | ... //Other commands
@@ -81,8 +82,9 @@ typedef struct s_sdc_set_multicycle_path t_sdc_set_multicycle_path;
 typedef struct s_sdc_string_group t_sdc_string_group;
 
 /*
- * Enumerations to describe specific SDC command types
+ * Enumerations to describe specific SDC command types and attributes
  */
+//Used to identify whether
 typedef enum e_sdc_io_delay_type {SDC_INPUT_DELAY, SDC_OUTPUT_DELAY} t_sdc_io_delay_type;
 typedef enum e_sdc_clock_groups_type {SDC_CG_NONE, SDC_CG_EXCLUSIVE} t_sdc_clock_groups_type;
 typedef enum e_sdc_to_from_dir {SDC_TO, SDC_FROM} t_sdc_to_from_dir;
@@ -147,7 +149,9 @@ struct s_sdc_create_clock {
 };
 
 struct s_sdc_set_io_delay {
-    t_sdc_io_delay_type type;
+    t_sdc_io_delay_type cmd_type; //Identifies whether this represents a
+                                  //set_input_delay or set_output delay
+                                  //command.
     char* clock_name;   //Name of the clock this constraint is associated with
     double max_delay;   //The maximum input delay allowed on the target ports
     t_sdc_string_group* target_ports; //The target ports
@@ -156,8 +160,8 @@ struct s_sdc_set_io_delay {
 };
 
 struct s_sdc_set_clock_groups {
-    t_sdc_clock_groups_type type;     //The type of clock group relation being specified
-    int num_clock_groups;                  //The number of clock groups (must be >= 2)  
+    t_sdc_clock_groups_type type;      //The type of clock group relation being specified
+    int num_clock_groups;              //The number of clock groups (must be >= 2)  
     t_sdc_string_group** clock_groups; //The array of clock groups [0..num_clock_groups-1]
 
     int file_line_number; //Line number where this command is defined
@@ -171,8 +175,8 @@ struct s_sdc_set_false_path {
 };
 
 struct s_sdc_set_max_delay {
-    double max_delay;               //The maximum allowed delay between the from
-                                    //and to clocks
+    double max_delay;          //The maximum allowed delay between the from
+                               //and to clocks
     t_sdc_string_group* from;  //The source list of startpoints or clocks
     t_sdc_string_group* to;    //The target list of endpoints or clocks
 
@@ -180,8 +184,8 @@ struct s_sdc_set_max_delay {
 };
 
 struct s_sdc_set_multicycle_path {
-    t_sdc_mcp_type type;            //The type of the mcp
-    int mcp_value;                  //The number of cycles specifed
+    t_sdc_mcp_type type;       //The type of the mcp
+    int mcp_value;             //The number of cycles specifed
     t_sdc_string_group* from;  //The source list of startpoints or clocks
     t_sdc_string_group* to;    //The target list of endpoints or clocks
 

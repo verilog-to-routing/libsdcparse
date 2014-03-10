@@ -215,13 +215,13 @@ t_sdc_commands* add_sdc_create_clock(t_sdc_commands* sdc_commands, t_sdc_create_
 /*
  * Functions for set_input_delay/set_output_delay
  */
-t_sdc_set_io_delay* alloc_sdc_set_io_delay(t_sdc_io_delay_type type) {
+t_sdc_set_io_delay* alloc_sdc_set_io_delay(t_sdc_io_delay_type cmd_type) {
     //Allocate
     t_sdc_set_io_delay* sdc_set_io_delay = (t_sdc_set_io_delay*) malloc(sizeof(t_sdc_set_io_delay));
     assert(sdc_set_io_delay != NULL);
 
     //Initialize
-    sdc_set_io_delay->type = type;
+    sdc_set_io_delay->cmd_type = cmd_type;
     sdc_set_io_delay->clock_name = NULL;
     sdc_set_io_delay->max_delay = UNINITIALIZED_FLOAT;
     sdc_set_io_delay->target_ports = NULL;
@@ -300,13 +300,13 @@ t_sdc_commands* add_sdc_set_io_delay(t_sdc_commands* sdc_commands, t_sdc_set_io_
     /*
      * Add command
      */
-    if(sdc_set_io_delay->type == SDC_INPUT_DELAY) {
+    if(sdc_set_io_delay->cmd_type == SDC_INPUT_DELAY) {
         sdc_commands->has_commands = true;
         sdc_commands->num_set_input_delay_cmds++;
         sdc_commands->set_input_delay_cmds = (t_sdc_set_io_delay**) realloc(sdc_commands->set_input_delay_cmds, sdc_commands->num_set_input_delay_cmds*sizeof(*sdc_commands->set_input_delay_cmds));
         sdc_commands->set_input_delay_cmds[sdc_commands->num_set_input_delay_cmds-1] = sdc_set_io_delay;
     } else {
-        assert(sdc_set_io_delay->type == SDC_OUTPUT_DELAY);
+        assert(sdc_set_io_delay->cmd_type == SDC_OUTPUT_DELAY);
         sdc_commands->has_commands = true;
         sdc_commands->num_set_output_delay_cmds++;
         sdc_commands->set_output_delay_cmds = (t_sdc_set_io_delay**) realloc(sdc_commands->set_output_delay_cmds, sdc_commands->num_set_output_delay_cmds*sizeof(*sdc_commands->set_output_delay_cmds));
