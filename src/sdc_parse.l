@@ -83,7 +83,7 @@
                                   free(tmp_str);
                                   return ESCAPED_STRING; 
                                 }
-[-a-zA-Z0-9_~|:*\\]*            { yylval.strVal = strdup(yytext); return STRING; }
+[-a-zA-Z0-9_~|:*\\/]*           { yylval.strVal = strdup(yytext); return STRING; }
 .                               { /* Literal character to pass unrecognized stuff to parser
                                      (i.e. brackets) */
                                   return (int)(*yytext); 

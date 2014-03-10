@@ -174,6 +174,8 @@ struct s_sdc_set_clock_groups {
 struct s_sdc_set_false_path {
     t_sdc_clock_group* from_clocks;  //The source clock group
     t_sdc_clock_group* to_clocks;    //The target clock group
+    t_sdc_string_group* from_ffs;    //The source list of Flip-Flops
+    t_sdc_string_group* to_ffs;      //The target list of Flip-Flops
 
     int file_line_number; //Line number where this command is defined
 };

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 #include "sdc.h"
 
 
@@ -82,15 +83,36 @@ int main(int argc, char **argv) {
     for(int i = 0; i < sdc_commands->num_set_false_path_cmds; i++) {
         t_sdc_set_false_path* sdc_set_false_path = sdc_commands->set_false_path_cmds[i];
         printf("Line %3d: ", sdc_set_false_path->file_line_number);
-        printf("set_false_path -from [get_clocks {");
-        for(int j = 0; j < sdc_set_false_path->from_clocks->num_clocks; j++) {
-            printf("%s ", sdc_set_false_path->from_clocks->clocks[j]);
+        printf("set_false_path ");
+        if(sdc_set_false_path->from_clocks) {
+            printf("-from [get_clocks {");
+            for(int j = 0; j < sdc_set_false_path->from_clocks->num_clocks; j++) {
+                printf("%s ", sdc_set_false_path->from_clocks->clocks[j]);
+            }
+            printf("}] ");
+        } else {
+            assert(sdc_set_false_path->from_ffs != NULL);
+            printf("-from {");
+            for(int j = 0; j < sdc_set_false_path->from_ffs->num_strings; j++) {
+                printf("%s ", sdc_set_false_path->from_ffs->strings[j]);
+            }
+            printf("}  ");
         }
-        printf("}] -to [get_clocks {");
-        for(int j = 0; j < sdc_set_false_path->to_clocks->num_clocks; j++) {
-            printf("%s ", sdc_set_false_path->to_clocks->clocks[j]);
+        if(sdc_set_false_path->to_clocks) {
+            printf("-to [get_clocks {");
+            for(int j = 0; j < sdc_set_false_path->to_clocks->num_clocks; j++) {
+                printf("%s ", sdc_set_false_path->to_clocks->clocks[j]);
+            }
+            printf("}] ");
+        } else {
+            assert(sdc_set_false_path->to_ffs != NULL);
+            printf("-to {");
+            for(int j = 0; j < sdc_set_false_path->to_ffs->num_strings; j++) {
+                printf("%s ", sdc_set_false_path->to_ffs->strings[j]);
+            }
+            printf("} ");
         }
-        printf("}]\n");
+        printf("\n");
     }
 
     for(int i = 0; i < sdc_commands->num_set_max_delay_cmds; i++) {
