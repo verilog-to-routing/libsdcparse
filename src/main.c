@@ -91,10 +91,10 @@ int main(int argc, char **argv) {
             }
             printf("}] ");
         } else {
-            assert(sdc_set_false_path->from_ffs != NULL);
+            assert(sdc_set_false_path->from_objs != NULL);
             printf("-from {");
-            for(int j = 0; j < sdc_set_false_path->from_ffs->num_strings; j++) {
-                printf("%s ", sdc_set_false_path->from_ffs->strings[j]);
+            for(int j = 0; j < sdc_set_false_path->from_objs->num_strings; j++) {
+                printf("%s ", sdc_set_false_path->from_objs->strings[j]);
             }
             printf("}  ");
         }
@@ -105,10 +105,10 @@ int main(int argc, char **argv) {
             }
             printf("}] ");
         } else {
-            assert(sdc_set_false_path->to_ffs != NULL);
+            assert(sdc_set_false_path->to_objs != NULL);
             printf("-to {");
-            for(int j = 0; j < sdc_set_false_path->to_ffs->num_strings; j++) {
-                printf("%s ", sdc_set_false_path->to_ffs->strings[j]);
+            for(int j = 0; j < sdc_set_false_path->to_objs->num_strings; j++) {
+                printf("%s ", sdc_set_false_path->to_objs->strings[j]);
             }
             printf("} ");
         }

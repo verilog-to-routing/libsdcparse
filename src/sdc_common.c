@@ -367,8 +367,8 @@ t_sdc_set_false_path* alloc_sdc_set_false_path() {
     //Initialize
     sdc_set_false_path->from_clocks = NULL;
     sdc_set_false_path->to_clocks = NULL;
-    sdc_set_false_path->from_ffs = NULL;
-    sdc_set_false_path->to_ffs = NULL;
+    sdc_set_false_path->from_objs = NULL;
+    sdc_set_false_path->to_objs = NULL;
 
     sdc_set_false_path->file_line_number = UNINITIALIZED_INT;
 
@@ -378,8 +378,8 @@ t_sdc_set_false_path* alloc_sdc_set_false_path() {
 void free_sdc_set_false_path(t_sdc_set_false_path* sdc_set_false_path) {
     free_sdc_clock_group(sdc_set_false_path->from_clocks);
     free_sdc_clock_group(sdc_set_false_path->to_clocks);
-    free_sdc_string_group(sdc_set_false_path->from_ffs);
-    free_sdc_string_group(sdc_set_false_path->to_ffs);
+    free_sdc_string_group(sdc_set_false_path->from_objs);
+    free_sdc_string_group(sdc_set_false_path->to_objs);
 
     free(sdc_set_false_path);
 }
@@ -392,13 +392,13 @@ t_sdc_set_false_path* sdc_set_false_path_add_clock_group(t_sdc_set_false_path* s
     //Error checking
     if(clock_group_dir == FROM) {
         //Check that we haven't already defined the from path    
-        if(sdc_set_false_path->from_clocks != NULL || sdc_set_false_path->from_ffs != NULL) {
+        if(sdc_set_false_path->from_clocks != NULL || sdc_set_false_path->from_objs != NULL) {
             sdc_error("SDC Error: only a single '-from' option is supported at line %d near '%s'\n", yylineno, yytext); 
         }
     } else {
         assert(clock_group_dir == TO);
         //Check that we haven't already defined the from path    
-        if(sdc_set_false_path->to_clocks != NULL || sdc_set_false_path->to_ffs != NULL) {
+        if(sdc_set_false_path->to_clocks != NULL || sdc_set_false_path->to_objs != NULL) {
             sdc_error("SDC Error: only a single '-to' option is supported at line %d near '%s'\n", yylineno, yytext); 
         }
     }
@@ -414,29 +414,29 @@ t_sdc_set_false_path* sdc_set_false_path_add_clock_group(t_sdc_set_false_path* s
     return sdc_set_false_path;
 }
 
-t_sdc_set_false_path* sdc_set_false_path_add_string_group(t_sdc_set_false_path* sdc_set_false_path, t_sdc_string_group* ff_group, t_sdc_clock_group_dir clock_group_dir) {
+t_sdc_set_false_path* sdc_set_false_path_add_string_group(t_sdc_set_false_path* sdc_set_false_path, t_sdc_string_group* obj_group, t_sdc_clock_group_dir clock_group_dir) {
     assert(sdc_set_false_path != NULL);
 
     //Error checking
     if(clock_group_dir == FROM) {
         //Check that we haven't already defined the from path    
-        if(sdc_set_false_path->from_clocks != NULL || sdc_set_false_path->from_ffs != NULL) {
+        if(sdc_set_false_path->from_clocks != NULL || sdc_set_false_path->from_objs != NULL) {
             sdc_error("SDC Error: only a single '-from' option is supported at line %d near '%s'\n", yylineno, yytext); 
         }
     } else {
         assert(clock_group_dir == TO);
         //Check that we haven't already defined the from path    
-        if(sdc_set_false_path->to_clocks != NULL || sdc_set_false_path->to_ffs != NULL) {
+        if(sdc_set_false_path->to_clocks != NULL || sdc_set_false_path->to_objs != NULL) {
             sdc_error("SDC Error: only a single '-to' option is supported at line %d near '%s'\n", yylineno, yytext); 
         }
     }
 
     //Add the clock group
     if(clock_group_dir == FROM) {
-        sdc_set_false_path->from_ffs = duplicate_string_group(ff_group);
+        sdc_set_false_path->from_objs = duplicate_string_group(obj_group);
     } else {
         assert(clock_group_dir == TO);
-        sdc_set_false_path->to_ffs = duplicate_string_group(ff_group);
+        sdc_set_false_path->to_objs = duplicate_string_group(obj_group);
     }
 
     return sdc_set_false_path;
@@ -447,11 +447,11 @@ t_sdc_commands* add_sdc_set_false_path(t_sdc_commands* sdc_commands, t_sdc_set_f
     /*
      * Error checks
      */
-    if(sdc_set_false_path->from_clocks == NULL && sdc_set_false_path->from_ffs == NULL) {
+    if(sdc_set_false_path->from_clocks == NULL && sdc_set_false_path->from_objs == NULL) {
         sdc_error("SDC Error: must specify source clock(s) with the '-from' option at line %d near '%s'\n", yylineno, yytext); 
     }
 
-    if(sdc_set_false_path->to_clocks == NULL && sdc_set_false_path->to_ffs == NULL) {
+    if(sdc_set_false_path->to_clocks == NULL && sdc_set_false_path->to_objs == NULL) {
         sdc_error("SDC Error: must specify source clock(s) with the '-to' option at line %d near '%s'\n", yylineno, yytext); 
     }
 

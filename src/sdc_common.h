@@ -49,7 +49,7 @@ t_sdc_commands* add_sdc_set_clock_groups(t_sdc_commands* sdc_commands, t_sdc_set
 t_sdc_set_false_path* alloc_sdc_set_false_path();
 void free_sdc_set_false_path(t_sdc_set_false_path* sdc_set_false_path);
 t_sdc_set_false_path* sdc_set_false_path_add_clock_group(t_sdc_set_false_path* sdc_set_false_path, t_sdc_clock_group* clock_group, t_sdc_clock_group_dir clock_group_dir);
-t_sdc_set_false_path* sdc_set_false_path_add_string_group(t_sdc_set_false_path* sdc_set_false_path, t_sdc_string_group* ff_group, t_sdc_clock_group_dir clock_group_dir);
+t_sdc_set_false_path* sdc_set_false_path_add_string_group(t_sdc_set_false_path* sdc_set_false_path, t_sdc_string_group* obj_group, t_sdc_clock_group_dir clock_group_dir);
 t_sdc_commands* add_sdc_set_false_path(t_sdc_commands* sdc_commands, t_sdc_set_false_path* sdc_set_false_path);
 
 //set_max_delay
