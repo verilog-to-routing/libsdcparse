@@ -1,5 +1,5 @@
 create_clock -period 3 -waveform {1.25 2.75} clk
-create_clock -period 2 clk2 clk_extra
+create_clock -period 2 {clk2 clk_extra}
 create_clock -period 1 -name input_clk
 create_clock -period 0 -name output_clk
 set_clock_groups -exclusive -group input_clk -group clk2
