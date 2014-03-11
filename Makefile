@@ -121,7 +121,7 @@ $(OBJ_DIR):
 clean:
 	rm -f $(LEXER_GEN_SRC)
 	rm -f $(PARSER_GEN_SRC)
+	rm -f $(DEP)
 	rm -rf $(OBJ_DIR)
 	rm -f $(EXE)
 	rm -f $(STATIC_LIB)
-	rm -f $(DEP)
