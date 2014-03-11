@@ -17,11 +17,11 @@ t_sdc_commands* sdc_parse_filename(char* filename) {
     if(yyin != NULL) {
         int error = yyparse();
         if(error) {
-            sdc_error("SDC Error: file %s failed to parse!\n", filename);
+            sdc_error(0, "", "File %s failed to parse.\n", filename);
         }
         fclose(yyin);
     } else {
-        sdc_error("SDC Error: Could not open file %s!\n", filename);
+        sdc_error(0, "", "Could not open file %s.\n", filename);
     }
 
 
@@ -33,7 +33,7 @@ t_sdc_commands* sdc_parse_file(FILE* sdc_file) {
 
     int error = yyparse();
     if(error) {
-        sdc_error("SDC Error: file failed to parse!\n");
+        sdc_error(0, "", "SDC Error: file failed to parse!\n");
     }
 
     return g_sdc_commands;

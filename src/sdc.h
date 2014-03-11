@@ -1,7 +1,9 @@
 #ifndef SDC_H
 #define SDC_H
 /*
- * libsdcparse (c) Kevin E. Murray 2014
+ * libsdcparse - Kevin E. Murray 2014
+ *
+ * Released under MIT License see LICENSE.txt for details.
  *
  * OVERVIEW
  * --------------------------
@@ -67,6 +69,18 @@
  */
 
 
+//For va_args used by sdc_error()
+#include <stdarg.h>
+
+/*
+ * libsdc uses the sdc_error() function to report errors encountered while parsing an SDC file.  
+ * If you wish to define your own error reporting function instead of using the default, simply
+ * define the pre-processor directive SDC_CUSTOM_ERROR_REPORT and implement the sdc_error 
+ * function as prototyped below.
+ */
+//#define SDC_CUSTOM_ERROR_REPORT
+extern void sdc_error(const int line_number, const char* near_text, const char* fmt, ...);
+
 /*
  * Forward declarations
  */
@@ -126,8 +140,8 @@ struct s_sdc_commands {
 struct s_sdc_string_group {
     t_sdc_string_group_type group_type; //The type of the string group, default is STRING. 
                                         //Groups derived from 'calls' to [get_clocks {..}] 
-                                        //and [get_ports {..}] will have types CLOCK and PORT
-                                        //respectively.
+                                        //and [get_ports {..}] will have types SDC_CLOCK 
+                                        //and SDC_PORT respectively.
     int num_strings;    //Number of strings in this group
     char** strings;     //Array of ports names [0..num_strings-1]. 
                         //May be exact string matches or regexs.
@@ -199,5 +213,6 @@ t_sdc_commands* sdc_parse_filename(char* filename);
 t_sdc_commands* sdc_parse_file(FILE* sdc);
 
 void sdc_parse_cleanup();
+
 
 #endif

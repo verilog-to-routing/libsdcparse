@@ -183,6 +183,6 @@ int_number: INT_NUMBER { $$ = $1; }
 
 
 int yyerror(const char *msg) {
-    sdc_error("SDC Error: %s at line %d near '%s'\n", msg, yylineno, yytext);
+    sdc_error(yylineno, yytext, "%s\n", msg);
     return 1;
 }

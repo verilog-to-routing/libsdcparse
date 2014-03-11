@@ -36,6 +36,20 @@ void print_from_to_group(t_sdc_string_group* from, t_sdc_string_group* to) {
     print_string_group(to);
 }
 
+/*
+ * Error handling
+ */
+#ifdef SDC_CUSTOM_ERROR_REPORT
+void sdc_error(const int line_no, const char* near_text, const char* fmt, ...) {
+    fprintf(stderr, "Custom SDC Error line %d near '%s': ", line_no, near_text);
+    va_list args;
+    va_start(args, fmt);
+    vfprintf(stderr, fmt, args);
+    va_end(args);
+    exit(1);
+}
+#endif
+
 int main(int argc, char **argv) {
     if(argc != 2) {
         fprintf(stderr, "Usage: %s filename.sdc\n", argv[0]);
