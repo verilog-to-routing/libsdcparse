@@ -6,6 +6,7 @@
 #include "ctype.h"
 #include "sdc_common.h"
 #include "sdc_parse.tab.h"
+#include "string.h"
 %}
 
 /*
@@ -13,6 +14,12 @@
  */
 %option yylineno
 %option noyywrap
+
+/* unistd.h doesn't exist on windows */
+%option nounistd
+
+/* isatty() doesn't exist on windows */
+%option never-interactive
 
 /*
  * Symbol Definitions
@@ -56,7 +63,7 @@
                                    * white-space.
                                    */
                                   size_t len = strlen(yytext);
-                                  char* tmp_str = strndup(yytext+1, len-2); //Duplicate and trim braces
+                                  char* tmp_str = sdc_strndup(yytext+1, len-2); //Duplicate and trim braces
 
                                   char* modified_str = tmp_str; //Save the original tmp_str for freeing
 
@@ -77,13 +84,13 @@
                                   *tmp_ptr = '\0';
 
                                   //Copy the modified string
-                                  yylval.strVal = strdup(modified_str); 
+                                  yylval.strVal = sdc_strdup(modified_str); 
 
                                   //Clean-up the temporary string
                                   free(tmp_str);
                                   return ESCAPED_STRING; 
                                 }
-[-a-zA-Z0-9_~|:*\\/]*           { yylval.strVal = strdup(yytext); return STRING; }
+[-a-zA-Z0-9_~|:*\\/]*           { yylval.strVal = sdc_strdup(yytext); return STRING; }
 .                               { /* Literal character to pass unrecognized stuff to parser
                                      (i.e. brackets) */
                                   return (int)(*yytext); 

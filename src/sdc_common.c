@@ -113,7 +113,7 @@ t_sdc_create_clock* sdc_create_clock_set_name(t_sdc_create_clock* sdc_create_clo
     if(sdc_create_clock->name != NULL) {
         sdc_error(yylineno, yytext, "Can only define a single clock name.\n");
     } else {
-        sdc_create_clock->name = strdup(name);
+        sdc_create_clock->name = sdc_strdup(name);
     }
 
     return sdc_create_clock;
@@ -245,7 +245,7 @@ t_sdc_set_io_delay* sdc_set_io_delay_set_clock(t_sdc_set_io_delay* sdc_set_io_de
         sdc_error(yylineno, yytext, "Can only specify a single clock\n"); 
     }
 
-    sdc_set_io_delay->clock_name = strdup(clock_name);
+    sdc_set_io_delay->clock_name = sdc_strdup(clock_name);
     return sdc_set_io_delay;
 }
 
@@ -724,7 +724,7 @@ t_sdc_string_group* duplicate_sdc_string_group(t_sdc_string_group* string_group)
     new_sdc_string_group->strings = (char**) calloc(new_sdc_string_group->num_strings, sizeof(*new_sdc_string_group->strings));
     assert(new_sdc_string_group->strings != NULL);
     for(int i = 0; i < new_sdc_string_group->num_strings; i++) {
-        new_sdc_string_group->strings[i] = strdup(string_group->strings[i]);
+        new_sdc_string_group->strings[i] = sdc_strdup(string_group->strings[i]);
     }
 
     return new_sdc_string_group;
@@ -750,7 +750,7 @@ t_sdc_string_group* sdc_string_group_add_string(t_sdc_string_group* sdc_string_g
     assert(sdc_string_group->strings != NULL);
 
     //Insert the new string
-    sdc_string_group->strings[sdc_string_group->num_strings-1] = strdup(string);
+    sdc_string_group->strings[sdc_string_group->num_strings-1] = sdc_strdup(string);
     
     return sdc_string_group;
 }
@@ -760,6 +760,41 @@ t_sdc_string_group* sdc_string_group_add_strings(t_sdc_string_group* sdc_string_
         sdc_string_group_add_string(sdc_string_group, string_group_to_add->strings[i]);
     }
     return sdc_string_group;
+}
+
+char* sdc_strdup(const char* src) {
+    if(src == NULL) {
+        return NULL;
+    }
+
+    size_t len = strlen(src); //Number of char's excluding null terminator
+
+    //Space for [0..len] chars
+    char* new_str = (char*) malloc((len+1)*sizeof(*src));
+    assert(new_str != NULL);
+
+    //Copy chars from [0..len], i.e. src[len] should be null terminator
+    memcpy(new_str, src, len+1);
+    
+    return new_str;
+}
+
+char* sdc_strndup(const char* src, size_t len) {
+    if(src == NULL) {
+        return NULL;
+    }
+
+    //Space for [0..len] chars
+    char* new_str = (char*) malloc((len+1)*sizeof(*src));
+    assert(new_str != NULL);
+
+    //Copy chars from [0..len-1]
+    memcpy(new_str, src, len);
+    
+    //Add the null terminator
+    new_str[len] = '\0';
+
+    return new_str;
 }
 
 /*

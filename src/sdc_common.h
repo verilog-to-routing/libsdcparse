@@ -75,4 +75,7 @@ void free_sdc_string_group(t_sdc_string_group* sdc_string_group);
 t_sdc_string_group* sdc_string_group_add_string(t_sdc_string_group* sdc_string_group, char* string);
 t_sdc_string_group* sdc_string_group_add_strings(t_sdc_string_group* sdc_string_group, t_sdc_string_group* string_group_to_add);
 
+//utility
+char* sdc_strdup(const char* src);
+char* sdc_strndup(const char* src, size_t len);
 #endif
