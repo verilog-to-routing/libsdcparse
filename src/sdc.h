@@ -54,10 +54,10 @@
  *          a) Add the new token definition to sdc_parse.y (e.g. CMD_SET_TIME_FORMAT)
  *          b) Add a pattern to sdc_parse.l which returns the token (e.g. 'set_time_format')
  *          c) Add a new rule for the command to sdc_parse.y e.g.:
- *                cmd_set_time_format: CMD_SET_INPUT_DELAY
+ *                cmd_set_time_format: CMD_SET_TIME_FORMAT
  *          d) Create a new C struct to represent the command, and write an alloc function
  *             (in sdc_common.c) that is called by the first rule e.g.:
- *                cmd_set_time_format: CMD_SET_INPUT_DELAY {$$ = alloc_sdc_set_time_units();}
+ *                cmd_set_time_format: CMD_SET_TIME_FORMAT {$$ = alloc_sdc_set_time_units();}
  *          c) Add options to the command as outlined in (1)
  *          d) Create an add_sdc*() command and extend the s_sdc_commands struct to include 
  *             the new command.  Call it in the top level sdc_commands rule e.g.:
@@ -143,7 +143,7 @@ struct s_sdc_string_group {
                                         //and [get_ports {..}] will have types SDC_CLOCK 
                                         //and SDC_PORT respectively.
     int num_strings;    //Number of strings in this group
-    char** strings;     //Array of ports names [0..num_strings-1]. 
+    char** strings;     //Array of strings [0..num_strings-1]. 
                         //May be exact string matches or regexs.
 };
 
@@ -156,7 +156,7 @@ struct s_sdc_create_clock {
     double rise_edge;   //Rise time from waveform definition
     double fall_edge;   //Fall time from waveform definition
     t_sdc_string_group* targets; //The set of strings indicating clock sources.
-                        //May be explicit strings or regexs.
+                                 //May be explicit strings or regexs.
     bool is_virtual;    //Identifies this as a virtual (non-netlist) clock
 
     int file_line_number; //Line number where this command is defined
