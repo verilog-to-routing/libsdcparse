@@ -33,27 +33,27 @@ extern int yylex(void);
 %error-verbose
 
 /* declare constant */
-%token CMD_CREATE_CLOCK
-%token CMD_SET_CLOCK_GROUPS
-%token CMD_SET_FALSE_PATH
-%token CMD_SET_MAX_DELAY
-%token CMD_SET_MULTICYCLE_PATH
-%token CMD_SET_INPUT_DELAY
-%token CMD_SET_OUTPUT_DELAY
+%token CMD_CREATE_CLOCK "create_clock"
+%token CMD_SET_CLOCK_GROUPS "set_clock_groups"
+%token CMD_SET_FALSE_PATH "set_false_path"
+%token CMD_SET_MAX_DELAY "set_max_delay"
+%token CMD_SET_MULTICYCLE_PATH "set_multicycle_path"
+%token CMD_SET_INPUT_DELAY "set_input_delay"
+%token CMD_SET_OUTPUT_DELAY "set_output_delay"
 
-%token CMD_GET_PORTS
-%token CMD_GET_CLOCKS
+%token CMD_GET_PORTS "get_ports"
+%token CMD_GET_CLOCKS "get_clocks"
 
-%token ARG_PERIOD
-%token ARG_WAVEFORM
-%token ARG_NAME
-%token ARG_EXCLUSIVE
-%token ARG_GROUP
-%token ARG_FROM
-%token ARG_TO
-%token ARG_SETUP
-%token ARG_CLOCK
-%token ARG_MAX
+%token ARG_PERIOD "-period"
+%token ARG_WAVEFORM "-waveform"
+%token ARG_NAME "-name" 
+%token ARG_EXCLUSIVE "-exclusive"
+%token ARG_GROUP "-group"
+%token ARG_FROM "-from"
+%token ARG_TO "-to"
+%token ARG_SETUP "-setup"
+%token ARG_CLOCK "-clock"
+%token ARG_MAX "-max"
 
 %token EOL
 
