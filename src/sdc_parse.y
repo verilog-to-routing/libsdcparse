@@ -55,7 +55,7 @@ extern int yylex(void);
 %token ARG_CLOCK "-clock"
 %token ARG_MAX "-max"
 
-%token EOL
+%token EOL "end-of-line"
 
 /* declare variable tokens */
 %token <strVal> STRING
@@ -183,6 +183,6 @@ int_number: INT_NUMBER { $$ = $1; }
 
 
 int yyerror(const char *msg) {
-    sdc_error(yylineno, yytext, "%s\n", msg);
+    sdc_error(yylineno, yytext, "%s.\n", msg);
     return 1;
 }
