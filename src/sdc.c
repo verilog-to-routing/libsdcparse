@@ -3,8 +3,11 @@
 #include "sdc.h"
 #include "sdc_common.h"
 
+
 extern int yyparse();
 extern FILE	*yyin;
+
+namespace sdcparse {
 
 /*
  * Given a filename parses the file as an SDC file
@@ -12,7 +15,7 @@ extern FILE	*yyin;
  * the sdc commands.  See sdc.h for data structure
  * detials.
  */
-t_sdc_commands* sdc_parse_filename(char* filename) {
+Commands* sdc_parse_filename(char* filename) {
     yyin = fopen(filename, "r");
     if(yyin != NULL) {
         int error = yyparse();
@@ -28,7 +31,7 @@ t_sdc_commands* sdc_parse_filename(char* filename) {
     return g_sdc_commands;
 }
 
-t_sdc_commands* sdc_parse_file(FILE* sdc_file) {
+Commands* sdc_parse_file(FILE* sdc_file) {
     yyin = sdc_file;
 
     int error = yyparse();
@@ -41,4 +44,6 @@ t_sdc_commands* sdc_parse_file(FILE* sdc_file) {
 
 void sdc_parse_cleanup() {
     free_sdc_commands(g_sdc_commands);
+}
+
 }

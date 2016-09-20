@@ -1,10 +1,16 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <string.h>
-#include <assert.h>
+/*#include <stdlib.h>*/
+/*#include <stdio.h>*/
+/*#include <stdarg.h>*/
+/*#include <string.h>*/
+#include <cstring>
+#include <cstdio>
+#include <cstdlib>
+#include <cstdarg>
+#include <cassert>
 
 #include "sdc_common.h"
+
+namespace sdcparse {
 
 constexpr float UNINITIALIZED_FLOAT = -1.0;
 constexpr int UNINITIALIZED_INT = -1;
@@ -12,15 +18,15 @@ constexpr int UNINITIALIZED_INT = -1;
 /*
  * Data structure to store the SDC Commands
  */
-t_sdc_commands* g_sdc_commands;
+Commands* g_sdc_commands;
 
 /*
  * Functions for SDC Command List
  */
-t_sdc_commands* alloc_sdc_commands() {
+Commands* alloc_sdc_commands() {
 
     //Alloc and initialize to empty
-    t_sdc_commands* sdc_commands = (t_sdc_commands*) calloc(1, sizeof(t_sdc_commands));
+    Commands* sdc_commands = (Commands*) calloc(1, sizeof(Commands));
 
     assert(sdc_commands != NULL);
     assert(sdc_commands->has_commands == false);
@@ -28,7 +34,7 @@ t_sdc_commands* alloc_sdc_commands() {
     return sdc_commands;
 }
 
-void free_sdc_commands(t_sdc_commands* sdc_commands) {
+void free_sdc_commands(Commands* sdc_commands) {
     if(sdc_commands != NULL) {
         for(int i = 0; i < sdc_commands->num_create_clock_cmds; i++) {
             free_sdc_create_clock(sdc_commands->create_clock_cmds[i]);
@@ -72,8 +78,8 @@ void free_sdc_commands(t_sdc_commands* sdc_commands) {
 /*
  * Functions for create_clock
  */
-t_sdc_create_clock* alloc_sdc_create_clock() {
-    t_sdc_create_clock* sdc_create_clock = (t_sdc_create_clock*) malloc(sizeof(t_sdc_create_clock));
+CreateClock* alloc_sdc_create_clock() {
+    CreateClock* sdc_create_clock = (CreateClock*) malloc(sizeof(CreateClock));
     assert(sdc_create_clock != NULL);
 
     //Initialize
@@ -89,7 +95,7 @@ t_sdc_create_clock* alloc_sdc_create_clock() {
     return sdc_create_clock;
 }
 
-void free_sdc_create_clock(t_sdc_create_clock* sdc_create_clock) {
+void free_sdc_create_clock(CreateClock* sdc_create_clock) {
     if(sdc_create_clock != NULL) {
         free(sdc_create_clock->name);
         free_sdc_string_group(sdc_create_clock->targets);
@@ -97,10 +103,10 @@ void free_sdc_create_clock(t_sdc_create_clock* sdc_create_clock) {
     }
 }
 
-t_sdc_create_clock* sdc_create_clock_set_period(t_sdc_create_clock* sdc_create_clock, double period) {
+CreateClock* sdc_create_clock_set_period(CreateClock* sdc_create_clock, double period) {
     assert(sdc_create_clock != NULL);
     if(sdc_create_clock->period != UNINITIALIZED_FLOAT) {
-        sdc_error(yylineno, yytext, "Can only define a single clock period.\n", yylineno, yytext); 
+        sdc_error(yylineno, yytext, "Can only define a single clock period.\n"); 
     } else {
         sdc_create_clock->period = period;
     }
@@ -108,18 +114,18 @@ t_sdc_create_clock* sdc_create_clock_set_period(t_sdc_create_clock* sdc_create_c
     return sdc_create_clock;
 }
 
-t_sdc_create_clock* sdc_create_clock_set_name(t_sdc_create_clock* sdc_create_clock, char* name) {
+CreateClock* sdc_create_clock_set_name(CreateClock* sdc_create_clock, char* name) {
     assert(sdc_create_clock != NULL);
     if(sdc_create_clock->name != NULL) {
         sdc_error(yylineno, yytext, "Can only define a single clock name.\n");
     } else {
-        sdc_create_clock->name = sdc_strdup(name);
+        sdc_create_clock->name = sdcparse::strdup(name);
     }
 
     return sdc_create_clock;
 }
 
-t_sdc_create_clock* sdc_create_clock_set_waveform(t_sdc_create_clock* sdc_create_clock, double rise_edge, double fall_edge) {
+CreateClock* sdc_create_clock_set_waveform(CreateClock* sdc_create_clock, double rise_edge, double fall_edge) {
     assert(sdc_create_clock != NULL);
     if(sdc_create_clock->rise_edge != UNINITIALIZED_FLOAT || sdc_create_clock->fall_edge != UNINITIALIZED_FLOAT) {
         sdc_error(yylineno, yytext, "Can only define a single waveform.\n"); 
@@ -131,10 +137,10 @@ t_sdc_create_clock* sdc_create_clock_set_waveform(t_sdc_create_clock* sdc_create
     return sdc_create_clock;
 }
 
-t_sdc_create_clock* sdc_create_clock_add_targets(t_sdc_create_clock* sdc_create_clock, t_sdc_string_group* target_group) {
+CreateClock* sdc_create_clock_add_targets(CreateClock* sdc_create_clock, StringGroup* target_group) {
     assert(sdc_create_clock != NULL);
 
-    assert(target_group->group_type == t_sdc_string_group_type::SDC_STRING);
+    assert(target_group->group_type == StringGroupType::STRING);
 
     if(sdc_create_clock->targets != NULL) {
         sdc_error(yylineno, yytext, "Can only define a single set of targets for clock creation. "
@@ -146,7 +152,7 @@ t_sdc_create_clock* sdc_create_clock_add_targets(t_sdc_create_clock* sdc_create_
     return sdc_create_clock;
 }
 
-t_sdc_commands* add_sdc_create_clock(t_sdc_commands* sdc_commands, t_sdc_create_clock* sdc_create_clock) {
+Commands* add_sdc_create_clock(Commands* sdc_commands, CreateClock* sdc_create_clock) {
     /*
      * Error Checking
      */
@@ -155,7 +161,7 @@ t_sdc_commands* add_sdc_create_clock(t_sdc_commands* sdc_commands, t_sdc_create_
 
     //Allocate a default (empty) target if none was defined, since this clock may be virtual
     if(sdc_create_clock->targets == NULL) {
-        sdc_create_clock->targets = alloc_sdc_string_group(t_sdc_string_group_type::SDC_STRING);
+        sdc_create_clock->targets = alloc_sdc_string_group(StringGroupType::STRING);
         assert(sdc_create_clock->targets != NULL);
     }
 
@@ -205,7 +211,7 @@ t_sdc_commands* add_sdc_create_clock(t_sdc_commands* sdc_commands, t_sdc_create_
      */
     sdc_commands->has_commands = true;
     sdc_commands->num_create_clock_cmds++;
-    sdc_commands->create_clock_cmds = (t_sdc_create_clock**) realloc(sdc_commands->create_clock_cmds, sdc_commands->num_create_clock_cmds*sizeof(*sdc_commands->create_clock_cmds));
+    sdc_commands->create_clock_cmds = (CreateClock**) realloc(sdc_commands->create_clock_cmds, sdc_commands->num_create_clock_cmds*sizeof(*sdc_commands->create_clock_cmds));
     sdc_commands->create_clock_cmds[sdc_commands->num_create_clock_cmds-1] = sdc_create_clock;
 
     return sdc_commands;
@@ -214,9 +220,9 @@ t_sdc_commands* add_sdc_create_clock(t_sdc_commands* sdc_commands, t_sdc_create_
 /*
  * Functions for set_input_delay/set_output_delay
  */
-t_sdc_set_io_delay* alloc_sdc_set_io_delay(t_sdc_io_delay_type cmd_type) {
+SetIoDelay* alloc_sdc_set_io_delay(IoDelayType cmd_type) {
     //Allocate
-    t_sdc_set_io_delay* sdc_set_io_delay = (t_sdc_set_io_delay*) malloc(sizeof(t_sdc_set_io_delay));
+    SetIoDelay* sdc_set_io_delay = (SetIoDelay*) malloc(sizeof(SetIoDelay));
     assert(sdc_set_io_delay != NULL);
 
     //Initialize
@@ -230,7 +236,7 @@ t_sdc_set_io_delay* alloc_sdc_set_io_delay(t_sdc_io_delay_type cmd_type) {
     return sdc_set_io_delay;
 }
 
-void free_sdc_set_io_delay(t_sdc_set_io_delay* sdc_set_io_delay) {
+void free_sdc_set_io_delay(SetIoDelay* sdc_set_io_delay) {
     if(sdc_set_io_delay != NULL) {
         free(sdc_set_io_delay->clock_name);
         free_sdc_string_group(sdc_set_io_delay->target_ports);
@@ -238,18 +244,18 @@ void free_sdc_set_io_delay(t_sdc_set_io_delay* sdc_set_io_delay) {
     }
 }
 
-t_sdc_set_io_delay* sdc_set_io_delay_set_clock(t_sdc_set_io_delay* sdc_set_io_delay, char* clock_name) {
+SetIoDelay* sdc_set_io_delay_set_clock(SetIoDelay* sdc_set_io_delay, char* clock_name) {
     assert(sdc_set_io_delay != NULL);
 
     if(sdc_set_io_delay->clock_name != NULL) {
         sdc_error(yylineno, yytext, "Can only specify a single clock\n"); 
     }
 
-    sdc_set_io_delay->clock_name = sdc_strdup(clock_name);
+    sdc_set_io_delay->clock_name = sdcparse::strdup(clock_name);
     return sdc_set_io_delay;
 }
 
-t_sdc_set_io_delay* sdc_set_io_delay_set_max_value(t_sdc_set_io_delay* sdc_set_io_delay, double max_value) {
+SetIoDelay* sdc_set_io_delay_set_max_value(SetIoDelay* sdc_set_io_delay, double max_value) {
     assert(sdc_set_io_delay != NULL);
 
     if(sdc_set_io_delay->max_delay != UNINITIALIZED_FLOAT) {
@@ -260,10 +266,10 @@ t_sdc_set_io_delay* sdc_set_io_delay_set_max_value(t_sdc_set_io_delay* sdc_set_i
     return sdc_set_io_delay;
 }
 
-t_sdc_set_io_delay* sdc_set_io_delay_set_ports(t_sdc_set_io_delay* sdc_set_io_delay, t_sdc_string_group* ports) {
+SetIoDelay* sdc_set_io_delay_set_ports(SetIoDelay* sdc_set_io_delay, StringGroup* ports) {
     assert(sdc_set_io_delay != NULL);
     assert(ports != NULL);
-    assert(ports->group_type == t_sdc_string_group_type::SDC_PORT);
+    assert(ports->group_type == StringGroupType::PORT);
 
     if(sdc_set_io_delay->target_ports != NULL) {
         sdc_error(yylineno, yytext, "Currently only a single get_ports command is supported.\n"); 
@@ -273,7 +279,7 @@ t_sdc_set_io_delay* sdc_set_io_delay_set_ports(t_sdc_set_io_delay* sdc_set_io_de
     return sdc_set_io_delay;
 }
 
-t_sdc_commands* add_sdc_set_io_delay(t_sdc_commands* sdc_commands, t_sdc_set_io_delay* sdc_set_io_delay) {
+Commands* add_sdc_set_io_delay(Commands* sdc_commands, SetIoDelay* sdc_set_io_delay) {
     assert(sdc_commands != NULL);
     assert(sdc_set_io_delay != NULL);
     /*
@@ -299,16 +305,16 @@ t_sdc_commands* add_sdc_set_io_delay(t_sdc_commands* sdc_commands, t_sdc_set_io_
     /*
      * Add command
      */
-    if(sdc_set_io_delay->cmd_type == t_sdc_io_delay_type::SDC_INPUT_DELAY) {
+    if(sdc_set_io_delay->cmd_type == IoDelayType::INPUT) {
         sdc_commands->has_commands = true;
         sdc_commands->num_set_input_delay_cmds++;
-        sdc_commands->set_input_delay_cmds = (t_sdc_set_io_delay**) realloc(sdc_commands->set_input_delay_cmds, sdc_commands->num_set_input_delay_cmds*sizeof(*sdc_commands->set_input_delay_cmds));
+        sdc_commands->set_input_delay_cmds = (SetIoDelay**) realloc(sdc_commands->set_input_delay_cmds, sdc_commands->num_set_input_delay_cmds*sizeof(*sdc_commands->set_input_delay_cmds));
         sdc_commands->set_input_delay_cmds[sdc_commands->num_set_input_delay_cmds-1] = sdc_set_io_delay;
     } else {
-        assert(sdc_set_io_delay->cmd_type == t_sdc_io_delay_type::SDC_OUTPUT_DELAY);
+        assert(sdc_set_io_delay->cmd_type == IoDelayType::OUTPUT);
         sdc_commands->has_commands = true;
         sdc_commands->num_set_output_delay_cmds++;
-        sdc_commands->set_output_delay_cmds = (t_sdc_set_io_delay**) realloc(sdc_commands->set_output_delay_cmds, sdc_commands->num_set_output_delay_cmds*sizeof(*sdc_commands->set_output_delay_cmds));
+        sdc_commands->set_output_delay_cmds = (SetIoDelay**) realloc(sdc_commands->set_output_delay_cmds, sdc_commands->num_set_output_delay_cmds*sizeof(*sdc_commands->set_output_delay_cmds));
         sdc_commands->set_output_delay_cmds[sdc_commands->num_set_output_delay_cmds-1] = sdc_set_io_delay;
     }
 
@@ -318,13 +324,13 @@ t_sdc_commands* add_sdc_set_io_delay(t_sdc_commands* sdc_commands, t_sdc_set_io_
 /*
  * Functions for set_clock_groups
  */
-t_sdc_set_clock_groups* alloc_sdc_set_clock_groups() {
+SetClockGroups* alloc_sdc_set_clock_groups() {
     //Allocate
-    t_sdc_set_clock_groups* sdc_set_clock_groups = (t_sdc_set_clock_groups*) malloc(sizeof(t_sdc_set_clock_groups));
+    SetClockGroups* sdc_set_clock_groups = (SetClockGroups*) malloc(sizeof(SetClockGroups));
     assert(sdc_set_clock_groups != NULL);
 
     //Initialize
-    sdc_set_clock_groups->type = t_sdc_clock_groups_type::SDC_CG_NONE;
+    sdc_set_clock_groups->type = ClockGroupsType::NONE;
     sdc_set_clock_groups->num_clock_groups = 0;
     sdc_set_clock_groups->clock_groups = NULL;
 
@@ -333,7 +339,7 @@ t_sdc_set_clock_groups* alloc_sdc_set_clock_groups() {
     return sdc_set_clock_groups;
 }
 
-void free_sdc_set_clock_groups(t_sdc_set_clock_groups* sdc_set_clock_groups) {
+void free_sdc_set_clock_groups(SetClockGroups* sdc_set_clock_groups) {
     if(sdc_set_clock_groups != NULL) {
         for(int i = 0; i < sdc_set_clock_groups->num_clock_groups; i++) {
             free_sdc_string_group(sdc_set_clock_groups->clock_groups[i]);
@@ -343,10 +349,10 @@ void free_sdc_set_clock_groups(t_sdc_set_clock_groups* sdc_set_clock_groups) {
     }
 }
 
-t_sdc_set_clock_groups* sdc_set_clock_groups_set_type(t_sdc_set_clock_groups* sdc_set_clock_groups, t_sdc_clock_groups_type type) {
+SetClockGroups* sdc_set_clock_groups_set_type(SetClockGroups* sdc_set_clock_groups, ClockGroupsType type) {
     assert(sdc_set_clock_groups != NULL);
 
-    if(sdc_set_clock_groups->type != t_sdc_clock_groups_type::SDC_CG_NONE) {
+    if(sdc_set_clock_groups->type != ClockGroupsType::NONE) {
         sdc_error(yylineno, yytext, "Can only specify a single clock groups relation type (e.g. '-exclusive')\n"); 
     }
 
@@ -354,15 +360,15 @@ t_sdc_set_clock_groups* sdc_set_clock_groups_set_type(t_sdc_set_clock_groups* sd
     return sdc_set_clock_groups;
 }
 
-t_sdc_set_clock_groups* sdc_set_clock_groups_add_group(t_sdc_set_clock_groups* sdc_set_clock_groups, t_sdc_string_group* clock_group) {
+SetClockGroups* sdc_set_clock_groups_add_group(SetClockGroups* sdc_set_clock_groups, StringGroup* clock_group) {
     assert(sdc_set_clock_groups != NULL);
     assert(clock_group != NULL);
 
-    assert(clock_group->group_type == t_sdc_string_group_type::SDC_CLOCK || clock_group->group_type == t_sdc_string_group_type::SDC_STRING);
+    assert(clock_group->group_type == StringGroupType::CLOCK || clock_group->group_type == StringGroupType::STRING);
 
     //Allocate space
     sdc_set_clock_groups->num_clock_groups++;
-    sdc_set_clock_groups->clock_groups = (t_sdc_string_group**) realloc(sdc_set_clock_groups->clock_groups, sdc_set_clock_groups->num_clock_groups*sizeof(*sdc_set_clock_groups->clock_groups));
+    sdc_set_clock_groups->clock_groups = (StringGroup**) realloc(sdc_set_clock_groups->clock_groups, sdc_set_clock_groups->num_clock_groups*sizeof(*sdc_set_clock_groups->clock_groups));
     assert(sdc_set_clock_groups->clock_groups != NULL);
 
     //Duplicate and insert the clock group
@@ -371,11 +377,11 @@ t_sdc_set_clock_groups* sdc_set_clock_groups_add_group(t_sdc_set_clock_groups* s
     return sdc_set_clock_groups;
 }
 
-t_sdc_commands* add_sdc_set_clock_groups(t_sdc_commands* sdc_commands, t_sdc_set_clock_groups* sdc_set_clock_groups) {
+Commands* add_sdc_set_clock_groups(Commands* sdc_commands, SetClockGroups* sdc_set_clock_groups) {
     /*
      * Error checks
      */
-    if(sdc_set_clock_groups->type == t_sdc_clock_groups_type::SDC_CG_NONE) {
+    if(sdc_set_clock_groups->type == ClockGroupsType::NONE) {
         sdc_error(yylineno, yytext, "Must specify clock relation type as '-exclusive'.\n"); 
     }
 
@@ -393,7 +399,7 @@ t_sdc_commands* add_sdc_set_clock_groups(t_sdc_commands* sdc_commands, t_sdc_set
      */
     sdc_commands->has_commands = true;
     sdc_commands->num_set_clock_groups_cmds++;
-    sdc_commands->set_clock_groups_cmds = (t_sdc_set_clock_groups**) realloc(sdc_commands->set_clock_groups_cmds, sdc_commands->num_set_clock_groups_cmds*sizeof(*sdc_commands->set_clock_groups_cmds));
+    sdc_commands->set_clock_groups_cmds = (SetClockGroups**) realloc(sdc_commands->set_clock_groups_cmds, sdc_commands->num_set_clock_groups_cmds*sizeof(*sdc_commands->set_clock_groups_cmds));
     sdc_commands->set_clock_groups_cmds[sdc_commands->num_set_clock_groups_cmds-1] = sdc_set_clock_groups;
 
     return sdc_commands;
@@ -402,9 +408,9 @@ t_sdc_commands* add_sdc_set_clock_groups(t_sdc_commands* sdc_commands, t_sdc_set
 /*
  * Functions for set_false_path
  */
-t_sdc_set_false_path* alloc_sdc_set_false_path() {
+SetFalsePath* alloc_sdc_set_false_path() {
     //Allocate
-    t_sdc_set_false_path* sdc_set_false_path = (t_sdc_set_false_path*) malloc(sizeof(t_sdc_set_false_path));
+    SetFalsePath* sdc_set_false_path = (SetFalsePath*) malloc(sizeof(SetFalsePath));
 
     //Initialize
     sdc_set_false_path->from = NULL;
@@ -415,7 +421,7 @@ t_sdc_set_false_path* alloc_sdc_set_false_path() {
     return sdc_set_false_path;
 }
 
-void free_sdc_set_false_path(t_sdc_set_false_path* sdc_set_false_path) {
+void free_sdc_set_false_path(SetFalsePath* sdc_set_false_path) {
     if(sdc_set_false_path != NULL) {
         free_sdc_string_group(sdc_set_false_path->from);
         free_sdc_string_group(sdc_set_false_path->to);
@@ -424,21 +430,21 @@ void free_sdc_set_false_path(t_sdc_set_false_path* sdc_set_false_path) {
     }
 }
 
-t_sdc_set_false_path* sdc_set_false_path_add_to_from_group(t_sdc_set_false_path* sdc_set_false_path, 
-                                                           t_sdc_string_group* group, 
-                                                           t_sdc_to_from_dir to_from_dir) {
+SetFalsePath* sdc_set_false_path_add_to_from_group(SetFalsePath* sdc_set_false_path, 
+                                                           StringGroup* group, 
+                                                           FromToType to_from_dir) {
     assert(sdc_set_false_path != NULL);
     assert(group != NULL);
-    assert(group->group_type == t_sdc_string_group_type::SDC_CLOCK || group->group_type == t_sdc_string_group_type::SDC_STRING);
+    assert(group->group_type == StringGroupType::CLOCK || group->group_type == StringGroupType::STRING);
 
     //Error checking
-    if(to_from_dir == t_sdc_to_from_dir::SDC_FROM) {
+    if(to_from_dir == FromToType::FROM) {
         //Check that we haven't already defined the from path    
         if(sdc_set_false_path->from != NULL) {
             sdc_error(yylineno, yytext, "Only a single '-from' option is supported.\n"); 
         }
     } else {
-        assert(to_from_dir == t_sdc_to_from_dir::SDC_TO);
+        assert(to_from_dir == FromToType::TO);
         //Check that we haven't already defined the from path    
         if(sdc_set_false_path->to != NULL) {
             sdc_error(yylineno, yytext, "Only a single '-to' option is supported.\n"); 
@@ -446,17 +452,17 @@ t_sdc_set_false_path* sdc_set_false_path_add_to_from_group(t_sdc_set_false_path*
     }
 
     //Add the clock group
-    if(to_from_dir == t_sdc_to_from_dir::SDC_FROM) {
+    if(to_from_dir == FromToType::FROM) {
         sdc_set_false_path->from = duplicate_sdc_string_group(group);
     } else {
-        assert(to_from_dir == t_sdc_to_from_dir::SDC_TO);
+        assert(to_from_dir == FromToType::TO);
         sdc_set_false_path->to = duplicate_sdc_string_group(group);
     }
 
     return sdc_set_false_path;
 }
 
-t_sdc_commands* add_sdc_set_false_path(t_sdc_commands* sdc_commands, t_sdc_set_false_path* sdc_set_false_path) {
+Commands* add_sdc_set_false_path(Commands* sdc_commands, SetFalsePath* sdc_set_false_path) {
     /*
      * Error checks
      */
@@ -478,7 +484,7 @@ t_sdc_commands* add_sdc_set_false_path(t_sdc_commands* sdc_commands, t_sdc_set_f
      */
     sdc_commands->has_commands = true;
     sdc_commands->num_set_false_path_cmds++;
-    sdc_commands->set_false_path_cmds = (t_sdc_set_false_path**) realloc(sdc_commands->set_false_path_cmds, sdc_commands->num_set_false_path_cmds*sizeof(*sdc_commands->set_false_path_cmds));
+    sdc_commands->set_false_path_cmds = (SetFalsePath**) realloc(sdc_commands->set_false_path_cmds, sdc_commands->num_set_false_path_cmds*sizeof(*sdc_commands->set_false_path_cmds));
     sdc_commands->set_false_path_cmds[sdc_commands->num_set_false_path_cmds-1] = sdc_set_false_path;
 
     return sdc_commands;
@@ -487,9 +493,9 @@ t_sdc_commands* add_sdc_set_false_path(t_sdc_commands* sdc_commands, t_sdc_set_f
 /*
  * Functions for set_max_delay
  */
-t_sdc_set_max_delay* alloc_sdc_set_max_delay() {
+SetMaxDelay* alloc_sdc_set_max_delay() {
     //Allocate
-    t_sdc_set_max_delay* sdc_set_max_delay = (t_sdc_set_max_delay*) malloc(sizeof(t_sdc_set_max_delay));
+    SetMaxDelay* sdc_set_max_delay = (SetMaxDelay*) malloc(sizeof(SetMaxDelay));
 
     //Initialize
     sdc_set_max_delay->max_delay = UNINITIALIZED_FLOAT;
@@ -501,7 +507,7 @@ t_sdc_set_max_delay* alloc_sdc_set_max_delay() {
     return sdc_set_max_delay;
 }
 
-void free_sdc_set_max_delay(t_sdc_set_max_delay* sdc_set_max_delay) {
+void free_sdc_set_max_delay(SetMaxDelay* sdc_set_max_delay) {
     if(sdc_set_max_delay != NULL) {
         free_sdc_string_group(sdc_set_max_delay->from);
         free_sdc_string_group(sdc_set_max_delay->to);
@@ -509,7 +515,7 @@ void free_sdc_set_max_delay(t_sdc_set_max_delay* sdc_set_max_delay) {
     }
 }
 
-t_sdc_set_max_delay* sdc_set_max_delay_set_max_delay_value(t_sdc_set_max_delay* sdc_set_max_delay, double max_delay) {
+SetMaxDelay* sdc_set_max_delay_set_max_delay_value(SetMaxDelay* sdc_set_max_delay, double max_delay) {
     if(sdc_set_max_delay->max_delay != UNINITIALIZED_FLOAT) {
         sdc_error(yylineno, yytext, "Must specify max delay value only once.\n"); 
     }
@@ -517,19 +523,19 @@ t_sdc_set_max_delay* sdc_set_max_delay_set_max_delay_value(t_sdc_set_max_delay* 
     return sdc_set_max_delay;
 }
 
-t_sdc_set_max_delay* sdc_set_max_delay_add_to_from_group(t_sdc_set_max_delay* sdc_set_max_delay, t_sdc_string_group* group, t_sdc_to_from_dir to_from_dir) {
+SetMaxDelay* sdc_set_max_delay_add_to_from_group(SetMaxDelay* sdc_set_max_delay, StringGroup* group, FromToType to_from_dir) {
     assert(sdc_set_max_delay != NULL);
     assert(group != NULL);
-    assert(group->group_type == t_sdc_string_group_type::SDC_CLOCK || group->group_type == t_sdc_string_group_type::SDC_STRING);
+    assert(group->group_type == StringGroupType::CLOCK || group->group_type == StringGroupType::STRING);
 
     //Error checking
-    if(to_from_dir == t_sdc_to_from_dir::SDC_FROM) {
+    if(to_from_dir == FromToType::FROM) {
         //Check that we haven't already defined the from path    
         if(sdc_set_max_delay->from != NULL) {
             sdc_error(yylineno, yytext, "Only a single '-from' option is supported.\n"); 
         }
     } else {
-        assert(to_from_dir == t_sdc_to_from_dir::SDC_TO);
+        assert(to_from_dir == FromToType::TO);
         //Check that we haven't already defined the from path    
         if(sdc_set_max_delay->to != NULL) {
             sdc_error(yylineno, yytext, "Only a single '-to' option is supported.\n"); 
@@ -537,17 +543,17 @@ t_sdc_set_max_delay* sdc_set_max_delay_add_to_from_group(t_sdc_set_max_delay* sd
     }
 
     //Add the clock group
-    if(to_from_dir == t_sdc_to_from_dir::SDC_FROM) {
+    if(to_from_dir == FromToType::FROM) {
         sdc_set_max_delay->from = duplicate_sdc_string_group(group);
     } else {
-        assert(to_from_dir == t_sdc_to_from_dir::SDC_TO);
+        assert(to_from_dir == FromToType::TO);
         sdc_set_max_delay->to = duplicate_sdc_string_group(group);
     }
 
     return sdc_set_max_delay;
 }
 
-t_sdc_commands* add_sdc_set_max_delay(t_sdc_commands* sdc_commands, t_sdc_set_max_delay* sdc_set_max_delay) {
+Commands* add_sdc_set_max_delay(Commands* sdc_commands, SetMaxDelay* sdc_set_max_delay) {
     /*
      * Error checks
      */
@@ -573,7 +579,7 @@ t_sdc_commands* add_sdc_set_max_delay(t_sdc_commands* sdc_commands, t_sdc_set_ma
      */
     sdc_commands->has_commands = true;
     sdc_commands->num_set_max_delay_cmds++;
-    sdc_commands->set_max_delay_cmds = (t_sdc_set_max_delay**) realloc(sdc_commands->set_max_delay_cmds, sdc_commands->num_set_max_delay_cmds*sizeof(*sdc_commands->set_max_delay_cmds));
+    sdc_commands->set_max_delay_cmds = (SetMaxDelay**) realloc(sdc_commands->set_max_delay_cmds, sdc_commands->num_set_max_delay_cmds*sizeof(*sdc_commands->set_max_delay_cmds));
     sdc_commands->set_max_delay_cmds[sdc_commands->num_set_max_delay_cmds-1] = sdc_set_max_delay;
 
     return sdc_commands;
@@ -582,13 +588,13 @@ t_sdc_commands* add_sdc_set_max_delay(t_sdc_commands* sdc_commands, t_sdc_set_ma
 /*
  * Functions for set_multicycle_path
  */
-t_sdc_set_multicycle_path* alloc_sdc_set_multicycle_path() {
+SetMulticyclePath* alloc_sdc_set_multicycle_path() {
     //Allocate
-    t_sdc_set_multicycle_path* sdc_set_multicycle_path = (t_sdc_set_multicycle_path*) malloc(sizeof(t_sdc_set_multicycle_path));
+    SetMulticyclePath* sdc_set_multicycle_path = (SetMulticyclePath*) malloc(sizeof(SetMulticyclePath));
     assert(sdc_set_multicycle_path != NULL);
 
     //Initialize
-    sdc_set_multicycle_path->type = t_sdc_mcp_type::SDC_MCP_NONE;
+    sdc_set_multicycle_path->type = McpType::NONE;
     sdc_set_multicycle_path->mcp_value = UNINITIALIZED_INT;
     sdc_set_multicycle_path->from = NULL;
     sdc_set_multicycle_path->to = NULL;
@@ -598,7 +604,7 @@ t_sdc_set_multicycle_path* alloc_sdc_set_multicycle_path() {
     return sdc_set_multicycle_path;
 
 }
-void free_sdc_set_multicycle_path(t_sdc_set_multicycle_path* sdc_set_multicycle_path) {
+void free_sdc_set_multicycle_path(SetMulticyclePath* sdc_set_multicycle_path) {
     if(sdc_set_multicycle_path != NULL) {
         free_sdc_string_group(sdc_set_multicycle_path->from);
         free_sdc_string_group(sdc_set_multicycle_path->to);
@@ -606,15 +612,15 @@ void free_sdc_set_multicycle_path(t_sdc_set_multicycle_path* sdc_set_multicycle_
     }
 }
 
-t_sdc_set_multicycle_path* sdc_set_multicycle_path_set_type(t_sdc_set_multicycle_path* sdc_set_multicycle_path, t_sdc_mcp_type type) {
-    if(sdc_set_multicycle_path->type != t_sdc_mcp_type::SDC_MCP_NONE) {
+SetMulticyclePath* sdc_set_multicycle_path_set_type(SetMulticyclePath* sdc_set_multicycle_path, McpType type) {
+    if(sdc_set_multicycle_path->type != McpType::NONE) {
         sdc_error(yylineno, yytext, "Must specify the type (e.g. '-setup') only once.\n"); 
     }
     sdc_set_multicycle_path->type = type;
     return sdc_set_multicycle_path;
 }
 
-t_sdc_set_multicycle_path* sdc_set_multicycle_path_set_mcp_value(t_sdc_set_multicycle_path* sdc_set_multicycle_path, int mcp_value) {
+SetMulticyclePath* sdc_set_multicycle_path_set_mcp_value(SetMulticyclePath* sdc_set_multicycle_path, int mcp_value) {
     if(sdc_set_multicycle_path->mcp_value != UNINITIALIZED_INT) {
         sdc_error(yylineno, yytext, "Must specify multicycle path value only once.\n"); 
     }
@@ -622,21 +628,21 @@ t_sdc_set_multicycle_path* sdc_set_multicycle_path_set_mcp_value(t_sdc_set_multi
     return sdc_set_multicycle_path;
 }
 
-t_sdc_set_multicycle_path* sdc_set_multicycle_path_add_to_from_group(t_sdc_set_multicycle_path* sdc_set_multicycle_path, 
-                                                                     t_sdc_string_group* group, 
-                                                                     t_sdc_to_from_dir to_from_dir) {
+SetMulticyclePath* sdc_set_multicycle_path_add_to_from_group(SetMulticyclePath* sdc_set_multicycle_path, 
+                                                                     StringGroup* group, 
+                                                                     FromToType to_from_dir) {
     assert(sdc_set_multicycle_path != NULL);
     assert(group != NULL);
-    assert(group->group_type == t_sdc_string_group_type::SDC_CLOCK || group->group_type == t_sdc_string_group_type::SDC_STRING);
+    assert(group->group_type == StringGroupType::CLOCK || group->group_type == StringGroupType::STRING);
 
     //Error checking
-    if(to_from_dir == t_sdc_to_from_dir::SDC_FROM) {
+    if(to_from_dir == FromToType::FROM) {
         //Check that we haven't already defined the from path    
         if(sdc_set_multicycle_path->from != NULL) {
             sdc_error(yylineno, yytext, "Only a single '-from' option is supported.\n"); 
         }
     } else {
-        assert(to_from_dir == t_sdc_to_from_dir::SDC_TO);
+        assert(to_from_dir == FromToType::TO);
         //Check that we haven't already defined the from path    
         if(sdc_set_multicycle_path->to != NULL) {
             sdc_error(yylineno, yytext, "Only a single '-to' option is supported.\n"); 
@@ -644,21 +650,21 @@ t_sdc_set_multicycle_path* sdc_set_multicycle_path_add_to_from_group(t_sdc_set_m
     }
 
     //Add the clock group
-    if(to_from_dir == t_sdc_to_from_dir::SDC_FROM) {
+    if(to_from_dir == FromToType::FROM) {
         sdc_set_multicycle_path->from = duplicate_sdc_string_group(group);
     } else {
-        assert(to_from_dir == t_sdc_to_from_dir::SDC_TO);
+        assert(to_from_dir == FromToType::TO);
         sdc_set_multicycle_path->to = duplicate_sdc_string_group(group);
     }
 
     return sdc_set_multicycle_path;
 }
 
-t_sdc_commands* add_sdc_set_multicycle_path(t_sdc_commands* sdc_commands, t_sdc_set_multicycle_path* sdc_set_multicycle_path) {
+Commands* add_sdc_set_multicycle_path(Commands* sdc_commands, SetMulticyclePath* sdc_set_multicycle_path) {
     /*
      * Error checks
      */
-    if(sdc_set_multicycle_path->type != t_sdc_mcp_type::SDC_MCP_SETUP) {
+    if(sdc_set_multicycle_path->type != McpType::SETUP) {
         sdc_error(yylineno, yytext, "Must specify the multicycle path type as '-setup'.\n"); 
     }
 
@@ -684,7 +690,7 @@ t_sdc_commands* add_sdc_set_multicycle_path(t_sdc_commands* sdc_commands, t_sdc_
      */
     sdc_commands->has_commands = true;
     sdc_commands->num_set_multicycle_path_cmds++;
-    sdc_commands->set_multicycle_path_cmds = (t_sdc_set_multicycle_path**) realloc(sdc_commands->set_multicycle_path_cmds, sdc_commands->num_set_multicycle_path_cmds*sizeof(*sdc_commands->set_multicycle_path_cmds));
+    sdc_commands->set_multicycle_path_cmds = (SetMulticyclePath**) realloc(sdc_commands->set_multicycle_path_cmds, sdc_commands->num_set_multicycle_path_cmds*sizeof(*sdc_commands->set_multicycle_path_cmds));
     sdc_commands->set_multicycle_path_cmds[sdc_commands->num_set_multicycle_path_cmds-1] = sdc_set_multicycle_path;
 
     return sdc_commands;
@@ -693,9 +699,9 @@ t_sdc_commands* add_sdc_set_multicycle_path(t_sdc_commands* sdc_commands, t_sdc_
 /*
  * Functions for string_group
  */
-t_sdc_string_group* alloc_sdc_string_group(t_sdc_string_group_type type) {
+StringGroup* alloc_sdc_string_group(StringGroupType type) {
     //Allocate and initialize
-    t_sdc_string_group* sdc_string_group = (t_sdc_string_group*) calloc(1, sizeof(t_sdc_string_group)); 
+    StringGroup* sdc_string_group = (StringGroup*) calloc(1, sizeof(StringGroup)); 
     assert(sdc_string_group != NULL);
 
     sdc_string_group->group_type = type;
@@ -703,18 +709,18 @@ t_sdc_string_group* alloc_sdc_string_group(t_sdc_string_group_type type) {
     return sdc_string_group;
 }
 
-t_sdc_string_group* make_sdc_string_group(t_sdc_string_group_type type, char* string) {
+StringGroup* make_sdc_string_group(StringGroupType type, char* string) {
     //Convenience function for converting a single string into a group
-    t_sdc_string_group* sdc_string_group = alloc_sdc_string_group(type);
+    StringGroup* sdc_string_group = alloc_sdc_string_group(type);
 
     sdc_string_group_add_string(sdc_string_group, string);
 
     return sdc_string_group;
 }
 
-t_sdc_string_group* duplicate_sdc_string_group(t_sdc_string_group* string_group) {
+StringGroup* duplicate_sdc_string_group(StringGroup* string_group) {
     //Allocate
-    t_sdc_string_group* new_sdc_string_group = (t_sdc_string_group*) malloc(sizeof(t_sdc_string_group));
+    StringGroup* new_sdc_string_group = (StringGroup*) malloc(sizeof(StringGroup));
     assert(new_sdc_string_group != NULL);
 
     //Deep Copy
@@ -724,13 +730,13 @@ t_sdc_string_group* duplicate_sdc_string_group(t_sdc_string_group* string_group)
     new_sdc_string_group->strings = (char**) calloc(new_sdc_string_group->num_strings, sizeof(*new_sdc_string_group->strings));
     assert(new_sdc_string_group->strings != NULL);
     for(int i = 0; i < new_sdc_string_group->num_strings; i++) {
-        new_sdc_string_group->strings[i] = sdc_strdup(string_group->strings[i]);
+        new_sdc_string_group->strings[i] = sdcparse::strdup(string_group->strings[i]);
     }
 
     return new_sdc_string_group;
 }
 
-void free_sdc_string_group(t_sdc_string_group* sdc_string_group) {
+void free_sdc_string_group(StringGroup* sdc_string_group) {
     if(sdc_string_group != NULL) {
 
         for(int i = 0; i < sdc_string_group->num_strings; i++) {
@@ -741,7 +747,7 @@ void free_sdc_string_group(t_sdc_string_group* sdc_string_group) {
     }
 }
 
-t_sdc_string_group* sdc_string_group_add_string(t_sdc_string_group* sdc_string_group, char* string) {
+StringGroup* sdc_string_group_add_string(StringGroup* sdc_string_group, char* string) {
     assert(sdc_string_group != NULL);
 
     //Allocate space
@@ -750,46 +756,46 @@ t_sdc_string_group* sdc_string_group_add_string(t_sdc_string_group* sdc_string_g
     assert(sdc_string_group->strings != NULL);
 
     //Insert the new string
-    sdc_string_group->strings[sdc_string_group->num_strings-1] = sdc_strdup(string);
+    sdc_string_group->strings[sdc_string_group->num_strings-1] = sdcparse::strdup(string);
     
     return sdc_string_group;
 }
 
-t_sdc_string_group* sdc_string_group_add_strings(t_sdc_string_group* sdc_string_group, t_sdc_string_group* string_group_to_add) {
+StringGroup* sdc_string_group_add_strings(StringGroup* sdc_string_group, StringGroup* string_group_to_add) {
     for(int i = 0; i < string_group_to_add->num_strings; i++) {
         sdc_string_group_add_string(sdc_string_group, string_group_to_add->strings[i]);
     }
     return sdc_string_group;
 }
 
-char* sdc_strdup(const char* src) {
+char* strdup(const char* src) {
     if(src == NULL) {
         return NULL;
     }
 
-    size_t len = strlen(src); //Number of char's excluding null terminator
+    size_t len = std::strlen(src); //Number of char's excluding null terminator
 
     //Space for [0..len] chars
-    char* new_str = (char*) malloc((len+1)*sizeof(*src));
+    char* new_str = (char*) std::malloc((len+1)*sizeof(*src));
     assert(new_str != NULL);
 
     //Copy chars from [0..len], i.e. src[len] should be null terminator
-    memcpy(new_str, src, len+1);
+    std::memcpy(new_str, src, len+1);
     
     return new_str;
 }
 
-char* sdc_strndup(const char* src, size_t len) {
+char* strndup(const char* src, size_t len) {
     if(src == NULL) {
         return NULL;
     }
 
     //Space for [0..len] chars
-    char* new_str = (char*) malloc((len+1)*sizeof(*src));
+    char* new_str = (char*) std::malloc((len+1)*sizeof(*src));
     assert(new_str != NULL);
 
     //Copy chars from [0..len-1]
-    memcpy(new_str, src, len);
+    std::memcpy(new_str, src, len);
     
     //Add the null terminator
     new_str[len] = '\0';
@@ -800,7 +806,7 @@ char* sdc_strndup(const char* src, size_t len) {
 /*
  * Error reporting
  */
-#ifndef SDC_CUSTOM_ERROR_REPORT
+#ifndef CUSTOM_ERROR_REPORT
 void sdc_error(const int line_no, const char* near_text, const char* fmt, ...) {
     fprintf(stderr, "SDC Error line %d near '%s': ", line_no, near_text);
     va_list args;
@@ -810,3 +816,5 @@ void sdc_error(const int line_no, const char* near_text, const char* fmt, ...) {
     exit(1);
 }
 #endif
+
+} //namespace

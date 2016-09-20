@@ -6,8 +6,7 @@ do
     for sdc_file in ${sdc_files[@]}
     do
         echo
-        echo "File: $sdc_file"
-        ./sdc_parse_test $sdc_file
+        ./sdcparse_test $sdc_file
     done
 
 done

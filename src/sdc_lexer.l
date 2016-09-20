@@ -66,7 +66,7 @@
                                    * white-space.
                                    */
                                   size_t len = strlen(yytext);
-                                  char* tmp_str = sdc_strndup(yytext+1, len-2); //Duplicate and trim braces
+                                  char* tmp_str = sdcparse::strndup(yytext+1, len-2); //Duplicate and trim braces
 
                                   char* modified_str = tmp_str; //Save the original tmp_str for freeing
 
@@ -87,13 +87,13 @@
                                   *tmp_ptr = '\0';
 
                                   //Copy the modified string
-                                  yylval.strVal = sdc_strdup(modified_str); 
+                                  yylval.strVal = sdcparse::strdup(modified_str); 
 
                                   //Clean-up the temporary string
                                   free(tmp_str);
                                   return ESCAPED_STRING; 
                                 }
-[-a-zA-Z0-9_~|:*\\/]*           { yylval.strVal = sdc_strdup(yytext); return STRING; }
+[-a-zA-Z0-9_~|:*\\/]*           { yylval.strVal = sdcparse::strdup(yytext); return STRING; }
 .                               { /* Literal character to pass unrecognized stuff to parser
                                      (i.e. brackets) */
                                   return (int)(*yytext); 

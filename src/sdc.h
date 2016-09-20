@@ -14,7 +14,7 @@
  * USING THIS LIBRARY
  * --------------------------
  * Since this is NOT a full TCL interpreter, 'function calls' to get_ports or
- * get_clocks, are converted to t_sdc_string_group, with the group_type field set
+ * get_clocks, are converted to string_group, with the group_type field set
  * to either SDC_CLOCK or SDC_PORT respectively. That is, they are represented as 
  * the sets of the strings passed to those functions.  It is left up to the 
  * application to interpret them.
@@ -24,7 +24,7 @@
  * (such as set_input_delay and set_output_delay) may share a struct and be identified
  * by a 'cmd_type' field in the struct.
  *
- * All supported SDC commands are collected into a t_sdc_commands struct which
+ * All supported SDC commands are collected into a commands struct which
  * represents the entire SDC file.
  *
  * See the associated main.c for example usage.
@@ -68,6 +68,8 @@
  *
  */
 
+namespace sdcparse {
+
 /*
  * libsdc uses the sdc_error() function to report errors encountered while parsing an SDC file.  
  * If you wish to define your own error reporting function instead of using the default, simply
@@ -80,78 +82,79 @@ extern void sdc_error(const int line_number, const char* near_text, const char* 
 /*
  * Forward declarations
  */
-struct t_sdc_commands;
+struct Commands;
 
-struct t_sdc_create_clock;
-struct t_sdc_set_io_delay;
-struct t_sdc_set_clock_groups;
-struct t_sdc_set_false_path;
-struct t_sdc_set_max_delay;
-struct t_sdc_set_multicycle_path;
+struct CreateClock;
+struct SetIoDelay;
+struct SetClockGroups;
+struct SetFalsePath;
+struct SetMaxDelay;
+struct SetMulticyclePath;
 
-struct t_sdc_string_group;
+struct string_group;
 
 /*
  * Enumerations to describe specific SDC command types and attributes
  */
-enum class t_sdc_io_delay_type {
-    SDC_INPUT_DELAY, 
-    SDC_OUTPUT_DELAY
+enum class IoDelayType {
+    INPUT, 
+    OUTPUT
 };
 
-enum class t_sdc_clock_groups_type {
-    SDC_CG_NONE,
-    SDC_CG_EXCLUSIVE
+enum class ClockGroupsType {
+    NONE,
+    EXCLUSIVE
 };
 
-enum class t_sdc_to_from_dir {
-    SDC_TO, 
-    SDC_FROM
+enum class FromToType {
+    FROM,
+    TO
 };
-enum class t_sdc_mcp_type {
-    SDC_MCP_NONE, 
-    SDC_MCP_SETUP
+
+enum class McpType {
+    NONE, 
+    SETUP
 };
-enum class t_sdc_string_group_type {
-    SDC_STRING, 
-    SDC_PORT, 
-    SDC_CLOCK
+enum class StringGroupType {
+    STRING, 
+    PORT, 
+    CLOCK
 };
 
 /*
  * Collection of SDC commands
  */
-struct t_sdc_commands {
+struct Commands {
     bool has_commands;                                      //Indicates whether any sdc commands were found
 
     int num_create_clock_cmds;                              //Number of create_clock commands
-    t_sdc_create_clock** create_clock_cmds;                 //Array of create_clock commands [0..num_create_clock_cmds-1]
+    CreateClock** create_clock_cmds;                 //Array of create_clock commands [0..num_create_clock_cmds-1]
 
     int num_set_input_delay_cmds;                           //Number of set_input_delay commands
-    t_sdc_set_io_delay** set_input_delay_cmds;              //Array of set_input_delay commands [0..num_set_input_delay_cmds-1]
+    SetIoDelay** set_input_delay_cmds;              //Array of set_input_delay commands [0..num_set_input_delay_cmds-1]
 
     int num_set_output_delay_cmds;                          //Number of set_output_delay commands
-    t_sdc_set_io_delay** set_output_delay_cmds;             //Array of set_output_delay commands [0..num_set_output_delay_cmds-1]
+    SetIoDelay** set_output_delay_cmds;             //Array of set_output_delay commands [0..num_set_output_delay_cmds-1]
 
     int num_set_clock_groups_cmds;                          //Number of set_clock_groups commands
-    t_sdc_set_clock_groups** set_clock_groups_cmds;         //Array of set_clock_groups commands [0..num_set_clock_groups_cmds-1]
+    SetClockGroups** set_clock_groups_cmds;         //Array of set_clock_groups commands [0..num_set_clock_groups_cmds-1]
 
     int num_set_false_path_cmds;                            //Number of set_false_path commands
-    t_sdc_set_false_path** set_false_path_cmds;             //Array of set_false_path commands [0..num_set_false_path_cmds-1]
+    SetFalsePath** set_false_path_cmds;             //Array of set_false_path commands [0..num_set_false_path_cmds-1]
 
     int num_set_max_delay_cmds;                             //Number of set_max_delay commands
-    t_sdc_set_max_delay** set_max_delay_cmds;               //Array of set_max_delay commands [0..num_set_max_delay_cmds-1]
+    SetMaxDelay** set_max_delay_cmds;               //Array of set_max_delay commands [0..num_set_max_delay_cmds-1]
 
     int num_set_multicycle_path_cmds;                       //Number of set_multicycle_path commands
-    t_sdc_set_multicycle_path** set_multicycle_path_cmds;   //Array of set_multicycle_path commands [0..num_set_multicycle_path_cmds-1]
+    SetMulticyclePath** set_multicycle_path_cmds;   //Array of set_multicycle_path commands [0..num_set_multicycle_path_cmds-1]
 };
 
 /*
  * Common SDC data structures
  */
 
-struct t_sdc_string_group {
-    t_sdc_string_group_type group_type; //The type of the string group, default is STRING. 
+struct StringGroup {
+    StringGroupType group_type; //The type of the string group, default is STRING. 
                                         //Groups derived from 'calls' to [get_clocks {..}] 
                                         //and [get_ports {..}] will have types SDC_CLOCK 
                                         //and SDC_PORT respectively.
@@ -163,58 +166,58 @@ struct t_sdc_string_group {
 /*
  * Structures defining different SDC commands
  */
-struct t_sdc_create_clock {
+struct CreateClock {
     double period;      //Clock period
     char* name;         //Name of the clock
     double rise_edge;   //Rise time from waveform definition
     double fall_edge;   //Fall time from waveform definition
-    t_sdc_string_group* targets; //The set of strings indicating clock sources.
+    StringGroup* targets; //The set of strings indicating clock sources.
                                  //May be explicit strings or regexs.
     bool is_virtual;    //Identifies this as a virtual (non-netlist) clock
 
     int file_line_number; //Line number where this command is defined
 };
 
-struct t_sdc_set_io_delay {
-    t_sdc_io_delay_type cmd_type; //Identifies whether this represents a
+struct SetIoDelay {
+    IoDelayType cmd_type; //Identifies whether this represents a
                                   //set_input_delay or set_output delay
                                   //command.
     char* clock_name;   //Name of the clock this constraint is associated with
     double max_delay;   //The maximum input delay allowed on the target ports
-    t_sdc_string_group* target_ports; //The target ports
+    StringGroup* target_ports; //The target ports
 
     int file_line_number; //Line number where this command is defined
 };
 
-struct t_sdc_set_clock_groups {
-    t_sdc_clock_groups_type type;      //The type of clock group relation being specified
+struct SetClockGroups {
+    ClockGroupsType type;      //The type of clock group relation being specified
     int num_clock_groups;              //The number of clock groups (must be >= 2)  
-    t_sdc_string_group** clock_groups; //The array of clock groups [0..num_clock_groups-1]
+    StringGroup** clock_groups; //The array of clock groups [0..num_clock_groups-1]
 
     int file_line_number; //Line number where this command is defined
 };
 
-struct t_sdc_set_false_path {
-    t_sdc_string_group* from;    //The source list of startpoints or clocks
-    t_sdc_string_group* to;      //The target list of endpoints or clocks
+struct SetFalsePath {
+    StringGroup* from;    //The source list of startpoints or clocks
+    StringGroup* to;      //The target list of endpoints or clocks
 
     int file_line_number; //Line number where this command is defined
 };
 
-struct t_sdc_set_max_delay {
+struct SetMaxDelay {
     double max_delay;          //The maximum allowed delay between the from
                                //and to clocks
-    t_sdc_string_group* from;  //The source list of startpoints or clocks
-    t_sdc_string_group* to;    //The target list of endpoints or clocks
+    StringGroup* from;  //The source list of startpoints or clocks
+    StringGroup* to;    //The target list of endpoints or clocks
 
     int file_line_number; //Line number where this command is defined
 };
 
-struct t_sdc_set_multicycle_path {
-    t_sdc_mcp_type type;       //The type of the mcp
+struct SetMulticyclePath {
+    McpType type;       //The type of the mcp
     int mcp_value;             //The number of cycles specifed
-    t_sdc_string_group* from;  //The source list of startpoints or clocks
-    t_sdc_string_group* to;    //The target list of endpoints or clocks
+    StringGroup* from;  //The source list of startpoints or clocks
+    StringGroup* to;    //The target list of endpoints or clocks
 
     int file_line_number; //Line number where this command is defined
 };
@@ -222,10 +225,11 @@ struct t_sdc_set_multicycle_path {
 /*
  *  Externally useful functions
  */
-t_sdc_commands* sdc_parse_filename(char* filename);
-t_sdc_commands* sdc_parse_file(FILE* sdc);
+Commands* sdc_parse_filename(char* filename);
+Commands* sdc_parse_file(FILE* sdc);
 
 void sdc_parse_cleanup();
 
+}
 
 #endif

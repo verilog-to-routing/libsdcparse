@@ -9,6 +9,8 @@
 int yyerror(const char *msg);
 extern int yylex(void);
 
+using namespace sdcparse;
+
 %}
 
 %union {
@@ -16,16 +18,16 @@ extern int yylex(void);
     double floatVal;
     int intVal;
 
-    t_sdc_commands* sdc_commands;
+    sdcparse::Commands* sdc_commands;
 
-    t_sdc_create_clock* create_clock;
-    t_sdc_set_io_delay* set_io_delay;
-    t_sdc_set_clock_groups* set_clock_groups;
-    t_sdc_set_false_path* set_false_path;
-    t_sdc_set_max_delay* set_max_delay;
-    t_sdc_set_multicycle_path* set_multicycle_path;
+    sdcparse::CreateClock* create_clock;
+    sdcparse::SetIoDelay* set_io_delay;
+    sdcparse::SetClockGroups* set_clock_groups;
+    sdcparse::SetFalsePath* set_false_path;
+    sdcparse::SetMaxDelay* set_max_delay;
+    sdcparse::SetMulticyclePath* set_multicycle_path;
 
-    t_sdc_string_group* string_group;
+    sdcparse::StringGroup* string_group;
 }
 
 /* Verbose error reporting */
@@ -102,12 +104,12 @@ cmd_create_clock: CMD_CREATE_CLOCK                          { $$ = alloc_sdc_cre
                                                               free_sdc_string_group($3); 
                                                             }
     | cmd_create_clock string                               { $$ = sdc_create_clock_add_targets($1, 
-                                                                        make_sdc_string_group(t_sdc_string_group_type::SDC_STRING, $2)); 
+                                                                        make_sdc_string_group(sdcparse::StringGroupType::STRING, $2)); 
                                                               free($2); 
                                                             }
     ;
 
-cmd_set_input_delay: CMD_SET_INPUT_DELAY        { $$ = alloc_sdc_set_io_delay(t_sdc_io_delay_type::SDC_INPUT_DELAY); }
+cmd_set_input_delay: CMD_SET_INPUT_DELAY        { $$ = alloc_sdc_set_io_delay(IoDelayType::INPUT); }
     | cmd_set_input_delay ARG_CLOCK string      { $$ = sdc_set_io_delay_set_clock($1, $3); 
                                                   free($3); 
                                                 }
@@ -117,7 +119,7 @@ cmd_set_input_delay: CMD_SET_INPUT_DELAY        { $$ = alloc_sdc_set_io_delay(t_
                                                 }
     ;
 
-cmd_set_output_delay: CMD_SET_OUTPUT_DELAY       { $$ = alloc_sdc_set_io_delay(t_sdc_io_delay_type::SDC_OUTPUT_DELAY); }
+cmd_set_output_delay: CMD_SET_OUTPUT_DELAY       { $$ = alloc_sdc_set_io_delay(IoDelayType::OUTPUT); }
     | cmd_set_output_delay ARG_CLOCK string      { $$ = sdc_set_io_delay_set_clock($1, $3); 
                                                    free($3); 
                                                  }
@@ -128,93 +130,93 @@ cmd_set_output_delay: CMD_SET_OUTPUT_DELAY       { $$ = alloc_sdc_set_io_delay(t
     ;
 
 cmd_set_clock_groups: CMD_SET_CLOCK_GROUPS                  { $$ = alloc_sdc_set_clock_groups(); }
-    | cmd_set_clock_groups ARG_EXCLUSIVE                    { $$ = sdc_set_clock_groups_set_type($1, t_sdc_clock_groups_type::SDC_CG_EXCLUSIVE); }
+    | cmd_set_clock_groups ARG_EXCLUSIVE                    { $$ = sdc_set_clock_groups_set_type($1, ClockGroupsType::EXCLUSIVE); }
     | cmd_set_clock_groups ARG_GROUP '[' cmd_get_clocks ']' { $$ = sdc_set_clock_groups_add_group($1, $4); free_sdc_string_group($4); }
     | cmd_set_clock_groups ARG_GROUP '{' stringGroup '}'    { $$ = sdc_set_clock_groups_add_group($1, $4); free_sdc_string_group($4);}
-    | cmd_set_clock_groups ARG_GROUP     string             { $$ = sdc_set_clock_groups_add_group($1, make_sdc_string_group(t_sdc_string_group_type::SDC_STRING, $3)); 
+    | cmd_set_clock_groups ARG_GROUP     string             { $$ = sdc_set_clock_groups_add_group($1, make_sdc_string_group(sdcparse::StringGroupType::STRING, $3)); 
                                                               free($3);
                                                             }
     ;
 
 cmd_set_false_path: CMD_SET_FALSE_PATH                      { $$ = alloc_sdc_set_false_path(); }
-    | cmd_set_false_path ARG_FROM '[' cmd_get_clocks ']'    { $$ = sdc_set_false_path_add_to_from_group($1, $4, t_sdc_to_from_dir::SDC_FROM);
+    | cmd_set_false_path ARG_FROM '[' cmd_get_clocks ']'    { $$ = sdc_set_false_path_add_to_from_group($1, $4, FromToType::FROM);
                                                               free_sdc_string_group($4);
                                                             }
-    | cmd_set_false_path ARG_TO   '[' cmd_get_clocks ']'    { $$ = sdc_set_false_path_add_to_from_group($1, $4, t_sdc_to_from_dir::SDC_TO  ); 
+    | cmd_set_false_path ARG_TO   '[' cmd_get_clocks ']'    { $$ = sdc_set_false_path_add_to_from_group($1, $4, FromToType::TO  ); 
                                                               free_sdc_string_group($4);
                                                             }
-    | cmd_set_false_path ARG_FROM '{' stringGroup '}'       { $$ = sdc_set_false_path_add_to_from_group($1, $4, t_sdc_to_from_dir::SDC_FROM); 
+    | cmd_set_false_path ARG_FROM '{' stringGroup '}'       { $$ = sdc_set_false_path_add_to_from_group($1, $4, FromToType::FROM); 
                                                               free_sdc_string_group($4);
                                                             }
-    | cmd_set_false_path ARG_TO   '{' stringGroup '}'       { $$ = sdc_set_false_path_add_to_from_group($1, $4, t_sdc_to_from_dir::SDC_TO  );
+    | cmd_set_false_path ARG_TO   '{' stringGroup '}'       { $$ = sdc_set_false_path_add_to_from_group($1, $4, FromToType::TO  );
                                                               free_sdc_string_group($4);
                                                             }
     | cmd_set_false_path ARG_FROM     string                { $$ = sdc_set_false_path_add_to_from_group($1, 
-                                                                    make_sdc_string_group(t_sdc_string_group_type::SDC_STRING, $3), 
-                                                                    t_sdc_to_from_dir::SDC_FROM); 
+                                                                    make_sdc_string_group(sdcparse::StringGroupType::STRING, $3), 
+                                                                    FromToType::FROM); 
                                                               free($3);
                                                             }
     | cmd_set_false_path ARG_TO       string                { $$ = sdc_set_false_path_add_to_from_group($1, 
-                                                                    make_sdc_string_group(t_sdc_string_group_type::SDC_STRING, $3), 
-                                                                    t_sdc_to_from_dir::SDC_TO  ); 
+                                                                    make_sdc_string_group(sdcparse::StringGroupType::STRING, $3), 
+                                                                    FromToType::TO  ); 
                                                               free($3);
                                                             }
     ;
 
 cmd_set_max_delay: CMD_SET_MAX_DELAY                        { $$ = alloc_sdc_set_max_delay(); }
     | cmd_set_max_delay number                              { $$ = sdc_set_max_delay_set_max_delay_value($1, $2); }
-    | cmd_set_max_delay ARG_FROM '[' cmd_get_clocks ']'     { $$ = sdc_set_max_delay_add_to_from_group($1, $4, t_sdc_to_from_dir::SDC_FROM);
+    | cmd_set_max_delay ARG_FROM '[' cmd_get_clocks ']'     { $$ = sdc_set_max_delay_add_to_from_group($1, $4, FromToType::FROM);
                                                               free_sdc_string_group($4);
                                                             }
-    | cmd_set_max_delay ARG_TO   '[' cmd_get_clocks ']'     { $$ = sdc_set_max_delay_add_to_from_group($1, $4, t_sdc_to_from_dir::SDC_TO  );
+    | cmd_set_max_delay ARG_TO   '[' cmd_get_clocks ']'     { $$ = sdc_set_max_delay_add_to_from_group($1, $4, FromToType::TO  );
                                                               free_sdc_string_group($4);
                                                             }
-    | cmd_set_max_delay ARG_FROM '{' stringGroup '}'        { $$ = sdc_set_max_delay_add_to_from_group($1, $4, t_sdc_to_from_dir::SDC_FROM);
+    | cmd_set_max_delay ARG_FROM '{' stringGroup '}'        { $$ = sdc_set_max_delay_add_to_from_group($1, $4, FromToType::FROM);
                                                               free_sdc_string_group($4);
                                                             }
-    | cmd_set_max_delay ARG_TO   '{' stringGroup '}'        { $$ = sdc_set_max_delay_add_to_from_group($1, $4, t_sdc_to_from_dir::SDC_TO  );
+    | cmd_set_max_delay ARG_TO   '{' stringGroup '}'        { $$ = sdc_set_max_delay_add_to_from_group($1, $4, FromToType::TO  );
                                                               free_sdc_string_group($4); 
                                                             }
     | cmd_set_max_delay ARG_FROM     string                 { $$ = sdc_set_max_delay_add_to_from_group($1, 
-                                                                    make_sdc_string_group(t_sdc_string_group_type::SDC_STRING, $3), 
-                                                                    t_sdc_to_from_dir::SDC_FROM);
+                                                                    make_sdc_string_group(sdcparse::StringGroupType::STRING, $3), 
+                                                                    FromToType::FROM);
                                                               free($3);
                                                             }
     | cmd_set_max_delay ARG_TO       string                 { $$ = sdc_set_max_delay_add_to_from_group($1, 
-                                                                    make_sdc_string_group(t_sdc_string_group_type::SDC_STRING, $3),
-                                                                    t_sdc_to_from_dir::SDC_TO);
+                                                                    make_sdc_string_group(sdcparse::StringGroupType::STRING, $3),
+                                                                    FromToType::TO);
                                                               free($3);
                                                             }
     ;
 
 cmd_set_multicycle_path: CMD_SET_MULTICYCLE_PATH                { $$ = alloc_sdc_set_multicycle_path(); }
     | cmd_set_multicycle_path int_number                        { $$ = sdc_set_multicycle_path_set_mcp_value($1, $2); }
-    | cmd_set_multicycle_path ARG_SETUP                         { $$ = sdc_set_multicycle_path_set_type($1, t_sdc_mcp_type::SDC_MCP_SETUP); }
-    | cmd_set_multicycle_path ARG_FROM '[' cmd_get_clocks ']'   { $$ = sdc_set_multicycle_path_add_to_from_group($1, $4, t_sdc_to_from_dir::SDC_FROM);
+    | cmd_set_multicycle_path ARG_SETUP                         { $$ = sdc_set_multicycle_path_set_type($1, McpType::SETUP); }
+    | cmd_set_multicycle_path ARG_FROM '[' cmd_get_clocks ']'   { $$ = sdc_set_multicycle_path_add_to_from_group($1, $4, FromToType::FROM);
                                                                   free_sdc_string_group($4);
                                                                 }
-    | cmd_set_multicycle_path ARG_TO   '[' cmd_get_clocks ']'   { $$ = sdc_set_multicycle_path_add_to_from_group($1, $4, t_sdc_to_from_dir::SDC_TO);
+    | cmd_set_multicycle_path ARG_TO   '[' cmd_get_clocks ']'   { $$ = sdc_set_multicycle_path_add_to_from_group($1, $4, FromToType::TO);
                                                                   free_sdc_string_group($4);
                                                                 }
-    | cmd_set_multicycle_path ARG_FROM '{' stringGroup '}'      { $$ = sdc_set_multicycle_path_add_to_from_group($1, $4, t_sdc_to_from_dir::SDC_FROM);
+    | cmd_set_multicycle_path ARG_FROM '{' stringGroup '}'      { $$ = sdc_set_multicycle_path_add_to_from_group($1, $4, FromToType::FROM);
                                                                   free_sdc_string_group($4);
                                                                 }
-    | cmd_set_multicycle_path ARG_TO   '{' stringGroup '}'      { $$ = sdc_set_multicycle_path_add_to_from_group($1, $4, t_sdc_to_from_dir::SDC_TO);
+    | cmd_set_multicycle_path ARG_TO   '{' stringGroup '}'      { $$ = sdc_set_multicycle_path_add_to_from_group($1, $4, FromToType::TO);
                                                                   free_sdc_string_group($4);
                                                                 }
     | cmd_set_multicycle_path ARG_FROM     string               { $$ = sdc_set_multicycle_path_add_to_from_group($1, 
-                                                                        make_sdc_string_group(t_sdc_string_group_type::SDC_STRING, $3), 
-                                                                        t_sdc_to_from_dir::SDC_FROM);
+                                                                        make_sdc_string_group(sdcparse::StringGroupType::STRING, $3), 
+                                                                        FromToType::FROM);
                                                                   free($3);
                                                                 }
     | cmd_set_multicycle_path ARG_TO       string               { $$ = sdc_set_multicycle_path_add_to_from_group($1, 
-                                                                        make_sdc_string_group(t_sdc_string_group_type::SDC_STRING, $3),
-                                                                        t_sdc_to_from_dir::SDC_TO);
+                                                                        make_sdc_string_group(sdcparse::StringGroupType::STRING, $3),
+                                                                        FromToType::TO);
                                                                   free($3);
                                                                 }
     ;
 
-cmd_get_ports: CMD_GET_PORTS            { $$ = alloc_sdc_string_group(t_sdc_string_group_type::SDC_PORT); }
+cmd_get_ports: CMD_GET_PORTS            { $$ = alloc_sdc_string_group(sdcparse::StringGroupType::PORT); }
     | cmd_get_ports '{' stringGroup '}' { $$ = sdc_string_group_add_strings($1, $3);
                                           free_sdc_string_group($3);
                                         }
@@ -223,7 +225,7 @@ cmd_get_ports: CMD_GET_PORTS            { $$ = alloc_sdc_string_group(t_sdc_stri
                                         }
     ;
 
-cmd_get_clocks: CMD_GET_CLOCKS              { $$ = alloc_sdc_string_group(t_sdc_string_group_type::SDC_CLOCK); }
+cmd_get_clocks: CMD_GET_CLOCKS              { $$ = alloc_sdc_string_group(sdcparse::StringGroupType::CLOCK); }
     | cmd_get_clocks '{' stringGroup '}'    { $$ = sdc_string_group_add_strings($1, $3);
                                               free_sdc_string_group($3);
                                             }
@@ -232,7 +234,7 @@ cmd_get_clocks: CMD_GET_CLOCKS              { $$ = alloc_sdc_string_group(t_sdc_
                                             }
     ;
 
-stringGroup: /*empty*/   { $$ = alloc_sdc_string_group(t_sdc_string_group_type::SDC_STRING); }
+stringGroup: /*empty*/   { $$ = alloc_sdc_string_group(sdcparse::StringGroupType::STRING); }
     | stringGroup string { $$ = sdc_string_group_add_string($1, $2);
                            free($2);
                          } 
