@@ -84,7 +84,7 @@ extern void sdc_error(const int line_number, const char* near_text, const char* 
 /*
  * Forward declarations
  */
-struct Commands;
+struct SdcCommands;
 
 struct CreateClock;
 struct SetIoDelay;
@@ -126,7 +126,7 @@ enum class StringGroupType {
 /*
  * Collection of SDC commands
  */
-struct Commands {
+struct SdcCommands {
     bool has_commands();
 
     std::vector<CreateClock*> create_clock_cmds;
@@ -215,8 +215,8 @@ struct SetMulticyclePath {
 /*
  *  Externally useful functions
  */
-Commands* sdc_parse_filename(char* filename);
-Commands* sdc_parse_file(FILE* sdc);
+SdcCommands* sdc_parse_filename(char* filename);
+SdcCommands* sdc_parse_file(FILE* sdc);
 
 void sdc_parse_cleanup();
 

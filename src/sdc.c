@@ -9,7 +9,7 @@ extern FILE	*yyin;
 
 namespace sdcparse {
 
-bool Commands::has_commands() {
+bool SdcCommands::has_commands() {
     if(!create_clock_cmds.empty()) return true;
     if(!set_input_delay_cmds.empty()) return true;
     if(!set_output_delay_cmds.empty()) return true;
@@ -26,7 +26,7 @@ bool Commands::has_commands() {
  * the sdc commands.  See sdc.h for data structure
  * detials.
  */
-Commands* sdc_parse_filename(char* filename) {
+SdcCommands* sdc_parse_filename(char* filename) {
     yyin = fopen(filename, "r");
     if(yyin != NULL) {
         int error = yyparse();
@@ -42,7 +42,7 @@ Commands* sdc_parse_filename(char* filename) {
     return g_sdc_commands;
 }
 
-Commands* sdc_parse_file(FILE* sdc_file) {
+SdcCommands* sdc_parse_file(FILE* sdc_file) {
     yyin = sdc_file;
 
     int error = yyparse();

@@ -16,17 +16,17 @@ constexpr float UNINITIALIZED_FLOAT = -1.0;
 constexpr int UNINITIALIZED_INT = -1;
 
 /*
- * Data structure to store the SDC Commands
+ * Data structure to store the SDC SdcCommands
  */
-Commands* g_sdc_commands;
+SdcCommands* g_sdc_commands;
 
 /*
  * Functions for SDC Command List
  */
-Commands* alloc_sdc_commands() {
+SdcCommands* alloc_sdc_commands() {
 
     //Alloc and initialize to empty
-    Commands* sdc_commands = (Commands*) calloc(1, sizeof(Commands));
+    SdcCommands* sdc_commands = (SdcCommands*) calloc(1, sizeof(SdcCommands));
 
     assert(sdc_commands != NULL);
     assert(sdc_commands->has_commands() == false);
@@ -34,7 +34,7 @@ Commands* alloc_sdc_commands() {
     return sdc_commands;
 }
 
-void free_sdc_commands(Commands* sdc_commands) {
+void free_sdc_commands(SdcCommands* sdc_commands) {
     if(sdc_commands != NULL) {
         for(CreateClock* create_clock_cmd : sdc_commands->create_clock_cmds) {
             free_sdc_create_clock(create_clock_cmd);
@@ -145,7 +145,7 @@ CreateClock* sdc_create_clock_add_targets(CreateClock* sdc_create_clock, StringG
     return sdc_create_clock;
 }
 
-Commands* add_sdc_create_clock(Commands* sdc_commands, CreateClock* sdc_create_clock) {
+SdcCommands* add_sdc_create_clock(SdcCommands* sdc_commands, CreateClock* sdc_create_clock) {
     /*
      * Error Checking
      */
@@ -269,7 +269,7 @@ SetIoDelay* sdc_set_io_delay_set_ports(SetIoDelay* sdc_set_io_delay, StringGroup
     return sdc_set_io_delay;
 }
 
-Commands* add_sdc_set_io_delay(Commands* sdc_commands, SetIoDelay* sdc_set_io_delay) {
+SdcCommands* add_sdc_set_io_delay(SdcCommands* sdc_commands, SetIoDelay* sdc_set_io_delay) {
     assert(sdc_commands != NULL);
     assert(sdc_set_io_delay != NULL);
     /*
@@ -361,7 +361,7 @@ SetClockGroups* sdc_set_clock_groups_add_group(SetClockGroups* sdc_set_clock_gro
     return sdc_set_clock_groups;
 }
 
-Commands* add_sdc_set_clock_groups(Commands* sdc_commands, SetClockGroups* sdc_set_clock_groups) {
+SdcCommands* add_sdc_set_clock_groups(SdcCommands* sdc_commands, SetClockGroups* sdc_set_clock_groups) {
     /*
      * Error checks
      */
@@ -443,7 +443,7 @@ SetFalsePath* sdc_set_false_path_add_to_from_group(SetFalsePath* sdc_set_false_p
     return sdc_set_false_path;
 }
 
-Commands* add_sdc_set_false_path(Commands* sdc_commands, SetFalsePath* sdc_set_false_path) {
+SdcCommands* add_sdc_set_false_path(SdcCommands* sdc_commands, SetFalsePath* sdc_set_false_path) {
     /*
      * Error checks
      */
@@ -531,7 +531,7 @@ SetMaxDelay* sdc_set_max_delay_add_to_from_group(SetMaxDelay* sdc_set_max_delay,
     return sdc_set_max_delay;
 }
 
-Commands* add_sdc_set_max_delay(Commands* sdc_commands, SetMaxDelay* sdc_set_max_delay) {
+SdcCommands* add_sdc_set_max_delay(SdcCommands* sdc_commands, SetMaxDelay* sdc_set_max_delay) {
     /*
      * Error checks
      */
@@ -635,7 +635,7 @@ SetMulticyclePath* sdc_set_multicycle_path_add_to_from_group(SetMulticyclePath* 
     return sdc_set_multicycle_path;
 }
 
-Commands* add_sdc_set_multicycle_path(Commands* sdc_commands, SetMulticyclePath* sdc_set_multicycle_path) {
+SdcCommands* add_sdc_set_multicycle_path(SdcCommands* sdc_commands, SetMulticyclePath* sdc_set_multicycle_path) {
     /*
      * Error checks
      */

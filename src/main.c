@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
     printf("File: %s\n", argv[1]);
 
     //Parse the file
-    Commands* sdc_commands = sdc_parse_filename(argv[1]);
+    SdcCommands* sdc_commands = sdc_parse_filename(argv[1]);
 
 
 

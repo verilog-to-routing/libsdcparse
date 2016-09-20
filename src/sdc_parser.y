@@ -18,7 +18,7 @@ using namespace sdcparse;
     double floatVal;
     int intVal;
 
-    sdcparse::Commands* sdc_commands;
+    sdcparse::SdcCommands* sdc_commands;
 
     sdcparse::CreateClock* create_clock;
     sdcparse::SetIoDelay* set_io_delay;
