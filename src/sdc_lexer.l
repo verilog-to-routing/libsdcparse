@@ -5,7 +5,7 @@
  */
 #include "ctype.h"
 #include "sdc_common.h"
-#include "sdc_parse.tab.h"
+#include "sdc_parser.gen.h"
 #include "string.h"
 %}
 

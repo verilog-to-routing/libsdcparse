@@ -5,15 +5,15 @@
 
 void print_string_group(t_sdc_string_group* group) {
     const char *start_token, *end_token;
-    if(group->group_type == SDC_STRING) {
+    if(group->group_type == t_sdc_string_group_type::SDC_STRING) {
         start_token = "{";
         end_token   = "}";
 
-    } else if (group->group_type == SDC_CLOCK) {
+    } else if (group->group_type == t_sdc_string_group_type::SDC_CLOCK) {
         start_token = "[get_clocks {";
         end_token   = "}]";
 
-    } else if (group->group_type == SDC_PORT) {
+    } else if (group->group_type == t_sdc_string_group_type::SDC_PORT) {
         start_token = "[get_ports {";
         end_token   = "}]";
 
@@ -109,7 +109,7 @@ int main(int argc, char **argv) {
         t_sdc_set_clock_groups* sdc_set_clock_groups = sdc_commands->set_clock_groups_cmds[i];
         printf("Line %3d: ", sdc_set_clock_groups->file_line_number);
         printf("set_clock_groups ");
-        if(sdc_set_clock_groups->type == SDC_CG_EXCLUSIVE) {
+        if(sdc_set_clock_groups->type == t_sdc_clock_groups_type::SDC_CG_EXCLUSIVE) {
             printf(" -exclusive");
         }
         for(int j = 0; j < sdc_set_clock_groups->num_clock_groups; j++) {
@@ -139,7 +139,7 @@ int main(int argc, char **argv) {
         t_sdc_set_multicycle_path* sdc_set_multicycle_path = sdc_commands->set_multicycle_path_cmds[i];
         printf("Line %3d: ", sdc_set_multicycle_path->file_line_number);
         printf("set_multicycle_path %d ", sdc_set_multicycle_path->mcp_value);
-        if(sdc_set_multicycle_path->type == SDC_MCP_SETUP) {
+        if(sdc_set_multicycle_path->type == t_sdc_mcp_type::SDC_MCP_SETUP) {
             printf("-setup ");
         }
         print_from_to_group(sdc_set_multicycle_path->from, sdc_set_multicycle_path->to);

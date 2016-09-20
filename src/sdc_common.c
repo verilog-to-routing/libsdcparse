@@ -6,8 +6,8 @@
 
 #include "sdc_common.h"
 
-#define UNINITIALIZED_FLOAT -1.0
-#define UNINITIALIZED_INT -1
+constexpr float UNINITIALIZED_FLOAT = -1.0;
+constexpr int UNINITIALIZED_INT = -1;
 
 /*
  * Data structure to store the SDC Commands
@@ -134,7 +134,7 @@ t_sdc_create_clock* sdc_create_clock_set_waveform(t_sdc_create_clock* sdc_create
 t_sdc_create_clock* sdc_create_clock_add_targets(t_sdc_create_clock* sdc_create_clock, t_sdc_string_group* target_group) {
     assert(sdc_create_clock != NULL);
 
-    assert(target_group->group_type == SDC_STRING);
+    assert(target_group->group_type == t_sdc_string_group_type::SDC_STRING);
 
     if(sdc_create_clock->targets != NULL) {
         sdc_error(yylineno, yytext, "Can only define a single set of targets for clock creation. "
@@ -155,7 +155,7 @@ t_sdc_commands* add_sdc_create_clock(t_sdc_commands* sdc_commands, t_sdc_create_
 
     //Allocate a default (empty) target if none was defined, since this clock may be virtual
     if(sdc_create_clock->targets == NULL) {
-        sdc_create_clock->targets = alloc_sdc_string_group(SDC_STRING);
+        sdc_create_clock->targets = alloc_sdc_string_group(t_sdc_string_group_type::SDC_STRING);
         assert(sdc_create_clock->targets != NULL);
     }
 
@@ -263,7 +263,7 @@ t_sdc_set_io_delay* sdc_set_io_delay_set_max_value(t_sdc_set_io_delay* sdc_set_i
 t_sdc_set_io_delay* sdc_set_io_delay_set_ports(t_sdc_set_io_delay* sdc_set_io_delay, t_sdc_string_group* ports) {
     assert(sdc_set_io_delay != NULL);
     assert(ports != NULL);
-    assert(ports->group_type == SDC_PORT);
+    assert(ports->group_type == t_sdc_string_group_type::SDC_PORT);
 
     if(sdc_set_io_delay->target_ports != NULL) {
         sdc_error(yylineno, yytext, "Currently only a single get_ports command is supported.\n"); 
@@ -299,13 +299,13 @@ t_sdc_commands* add_sdc_set_io_delay(t_sdc_commands* sdc_commands, t_sdc_set_io_
     /*
      * Add command
      */
-    if(sdc_set_io_delay->cmd_type == SDC_INPUT_DELAY) {
+    if(sdc_set_io_delay->cmd_type == t_sdc_io_delay_type::SDC_INPUT_DELAY) {
         sdc_commands->has_commands = true;
         sdc_commands->num_set_input_delay_cmds++;
         sdc_commands->set_input_delay_cmds = (t_sdc_set_io_delay**) realloc(sdc_commands->set_input_delay_cmds, sdc_commands->num_set_input_delay_cmds*sizeof(*sdc_commands->set_input_delay_cmds));
         sdc_commands->set_input_delay_cmds[sdc_commands->num_set_input_delay_cmds-1] = sdc_set_io_delay;
     } else {
-        assert(sdc_set_io_delay->cmd_type == SDC_OUTPUT_DELAY);
+        assert(sdc_set_io_delay->cmd_type == t_sdc_io_delay_type::SDC_OUTPUT_DELAY);
         sdc_commands->has_commands = true;
         sdc_commands->num_set_output_delay_cmds++;
         sdc_commands->set_output_delay_cmds = (t_sdc_set_io_delay**) realloc(sdc_commands->set_output_delay_cmds, sdc_commands->num_set_output_delay_cmds*sizeof(*sdc_commands->set_output_delay_cmds));
@@ -324,7 +324,7 @@ t_sdc_set_clock_groups* alloc_sdc_set_clock_groups() {
     assert(sdc_set_clock_groups != NULL);
 
     //Initialize
-    sdc_set_clock_groups->type = SDC_CG_NONE;
+    sdc_set_clock_groups->type = t_sdc_clock_groups_type::SDC_CG_NONE;
     sdc_set_clock_groups->num_clock_groups = 0;
     sdc_set_clock_groups->clock_groups = NULL;
 
@@ -346,7 +346,7 @@ void free_sdc_set_clock_groups(t_sdc_set_clock_groups* sdc_set_clock_groups) {
 t_sdc_set_clock_groups* sdc_set_clock_groups_set_type(t_sdc_set_clock_groups* sdc_set_clock_groups, t_sdc_clock_groups_type type) {
     assert(sdc_set_clock_groups != NULL);
 
-    if(sdc_set_clock_groups->type != SDC_CG_NONE) {
+    if(sdc_set_clock_groups->type != t_sdc_clock_groups_type::SDC_CG_NONE) {
         sdc_error(yylineno, yytext, "Can only specify a single clock groups relation type (e.g. '-exclusive')\n"); 
     }
 
@@ -358,7 +358,7 @@ t_sdc_set_clock_groups* sdc_set_clock_groups_add_group(t_sdc_set_clock_groups* s
     assert(sdc_set_clock_groups != NULL);
     assert(clock_group != NULL);
 
-    assert(clock_group->group_type == SDC_CLOCK || clock_group->group_type == SDC_STRING);
+    assert(clock_group->group_type == t_sdc_string_group_type::SDC_CLOCK || clock_group->group_type == t_sdc_string_group_type::SDC_STRING);
 
     //Allocate space
     sdc_set_clock_groups->num_clock_groups++;
@@ -375,7 +375,7 @@ t_sdc_commands* add_sdc_set_clock_groups(t_sdc_commands* sdc_commands, t_sdc_set
     /*
      * Error checks
      */
-    if(sdc_set_clock_groups->type == SDC_CG_NONE) {
+    if(sdc_set_clock_groups->type == t_sdc_clock_groups_type::SDC_CG_NONE) {
         sdc_error(yylineno, yytext, "Must specify clock relation type as '-exclusive'.\n"); 
     }
 
@@ -429,16 +429,16 @@ t_sdc_set_false_path* sdc_set_false_path_add_to_from_group(t_sdc_set_false_path*
                                                            t_sdc_to_from_dir to_from_dir) {
     assert(sdc_set_false_path != NULL);
     assert(group != NULL);
-    assert(group->group_type == SDC_CLOCK || group->group_type == SDC_STRING);
+    assert(group->group_type == t_sdc_string_group_type::SDC_CLOCK || group->group_type == t_sdc_string_group_type::SDC_STRING);
 
     //Error checking
-    if(to_from_dir == SDC_FROM) {
+    if(to_from_dir == t_sdc_to_from_dir::SDC_FROM) {
         //Check that we haven't already defined the from path    
         if(sdc_set_false_path->from != NULL) {
             sdc_error(yylineno, yytext, "Only a single '-from' option is supported.\n"); 
         }
     } else {
-        assert(to_from_dir == SDC_TO);
+        assert(to_from_dir == t_sdc_to_from_dir::SDC_TO);
         //Check that we haven't already defined the from path    
         if(sdc_set_false_path->to != NULL) {
             sdc_error(yylineno, yytext, "Only a single '-to' option is supported.\n"); 
@@ -446,10 +446,10 @@ t_sdc_set_false_path* sdc_set_false_path_add_to_from_group(t_sdc_set_false_path*
     }
 
     //Add the clock group
-    if(to_from_dir == SDC_FROM) {
+    if(to_from_dir == t_sdc_to_from_dir::SDC_FROM) {
         sdc_set_false_path->from = duplicate_sdc_string_group(group);
     } else {
-        assert(to_from_dir == SDC_TO);
+        assert(to_from_dir == t_sdc_to_from_dir::SDC_TO);
         sdc_set_false_path->to = duplicate_sdc_string_group(group);
     }
 
@@ -520,16 +520,16 @@ t_sdc_set_max_delay* sdc_set_max_delay_set_max_delay_value(t_sdc_set_max_delay* 
 t_sdc_set_max_delay* sdc_set_max_delay_add_to_from_group(t_sdc_set_max_delay* sdc_set_max_delay, t_sdc_string_group* group, t_sdc_to_from_dir to_from_dir) {
     assert(sdc_set_max_delay != NULL);
     assert(group != NULL);
-    assert(group->group_type == SDC_CLOCK || group->group_type == SDC_STRING);
+    assert(group->group_type == t_sdc_string_group_type::SDC_CLOCK || group->group_type == t_sdc_string_group_type::SDC_STRING);
 
     //Error checking
-    if(to_from_dir == SDC_FROM) {
+    if(to_from_dir == t_sdc_to_from_dir::SDC_FROM) {
         //Check that we haven't already defined the from path    
         if(sdc_set_max_delay->from != NULL) {
             sdc_error(yylineno, yytext, "Only a single '-from' option is supported.\n"); 
         }
     } else {
-        assert(to_from_dir == SDC_TO);
+        assert(to_from_dir == t_sdc_to_from_dir::SDC_TO);
         //Check that we haven't already defined the from path    
         if(sdc_set_max_delay->to != NULL) {
             sdc_error(yylineno, yytext, "Only a single '-to' option is supported.\n"); 
@@ -537,10 +537,10 @@ t_sdc_set_max_delay* sdc_set_max_delay_add_to_from_group(t_sdc_set_max_delay* sd
     }
 
     //Add the clock group
-    if(to_from_dir == SDC_FROM) {
+    if(to_from_dir == t_sdc_to_from_dir::SDC_FROM) {
         sdc_set_max_delay->from = duplicate_sdc_string_group(group);
     } else {
-        assert(to_from_dir == SDC_TO);
+        assert(to_from_dir == t_sdc_to_from_dir::SDC_TO);
         sdc_set_max_delay->to = duplicate_sdc_string_group(group);
     }
 
@@ -588,7 +588,7 @@ t_sdc_set_multicycle_path* alloc_sdc_set_multicycle_path() {
     assert(sdc_set_multicycle_path != NULL);
 
     //Initialize
-    sdc_set_multicycle_path->type = SDC_MCP_NONE;
+    sdc_set_multicycle_path->type = t_sdc_mcp_type::SDC_MCP_NONE;
     sdc_set_multicycle_path->mcp_value = UNINITIALIZED_INT;
     sdc_set_multicycle_path->from = NULL;
     sdc_set_multicycle_path->to = NULL;
@@ -607,7 +607,7 @@ void free_sdc_set_multicycle_path(t_sdc_set_multicycle_path* sdc_set_multicycle_
 }
 
 t_sdc_set_multicycle_path* sdc_set_multicycle_path_set_type(t_sdc_set_multicycle_path* sdc_set_multicycle_path, t_sdc_mcp_type type) {
-    if(sdc_set_multicycle_path->type != SDC_MCP_NONE) {
+    if(sdc_set_multicycle_path->type != t_sdc_mcp_type::SDC_MCP_NONE) {
         sdc_error(yylineno, yytext, "Must specify the type (e.g. '-setup') only once.\n"); 
     }
     sdc_set_multicycle_path->type = type;
@@ -627,16 +627,16 @@ t_sdc_set_multicycle_path* sdc_set_multicycle_path_add_to_from_group(t_sdc_set_m
                                                                      t_sdc_to_from_dir to_from_dir) {
     assert(sdc_set_multicycle_path != NULL);
     assert(group != NULL);
-    assert(group->group_type == SDC_CLOCK || group->group_type == SDC_STRING);
+    assert(group->group_type == t_sdc_string_group_type::SDC_CLOCK || group->group_type == t_sdc_string_group_type::SDC_STRING);
 
     //Error checking
-    if(to_from_dir == SDC_FROM) {
+    if(to_from_dir == t_sdc_to_from_dir::SDC_FROM) {
         //Check that we haven't already defined the from path    
         if(sdc_set_multicycle_path->from != NULL) {
             sdc_error(yylineno, yytext, "Only a single '-from' option is supported.\n"); 
         }
     } else {
-        assert(to_from_dir == SDC_TO);
+        assert(to_from_dir == t_sdc_to_from_dir::SDC_TO);
         //Check that we haven't already defined the from path    
         if(sdc_set_multicycle_path->to != NULL) {
             sdc_error(yylineno, yytext, "Only a single '-to' option is supported.\n"); 
@@ -644,10 +644,10 @@ t_sdc_set_multicycle_path* sdc_set_multicycle_path_add_to_from_group(t_sdc_set_m
     }
 
     //Add the clock group
-    if(to_from_dir == SDC_FROM) {
+    if(to_from_dir == t_sdc_to_from_dir::SDC_FROM) {
         sdc_set_multicycle_path->from = duplicate_sdc_string_group(group);
     } else {
-        assert(to_from_dir == SDC_TO);
+        assert(to_from_dir == t_sdc_to_from_dir::SDC_TO);
         sdc_set_multicycle_path->to = duplicate_sdc_string_group(group);
     }
 
@@ -658,7 +658,7 @@ t_sdc_commands* add_sdc_set_multicycle_path(t_sdc_commands* sdc_commands, t_sdc_
     /*
      * Error checks
      */
-    if(sdc_set_multicycle_path->type != SDC_MCP_SETUP) {
+    if(sdc_set_multicycle_path->type != t_sdc_mcp_type::SDC_MCP_SETUP) {
         sdc_error(yylineno, yytext, "Must specify the multicycle path type as '-setup'.\n"); 
     }
 

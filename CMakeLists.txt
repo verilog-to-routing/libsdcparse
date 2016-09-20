@@ -1,0 +1,49 @@
+cmake_minimum_required(VERSION 2.8.12)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
+include(HeadersToIncludeDirs)
+
+project("libsdcparse")
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11")
+
+#Flex and Bison are used to generate the parser
+find_package(BISON REQUIRED)
+find_package(FLEX REQUIRED)
+
+file(GLOB_RECURSE LIB_SOURCES src/*.c)
+file(GLOB_RECURSE LIB_HEADERS src/*.h)
+headers_to_include_dirs(LIB_HEADERS LIB_INCLUDE_DIRS)
+
+#Find the flex and bison input files
+file(GLOB_RECURSE LEXER_SOURCES src/*.l)
+file(GLOB_RECURSE PARSER_SOURCES src/*.y)
+
+#Make the flex and bison targets
+flex_target(SdcLexer ${LEXER_SOURCES} ${CMAKE_CURRENT_BINARY_DIR}/sdc_lexer.gen.c)
+bison_target(SdcParser ${PARSER_SOURCES} ${CMAKE_CURRENT_BINARY_DIR}/sdc_parser.gen.c)
+add_flex_bison_dependency(SdcLexer SdcParser)
+
+
+#Treat .c as CXX
+set_source_files_properties(${LIB_SOURCES} ${FLEX_SdcLexer_OUTPUTS} ${BISON_SdcParser_OUTPUT_SOURCE} PROPERTIES LANGUAGE CXX)
+
+#Suppress warnings in Flex/Bison generated files
+if(${FLEX_BISON_WARN_SUPPRESS_FLAGS})
+    set_source_files_properties(${FLEX_SdcLexer_OUTPUTS} ${BISON_SdcParser_OUTPUT_SOURCE}
+                                PROPERTIES COMPILE_FLAGS ${FLEX_BISON_WARN_SUPPRESS_FLAGS})
+endif()
+
+#Create the library
+add_library(libsdcparse STATIC
+             ${LIB_HEADERS}
+             ${LIB_SOURCES}
+             ${FLEX_SdcLexer_OUTPUTS} 
+             ${BISON_SdcParser_OUTPUT_SOURCE})
+         target_include_directories(libsdcparse PUBLIC ${LIB_INCLUDE_DIRS})
+set_target_properties(libsdcparse PROPERTIES PREFIX "") #Avoid extra 'lib' prefix
+
+#Create the test executable
+add_executable(sdcparse_test src/main.c)
+target_link_libraries(sdcparse_test libsdcparse)
+
+install(TARGETS libsdcparse sdcparse_test DESTINATION bin)
