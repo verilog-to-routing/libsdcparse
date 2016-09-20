@@ -103,16 +103,15 @@
                                   //to terminate the string here.
                                   *tmp_ptr = '\0';
 
-                                  const char* escaped_str = sdcparse::strdup(modified_str);
+                                  auto ret = sdcparse::Parser::make_ESCAPED_STRING(modified_str);
 
                                   //Clean-up the temporary string
                                   free(tmp_str);
 
-                                  return sdcparse::Parser::make_ESCAPED_STRING(escaped_str); 
+                                  return ret; 
                                 }
 [-a-zA-Z0-9_~|:*\\/]*           { 
-                                  const char* str = sdcparse::strdup(yytext);
-                                  return sdcparse::Parser::make_STRING(str); 
+                                  return sdcparse::Parser::make_STRING(yytext); 
                                 }
 \[                              { return sdcparse::Parser::make_LSPAR(); }
 \]                              { return sdcparse::Parser::make_RSPAR(); }

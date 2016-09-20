@@ -7,6 +7,7 @@ do
     do
         echo
         echo "File: $sdc_file"
+        #valgrind --leak-check=full --track-origins=yes ./sdcparse_test $sdc_file
         ./sdcparse_test $sdc_file
         exit_code=$?
         if [ $exit_code -ne 0 ]; then
