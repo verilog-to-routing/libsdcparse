@@ -11,8 +11,6 @@ extern char* sdcparse_text;
 
 namespace sdcparse {
 
-extern std::shared_ptr<SdcCommands> g_sdc_commands;
-
 /*
  * Function Declarations
  */

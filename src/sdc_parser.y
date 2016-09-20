@@ -28,8 +28,10 @@
 /* Wrap everything in our namespace */
 %define api.namespace {sdcparse}
 
+/* Name the parser class */
 %define parser_class_name {Parser}
 
+/* Match the flex prefix */
 %define api.prefix {sdcparse_}
 
 /* Extra checks for correct usage */
@@ -52,6 +54,8 @@
 
 /* Generate a table of token names */
 %token-table
+
+%parse-param {std::shared_ptr<SdcCommands> sdc_commands}
 
 %code requires {
     #ifndef YY_NULLPTR
@@ -135,7 +139,7 @@ using namespace sdcparse;
 
 %%
 
-sdc_commands:                                   { g_sdc_commands = alloc_sdc_commands(); $$ = g_sdc_commands; }
+sdc_commands:                                   { $$ = sdc_commands; /* passed as parse-param */ }
     | sdc_commands cmd_create_clock EOL         { $$ = add_sdc_create_clock($1, $2); }
     | sdc_commands cmd_set_input_delay EOL      { $$ = add_sdc_set_io_delay($1, $2); }
     | sdc_commands cmd_set_output_delay EOL     { $$ = add_sdc_set_io_delay($1, $2); }
@@ -146,7 +150,7 @@ sdc_commands:                                   { g_sdc_commands = alloc_sdc_com
     | sdc_commands EOL                          { /* Eat stray EOL symbols */ $$ = $1; }
     ;
 
-cmd_create_clock: CMD_CREATE_CLOCK                          { $$ = alloc_sdc_create_clock(); }
+cmd_create_clock: CMD_CREATE_CLOCK                          { $$ = std::make_shared<CreateClock>(); }
     | cmd_create_clock ARG_PERIOD number                    { $$ = sdc_create_clock_set_period($1, $3); }
     | cmd_create_clock ARG_NAME string                      { $$ = sdc_create_clock_set_name($1, $3); }
     | cmd_create_clock ARG_WAVEFORM LCPAR number number RCPAR   { $$ = sdc_create_clock_set_waveform($1, $4, $5); }
@@ -157,19 +161,19 @@ cmd_create_clock: CMD_CREATE_CLOCK                          { $$ = alloc_sdc_cre
                                                             }
     ;
 
-cmd_set_input_delay: CMD_SET_INPUT_DELAY        { $$ = alloc_sdc_set_io_delay(IoDelayType::INPUT); }
+cmd_set_input_delay: CMD_SET_INPUT_DELAY        { $$ = std::make_shared<SetIoDelay>(IoDelayType::INPUT); }
     | cmd_set_input_delay ARG_CLOCK string      { $$ = sdc_set_io_delay_set_clock($1, $3); }
     | cmd_set_input_delay ARG_MAX number        { $$ = sdc_set_io_delay_set_max_value($1, $3); }
     | cmd_set_input_delay LSPAR cmd_get_ports RSPAR { $$ = sdc_set_io_delay_set_ports($1, $3); }
     ;
 
-cmd_set_output_delay: CMD_SET_OUTPUT_DELAY       { $$ = alloc_sdc_set_io_delay(IoDelayType::OUTPUT); }
+cmd_set_output_delay: CMD_SET_OUTPUT_DELAY       { $$ = std::make_shared<SetIoDelay>(IoDelayType::OUTPUT); }
     | cmd_set_output_delay ARG_CLOCK string      { $$ = sdc_set_io_delay_set_clock($1, $3); }
     | cmd_set_output_delay ARG_MAX number        { $$ = sdc_set_io_delay_set_max_value($1, $3); }
     | cmd_set_output_delay LSPAR cmd_get_ports RSPAR { $$ = sdc_set_io_delay_set_ports($1, $3); }
     ;
 
-cmd_set_clock_groups: CMD_SET_CLOCK_GROUPS                  { $$ = alloc_sdc_set_clock_groups(); }
+cmd_set_clock_groups: CMD_SET_CLOCK_GROUPS                  { $$ = std::make_shared<SetClockGroups>(); }
     | cmd_set_clock_groups ARG_EXCLUSIVE                    { $$ = sdc_set_clock_groups_set_type($1, ClockGroupsType::EXCLUSIVE); }
     | cmd_set_clock_groups ARG_GROUP LSPAR cmd_get_clocks RSPAR { $$ = sdc_set_clock_groups_add_group($1, $4); }
     | cmd_set_clock_groups ARG_GROUP LCPAR stringGroup RCPAR    { $$ = sdc_set_clock_groups_add_group($1, $4); }
@@ -178,7 +182,7 @@ cmd_set_clock_groups: CMD_SET_CLOCK_GROUPS                  { $$ = alloc_sdc_set
                                                             }
     ;
 
-cmd_set_false_path: CMD_SET_FALSE_PATH                      { $$ = alloc_sdc_set_false_path(); }
+cmd_set_false_path: CMD_SET_FALSE_PATH                      { $$ = std::make_shared<SetFalsePath>(); }
     | cmd_set_false_path ARG_FROM LSPAR cmd_get_clocks RSPAR    { $$ = sdc_set_false_path_add_to_from_group($1, $4, FromToType::FROM); }
     | cmd_set_false_path ARG_TO   LSPAR cmd_get_clocks RSPAR    { $$ = sdc_set_false_path_add_to_from_group($1, $4, FromToType::TO  ); }
     | cmd_set_false_path ARG_FROM LCPAR stringGroup RCPAR       { $$ = sdc_set_false_path_add_to_from_group($1, $4, FromToType::FROM); }
@@ -193,7 +197,7 @@ cmd_set_false_path: CMD_SET_FALSE_PATH                      { $$ = alloc_sdc_set
                                                             }
     ;
 
-cmd_set_max_delay: CMD_SET_MAX_DELAY                        { $$ = alloc_sdc_set_max_delay(); }
+cmd_set_max_delay: CMD_SET_MAX_DELAY                        { $$ = std::make_shared<SetMaxDelay>(); }
     | cmd_set_max_delay number                              { $$ = sdc_set_max_delay_set_max_delay_value($1, $2); }
     | cmd_set_max_delay ARG_FROM LSPAR cmd_get_clocks RSPAR     { $$ = sdc_set_max_delay_add_to_from_group($1, $4, FromToType::FROM); }
     | cmd_set_max_delay ARG_TO   LSPAR cmd_get_clocks RSPAR     { $$ = sdc_set_max_delay_add_to_from_group($1, $4, FromToType::TO  ); }
@@ -209,7 +213,7 @@ cmd_set_max_delay: CMD_SET_MAX_DELAY                        { $$ = alloc_sdc_set
                                                             }
     ;
 
-cmd_set_multicycle_path: CMD_SET_MULTICYCLE_PATH                { $$ = alloc_sdc_set_multicycle_path(); }
+cmd_set_multicycle_path: CMD_SET_MULTICYCLE_PATH                { $$ = std::make_shared<SetMulticyclePath>(); }
     | cmd_set_multicycle_path int_number                        { $$ = sdc_set_multicycle_path_set_mcp_value($1, $2); }
     | cmd_set_multicycle_path ARG_SETUP                         { $$ = sdc_set_multicycle_path_set_type($1, McpType::SETUP); }
     | cmd_set_multicycle_path ARG_FROM LSPAR cmd_get_clocks RSPAR   { $$ = sdc_set_multicycle_path_add_to_from_group($1, $4, FromToType::FROM); }
@@ -226,17 +230,17 @@ cmd_set_multicycle_path: CMD_SET_MULTICYCLE_PATH                { $$ = alloc_sdc
                                                                 }
     ;
 
-cmd_get_ports: CMD_GET_PORTS            { $$ = alloc_sdc_string_group(sdcparse::StringGroupType::PORT); }
+cmd_get_ports: CMD_GET_PORTS            { $$ = std::make_shared<StringGroup>(StringGroupType::PORT); }
     | cmd_get_ports LCPAR stringGroup RCPAR { $$ = sdc_string_group_add_strings($1, $3); }
     | cmd_get_ports string              { $$ = sdc_string_group_add_string($1, $2); }
     ;
 
-cmd_get_clocks: CMD_GET_CLOCKS              { $$ = alloc_sdc_string_group(sdcparse::StringGroupType::CLOCK); }
+cmd_get_clocks: CMD_GET_CLOCKS              { $$ = std::make_shared<StringGroup>(StringGroupType::CLOCK); }
     | cmd_get_clocks LCPAR stringGroup RCPAR    { $$ = sdc_string_group_add_strings($1, $3); }
     | cmd_get_clocks string                 { $$ = sdc_string_group_add_string($1, $2); }
     ;
 
-stringGroup: /*empty*/   { $$ = alloc_sdc_string_group(sdcparse::StringGroupType::STRING); }
+stringGroup: /*empty*/   { $$ = std::make_shared<StringGroup>(StringGroupType::STRING); }
     | stringGroup string { $$ = sdc_string_group_add_string($1, $2); } 
 
 string: STRING         { $$ = $1; }

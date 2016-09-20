@@ -14,26 +14,8 @@
 namespace sdcparse {
 
 /*
- * Data structure to store the SDC SdcCommands
- */
-std::shared_ptr<SdcCommands> g_sdc_commands;
-
-/*
- * Functions for SDC Command List
- */
-std::shared_ptr<SdcCommands> alloc_sdc_commands() {
-
-    //Alloc and initialize to empty
-    return std::make_shared<SdcCommands>();
-}
-
-/*
  * Functions for create_clock
  */
-std::shared_ptr<CreateClock> alloc_sdc_create_clock() {
-    return std::make_shared<CreateClock>();
-}
-
 std::shared_ptr<CreateClock> sdc_create_clock_set_period(std::shared_ptr<CreateClock> sdc_create_clock, double period) {
     assert(sdc_create_clock);
     if(!std::isnan(sdc_create_clock->period)) {
@@ -92,7 +74,7 @@ std::shared_ptr<SdcCommands> add_sdc_create_clock(std::shared_ptr<SdcCommands> s
 
     //Allocate a default (empty) target if none was defined, since this clock may be virtual
     if(sdc_create_clock->targets == NULL) {
-        sdc_create_clock->targets = alloc_sdc_string_group(StringGroupType::STRING);
+        sdc_create_clock->targets = std::make_shared<StringGroup>(StringGroupType::STRING);
     }
 
     //Must have a clock period
@@ -147,14 +129,6 @@ std::shared_ptr<SdcCommands> add_sdc_create_clock(std::shared_ptr<SdcCommands> s
 /*
  * Functions for set_input_delay/set_output_delay
  */
-std::shared_ptr<SetIoDelay> alloc_sdc_set_io_delay(IoDelayType io_type) {
-    auto sdc_set_io_delay = std::make_shared<SetIoDelay>();
-
-    sdc_set_io_delay->io_type = io_type;
-
-    return sdc_set_io_delay;
-}
-
 std::shared_ptr<SetIoDelay> sdc_set_io_delay_set_clock(std::shared_ptr<SetIoDelay> sdc_set_io_delay, const std::string& clock_name) {
     assert(sdc_set_io_delay);
 
@@ -229,10 +203,6 @@ std::shared_ptr<SdcCommands> add_sdc_set_io_delay(std::shared_ptr<SdcCommands> s
 /*
  * Functions for set_clock_groups
  */
-std::shared_ptr<SetClockGroups> alloc_sdc_set_clock_groups() {
-    return std::make_shared<SetClockGroups>();
-}
-
 std::shared_ptr<SetClockGroups> sdc_set_clock_groups_set_type(std::shared_ptr<SetClockGroups> sdc_set_clock_groups, ClockGroupsType type) {
     assert(sdc_set_clock_groups);
 
@@ -284,10 +254,6 @@ std::shared_ptr<SdcCommands> add_sdc_set_clock_groups(std::shared_ptr<SdcCommand
 /*
  * Functions for set_false_path
  */
-std::shared_ptr<SetFalsePath> alloc_sdc_set_false_path() {
-    return std::make_shared<SetFalsePath>();
-}
-
 std::shared_ptr<SetFalsePath> sdc_set_false_path_add_to_from_group(std::shared_ptr<SetFalsePath> sdc_set_false_path, 
                                                            std::shared_ptr<StringGroup> group, 
                                                            FromToType to_from_dir) {
@@ -348,10 +314,6 @@ std::shared_ptr<SdcCommands> add_sdc_set_false_path(std::shared_ptr<SdcCommands>
 /*
  * Functions for set_max_delay
  */
-std::shared_ptr<SetMaxDelay> alloc_sdc_set_max_delay() {
-    return std::make_shared<SetMaxDelay>();
-}
-
 std::shared_ptr<SetMaxDelay> sdc_set_max_delay_set_max_delay_value(std::shared_ptr<SetMaxDelay> sdc_set_max_delay, double max_delay) {
     if(!std::isnan(sdc_set_max_delay->max_delay)) {
         sdc_error(sdcparse_lineno, sdcparse_text, "Must specify max delay value only once.\n"); 
@@ -422,10 +384,6 @@ std::shared_ptr<SdcCommands> add_sdc_set_max_delay(std::shared_ptr<SdcCommands> 
 /*
  * Functions for set_multicycle_path
  */
-std::shared_ptr<SetMulticyclePath> alloc_sdc_set_multicycle_path() {
-    return std::make_shared<SetMulticyclePath>();
-}
-
 std::shared_ptr<SetMulticyclePath> sdc_set_multicycle_path_set_type(std::shared_ptr<SetMulticyclePath> sdc_set_multicycle_path, McpType type) {
     if(sdc_set_multicycle_path->type != McpType::NONE) {
         sdc_error(sdcparse_lineno, sdcparse_text, "Must specify the type (e.g. '-setup') only once.\n"); 
@@ -510,18 +468,9 @@ std::shared_ptr<SdcCommands> add_sdc_set_multicycle_path(std::shared_ptr<SdcComm
 /*
  * Functions for string_group
  */
-std::shared_ptr<StringGroup> alloc_sdc_string_group(StringGroupType type) {
-    //Allocate and initialize
-    auto sdc_string_group = std::make_shared<StringGroup>();
-
-    sdc_string_group->group_type = type;
-
-    return sdc_string_group;
-}
-
 std::shared_ptr<StringGroup> make_sdc_string_group(StringGroupType type, const std::string& string) {
     //Convenience function for converting a single string into a group
-    std::shared_ptr<StringGroup> sdc_string_group = alloc_sdc_string_group(type);
+    auto sdc_string_group = std::make_shared<StringGroup>(type);
 
     sdc_string_group_add_string(sdc_string_group, string);
 

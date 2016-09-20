@@ -133,8 +133,6 @@ enum class StringGroupType {
  * Collection of SDC commands
  */
 struct SdcCommands {
-    SdcCommands() = default;
-
     bool has_commands();
 
     std::vector<std::shared_ptr<CreateClock>> create_clock_cmds;
@@ -151,6 +149,10 @@ struct SdcCommands {
  */
 
 struct StringGroup {
+    StringGroup() = default;
+    StringGroup(StringGroupType type)
+        : group_type(type) {}
+
     StringGroupType group_type = StringGroupType::STRING;   //The type of the string group, default is STRING. 
                                                             //Groups derived from 'calls' to [get_clocks {...}] 
                                                             //and [get_ports {...}] will have types SDC_CLOCK 
@@ -174,6 +176,10 @@ struct CreateClock {
 };
 
 struct SetIoDelay {
+    SetIoDelay() = default;
+    SetIoDelay(IoDelayType type)
+        : io_type(type) {}
+
     IoDelayType io_type = IoDelayType::INPUT;               //Identifies whether this represents a
                                                             // set_input_delay or set_output delay
                                                             // command.
