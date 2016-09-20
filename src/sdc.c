@@ -2,6 +2,7 @@
 
 #include "sdc.h"
 #include "sdc_common.h"
+#include "sdc_parser.gen.h"
 
 
 extern int yyparse();
@@ -26,15 +27,13 @@ bool SdcCommands::has_commands() {
  * the sdc commands.  See sdc.h for data structure
  * detials.
  */
-SdcCommands* sdc_parse_filename(char* filename) {
-    yyin = fopen(filename, "r");
-    if(yyin != NULL) {
-        int error = yyparse();
-        if(error) {
-            sdc_error(0, "", "File %s failed to parse.\n", filename);
-        }
-        fclose(yyin);
+std::shared_ptr<SdcCommands> sdc_parse_filename(char* filename) {
+    FILE* infile = fopen(filename, "r");
+    if(infile != NULL) {
+        sdc_parse_file(infile);
+        fclose(infile);
     } else {
+        fclose(infile);
         sdc_error(0, "", "Could not open file %s.\n", filename);
     }
 
@@ -42,19 +41,16 @@ SdcCommands* sdc_parse_filename(char* filename) {
     return g_sdc_commands;
 }
 
-SdcCommands* sdc_parse_file(FILE* sdc_file) {
+std::shared_ptr<SdcCommands> sdc_parse_file(FILE* sdc_file) {
     yyin = sdc_file;
 
-    int error = yyparse();
+    Parser parser;
+    int error = parser.parse();
     if(error) {
         sdc_error(0, "", "SDC Error: file failed to parse!\n");
     }
 
     return g_sdc_commands;
-}
-
-void sdc_parse_cleanup() {
-    free_sdc_commands(g_sdc_commands);
 }
 
 }

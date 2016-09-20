@@ -8,7 +8,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11")
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=leak -fsanitize=undefined")
 
 #Flex and Bison are used to generate the parser
-find_package(BISON REQUIRED)
+find_package(BISON REQUIRED 3.0)
 find_package(FLEX REQUIRED)
 
 file(GLOB_RECURSE LIB_SOURCES src/*.c)
@@ -40,7 +40,7 @@ add_library(libsdcparse STATIC
              ${LIB_SOURCES}
              ${FLEX_SdcLexer_OUTPUTS} 
              ${BISON_SdcParser_OUTPUT_SOURCE})
-         target_include_directories(libsdcparse PUBLIC ${LIB_INCLUDE_DIRS})
+         target_include_directories(libsdcparse PUBLIC ${LIB_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 set_target_properties(libsdcparse PROPERTIES PREFIX "") #Avoid extra 'lib' prefix
 
 #Create the test executable

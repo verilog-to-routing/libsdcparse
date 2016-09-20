@@ -18,66 +18,26 @@ constexpr int UNINITIALIZED_INT = -1;
 /*
  * Data structure to store the SDC SdcCommands
  */
-SdcCommands* g_sdc_commands;
+std::shared_ptr<SdcCommands> g_sdc_commands;
 
 /*
  * Functions for SDC Command List
  */
-SdcCommands* alloc_sdc_commands() {
+std::shared_ptr<SdcCommands> alloc_sdc_commands() {
 
     //Alloc and initialize to empty
-    SdcCommands* sdc_commands = (SdcCommands*) calloc(1, sizeof(SdcCommands));
-
-    assert(sdc_commands != NULL);
-    assert(sdc_commands->has_commands() == false);
-
-    return sdc_commands;
-}
-
-void free_sdc_commands(SdcCommands* sdc_commands) {
-    if(sdc_commands != NULL) {
-        for(CreateClock* create_clock_cmd : sdc_commands->create_clock_cmds) {
-            free_sdc_create_clock(create_clock_cmd);
-        }
-
-        for(SetIoDelay* set_input_delay_cmd :  sdc_commands->set_input_delay_cmds) {
-            free_sdc_set_io_delay(set_input_delay_cmd);
-        }
-
-        for(SetIoDelay* set_output_delay_cmd : sdc_commands->set_output_delay_cmds) {
-            free_sdc_set_io_delay(set_output_delay_cmd);
-        }
-
-        for(SetClockGroups* set_clock_groups_cmd : sdc_commands->set_clock_groups_cmds) {
-            free_sdc_set_clock_groups(set_clock_groups_cmd);
-        }
-
-        for(SetFalsePath* set_false_path_cmd : sdc_commands->set_false_path_cmds) {
-            free_sdc_set_false_path(set_false_path_cmd);
-        }
-
-        for(SetMaxDelay* set_max_delay_cmd : sdc_commands->set_max_delay_cmds) {
-            free_sdc_set_max_delay(set_max_delay_cmd);
-        }
-
-        for(SetMulticyclePath* set_multicycle_path_cmd : sdc_commands->set_multicycle_path_cmds) {
-            free_sdc_set_multicycle_path(set_multicycle_path_cmd);
-        }
-
-        free(sdc_commands);
-    }
+    return std::make_shared<SdcCommands>();
 }
 
 /*
  * Functions for create_clock
  */
-CreateClock* alloc_sdc_create_clock() {
-    CreateClock* sdc_create_clock = (CreateClock*) malloc(sizeof(CreateClock));
-    assert(sdc_create_clock != NULL);
+std::shared_ptr<CreateClock> alloc_sdc_create_clock() {
+    auto sdc_create_clock = std::make_shared<CreateClock>();
 
     //Initialize
     sdc_create_clock->period = UNINITIALIZED_FLOAT;
-    sdc_create_clock->name = NULL;
+    sdc_create_clock->name = "";
     sdc_create_clock->rise_edge = UNINITIALIZED_FLOAT;
     sdc_create_clock->fall_edge = UNINITIALIZED_FLOAT;
     sdc_create_clock->targets = NULL;
@@ -88,16 +48,8 @@ CreateClock* alloc_sdc_create_clock() {
     return sdc_create_clock;
 }
 
-void free_sdc_create_clock(CreateClock* sdc_create_clock) {
-    if(sdc_create_clock != NULL) {
-        free(sdc_create_clock->name);
-        free_sdc_string_group(sdc_create_clock->targets);
-        free(sdc_create_clock);
-    }
-}
-
-CreateClock* sdc_create_clock_set_period(CreateClock* sdc_create_clock, double period) {
-    assert(sdc_create_clock != NULL);
+std::shared_ptr<CreateClock> sdc_create_clock_set_period(std::shared_ptr<CreateClock> sdc_create_clock, double period) {
+    assert(sdc_create_clock);
     if(sdc_create_clock->period != UNINITIALIZED_FLOAT) {
         sdc_error(yylineno, yytext, "Can only define a single clock period.\n"); 
     } else {
@@ -107,19 +59,19 @@ CreateClock* sdc_create_clock_set_period(CreateClock* sdc_create_clock, double p
     return sdc_create_clock;
 }
 
-CreateClock* sdc_create_clock_set_name(CreateClock* sdc_create_clock, char* name) {
-    assert(sdc_create_clock != NULL);
-    if(sdc_create_clock->name != NULL) {
+std::shared_ptr<CreateClock> sdc_create_clock_set_name(std::shared_ptr<CreateClock> sdc_create_clock, const std::string& name) {
+    assert(sdc_create_clock);
+    if(!sdc_create_clock->name.empty()) {
         sdc_error(yylineno, yytext, "Can only define a single clock name.\n");
     } else {
-        sdc_create_clock->name = sdcparse::strdup(name);
+        sdc_create_clock->name = name;
     }
 
     return sdc_create_clock;
 }
 
-CreateClock* sdc_create_clock_set_waveform(CreateClock* sdc_create_clock, double rise_edge, double fall_edge) {
-    assert(sdc_create_clock != NULL);
+std::shared_ptr<CreateClock> sdc_create_clock_set_waveform(std::shared_ptr<CreateClock> sdc_create_clock, double rise_edge, double fall_edge) {
+    assert(sdc_create_clock);
     if(sdc_create_clock->rise_edge != UNINITIALIZED_FLOAT || sdc_create_clock->fall_edge != UNINITIALIZED_FLOAT) {
         sdc_error(yylineno, yytext, "Can only define a single waveform.\n"); 
     } else {
@@ -130,8 +82,8 @@ CreateClock* sdc_create_clock_set_waveform(CreateClock* sdc_create_clock, double
     return sdc_create_clock;
 }
 
-CreateClock* sdc_create_clock_add_targets(CreateClock* sdc_create_clock, StringGroup* target_group) {
-    assert(sdc_create_clock != NULL);
+std::shared_ptr<CreateClock> sdc_create_clock_add_targets(std::shared_ptr<CreateClock> sdc_create_clock, std::shared_ptr<StringGroup> target_group) {
+    assert(sdc_create_clock);
 
     assert(target_group->group_type == StringGroupType::STRING);
 
@@ -145,17 +97,16 @@ CreateClock* sdc_create_clock_add_targets(CreateClock* sdc_create_clock, StringG
     return sdc_create_clock;
 }
 
-SdcCommands* add_sdc_create_clock(SdcCommands* sdc_commands, CreateClock* sdc_create_clock) {
+std::shared_ptr<SdcCommands> add_sdc_create_clock(std::shared_ptr<SdcCommands> sdc_commands, std::shared_ptr<CreateClock> sdc_create_clock) {
     /*
      * Error Checking
      */
-    assert(sdc_commands != NULL);
-    assert(sdc_create_clock != NULL);
+    assert(sdc_commands);
+    assert(sdc_create_clock);
 
     //Allocate a default (empty) target if none was defined, since this clock may be virtual
     if(sdc_create_clock->targets == NULL) {
         sdc_create_clock->targets = alloc_sdc_string_group(StringGroupType::STRING);
-        assert(sdc_create_clock->targets != NULL);
     }
 
     //Must have a clock period
@@ -164,12 +115,12 @@ SdcCommands* add_sdc_create_clock(SdcCommands* sdc_commands, CreateClock* sdc_cr
     }
 
     //Must have either a target (if a netlist clock), or a name (if a virtual clock) 
-    if(sdc_create_clock->targets->strings.size() == 0 && sdc_create_clock->name == NULL) {
+    if(sdc_create_clock->targets->strings.size() == 0 && sdc_create_clock->name.empty()) {
         sdc_error(yylineno, yytext, "Must define either a target (for netlist clock) or a name (for virtual clock).\n");
     }
 
     //Currently we do not support defining clock names that differ from the netlist target name
-    if(sdc_create_clock->targets->strings.size() != 0 && sdc_create_clock->name != NULL) {
+    if(sdc_create_clock->targets->strings.size() != 0 && !sdc_create_clock->name.empty()) {
         sdc_error(yylineno, yytext, "Currently custom names for netlist clocks are unsupported, remove '-name' option or create a virtual clock.\n");
     }
 
@@ -185,7 +136,7 @@ SdcCommands* add_sdc_create_clock(SdcCommands* sdc_commands, CreateClock* sdc_cr
     assert(sdc_create_clock->fall_edge != UNINITIALIZED_FLOAT);
     
     //Determine if clock is virtual or not
-    if(sdc_create_clock->targets->strings.size() == 0 && sdc_create_clock->name != NULL) {
+    if(sdc_create_clock->targets->strings.size() == 0 && !sdc_create_clock->name.empty()) {
         //Have a virtual target if there is a name AND no target strings
         sdc_create_clock->is_virtual = true;
     } else {
@@ -210,14 +161,13 @@ SdcCommands* add_sdc_create_clock(SdcCommands* sdc_commands, CreateClock* sdc_cr
 /*
  * Functions for set_input_delay/set_output_delay
  */
-SetIoDelay* alloc_sdc_set_io_delay(IoDelayType cmd_type) {
+std::shared_ptr<SetIoDelay> alloc_sdc_set_io_delay(IoDelayType cmd_type) {
     //Allocate
-    SetIoDelay* sdc_set_io_delay = (SetIoDelay*) malloc(sizeof(SetIoDelay));
-    assert(sdc_set_io_delay != NULL);
+    auto sdc_set_io_delay = std::make_shared<SetIoDelay>();
 
     //Initialize
     sdc_set_io_delay->cmd_type = cmd_type;
-    sdc_set_io_delay->clock_name = NULL;
+    sdc_set_io_delay->clock_name = "";
     sdc_set_io_delay->max_delay = UNINITIALIZED_FLOAT;
     sdc_set_io_delay->target_ports = NULL;
 
@@ -226,27 +176,19 @@ SetIoDelay* alloc_sdc_set_io_delay(IoDelayType cmd_type) {
     return sdc_set_io_delay;
 }
 
-void free_sdc_set_io_delay(SetIoDelay* sdc_set_io_delay) {
-    if(sdc_set_io_delay != NULL) {
-        free(sdc_set_io_delay->clock_name);
-        free_sdc_string_group(sdc_set_io_delay->target_ports);
-        free(sdc_set_io_delay);
-    }
-}
+std::shared_ptr<SetIoDelay> sdc_set_io_delay_set_clock(std::shared_ptr<SetIoDelay> sdc_set_io_delay, const std::string& clock_name) {
+    assert(sdc_set_io_delay);
 
-SetIoDelay* sdc_set_io_delay_set_clock(SetIoDelay* sdc_set_io_delay, char* clock_name) {
-    assert(sdc_set_io_delay != NULL);
-
-    if(sdc_set_io_delay->clock_name != NULL) {
+    if(!sdc_set_io_delay->clock_name.empty()) {
         sdc_error(yylineno, yytext, "Can only specify a single clock\n"); 
     }
 
-    sdc_set_io_delay->clock_name = sdcparse::strdup(clock_name);
+    sdc_set_io_delay->clock_name = clock_name;
     return sdc_set_io_delay;
 }
 
-SetIoDelay* sdc_set_io_delay_set_max_value(SetIoDelay* sdc_set_io_delay, double max_value) {
-    assert(sdc_set_io_delay != NULL);
+std::shared_ptr<SetIoDelay> sdc_set_io_delay_set_max_value(std::shared_ptr<SetIoDelay> sdc_set_io_delay, double max_value) {
+    assert(sdc_set_io_delay);
 
     if(sdc_set_io_delay->max_delay != UNINITIALIZED_FLOAT) {
         sdc_error(yylineno, yytext, "Max delay value can only specified once.\n"); 
@@ -256,9 +198,9 @@ SetIoDelay* sdc_set_io_delay_set_max_value(SetIoDelay* sdc_set_io_delay, double 
     return sdc_set_io_delay;
 }
 
-SetIoDelay* sdc_set_io_delay_set_ports(SetIoDelay* sdc_set_io_delay, StringGroup* ports) {
-    assert(sdc_set_io_delay != NULL);
-    assert(ports != NULL);
+std::shared_ptr<SetIoDelay> sdc_set_io_delay_set_ports(std::shared_ptr<SetIoDelay> sdc_set_io_delay, std::shared_ptr<StringGroup> ports) {
+    assert(sdc_set_io_delay);
+    assert(ports);
     assert(ports->group_type == StringGroupType::PORT);
 
     if(sdc_set_io_delay->target_ports != NULL) {
@@ -269,13 +211,13 @@ SetIoDelay* sdc_set_io_delay_set_ports(SetIoDelay* sdc_set_io_delay, StringGroup
     return sdc_set_io_delay;
 }
 
-SdcCommands* add_sdc_set_io_delay(SdcCommands* sdc_commands, SetIoDelay* sdc_set_io_delay) {
-    assert(sdc_commands != NULL);
-    assert(sdc_set_io_delay != NULL);
+std::shared_ptr<SdcCommands> add_sdc_set_io_delay(std::shared_ptr<SdcCommands> sdc_commands, std::shared_ptr<SetIoDelay> sdc_set_io_delay) {
+    assert(sdc_commands);
+    assert(sdc_set_io_delay);
     /*
      * Error checks
      */
-    if(sdc_set_io_delay->clock_name == NULL) {
+    if(sdc_set_io_delay->clock_name.empty()) {
         sdc_error(yylineno, yytext, "Must specify clock name.\n"); 
     }
 
@@ -308,33 +250,20 @@ SdcCommands* add_sdc_set_io_delay(SdcCommands* sdc_commands, SetIoDelay* sdc_set
 /*
  * Functions for set_clock_groups
  */
-SetClockGroups* alloc_sdc_set_clock_groups() {
+std::shared_ptr<SetClockGroups> alloc_sdc_set_clock_groups() {
     //Allocate
-    SetClockGroups* sdc_set_clock_groups = (SetClockGroups*) malloc(sizeof(SetClockGroups));
-    assert(sdc_set_clock_groups != NULL);
+    auto sdc_set_clock_groups = std::make_shared<SetClockGroups>();
 
     //Initialize
     sdc_set_clock_groups->type = ClockGroupsType::NONE;
-    sdc_set_clock_groups->num_clock_groups = 0;
-    sdc_set_clock_groups->clock_groups = NULL;
 
     sdc_set_clock_groups->file_line_number = UNINITIALIZED_INT;
 
     return sdc_set_clock_groups;
 }
 
-void free_sdc_set_clock_groups(SetClockGroups* sdc_set_clock_groups) {
-    if(sdc_set_clock_groups != NULL) {
-        for(int i = 0; i < sdc_set_clock_groups->num_clock_groups; i++) {
-            free_sdc_string_group(sdc_set_clock_groups->clock_groups[i]);
-        }
-        free(sdc_set_clock_groups->clock_groups);
-        free(sdc_set_clock_groups);
-    }
-}
-
-SetClockGroups* sdc_set_clock_groups_set_type(SetClockGroups* sdc_set_clock_groups, ClockGroupsType type) {
-    assert(sdc_set_clock_groups != NULL);
+std::shared_ptr<SetClockGroups> sdc_set_clock_groups_set_type(std::shared_ptr<SetClockGroups> sdc_set_clock_groups, ClockGroupsType type) {
+    assert(sdc_set_clock_groups);
 
     if(sdc_set_clock_groups->type != ClockGroupsType::NONE) {
         sdc_error(yylineno, yytext, "Can only specify a single clock groups relation type (e.g. '-exclusive')\n"); 
@@ -344,24 +273,19 @@ SetClockGroups* sdc_set_clock_groups_set_type(SetClockGroups* sdc_set_clock_grou
     return sdc_set_clock_groups;
 }
 
-SetClockGroups* sdc_set_clock_groups_add_group(SetClockGroups* sdc_set_clock_groups, StringGroup* clock_group) {
-    assert(sdc_set_clock_groups != NULL);
-    assert(clock_group != NULL);
+std::shared_ptr<SetClockGroups> sdc_set_clock_groups_add_group(std::shared_ptr<SetClockGroups> sdc_set_clock_groups, std::shared_ptr<StringGroup> clock_group) {
+    assert(sdc_set_clock_groups);
+    assert(clock_group);
 
     assert(clock_group->group_type == StringGroupType::CLOCK || clock_group->group_type == StringGroupType::STRING);
 
-    //Allocate space
-    sdc_set_clock_groups->num_clock_groups++;
-    sdc_set_clock_groups->clock_groups = (StringGroup**) realloc(sdc_set_clock_groups->clock_groups, sdc_set_clock_groups->num_clock_groups*sizeof(*sdc_set_clock_groups->clock_groups));
-    assert(sdc_set_clock_groups->clock_groups != NULL);
-
     //Duplicate and insert the clock group
-    sdc_set_clock_groups->clock_groups[sdc_set_clock_groups->num_clock_groups-1] = duplicate_sdc_string_group(clock_group);
+    sdc_set_clock_groups->clock_groups.push_back(duplicate_sdc_string_group(clock_group));
 
     return sdc_set_clock_groups;
 }
 
-SdcCommands* add_sdc_set_clock_groups(SdcCommands* sdc_commands, SetClockGroups* sdc_set_clock_groups) {
+std::shared_ptr<SdcCommands> add_sdc_set_clock_groups(std::shared_ptr<SdcCommands> sdc_commands, std::shared_ptr<SetClockGroups> sdc_set_clock_groups) {
     /*
      * Error checks
      */
@@ -369,7 +293,7 @@ SdcCommands* add_sdc_set_clock_groups(SdcCommands* sdc_commands, SetClockGroups*
         sdc_error(yylineno, yytext, "Must specify clock relation type as '-exclusive'.\n"); 
     }
 
-    if(sdc_set_clock_groups->num_clock_groups < 2) {
+    if(sdc_set_clock_groups->clock_groups.size() < 2) {
         sdc_error(yylineno, yytext, "Must specify at least 2 clock groups.\n"); 
     }
 
@@ -389,9 +313,9 @@ SdcCommands* add_sdc_set_clock_groups(SdcCommands* sdc_commands, SetClockGroups*
 /*
  * Functions for set_false_path
  */
-SetFalsePath* alloc_sdc_set_false_path() {
+std::shared_ptr<SetFalsePath> alloc_sdc_set_false_path() {
     //Allocate
-    SetFalsePath* sdc_set_false_path = (SetFalsePath*) malloc(sizeof(SetFalsePath));
+    auto sdc_set_false_path = std::make_shared<SetFalsePath>();
 
     //Initialize
     sdc_set_false_path->from = NULL;
@@ -402,17 +326,8 @@ SetFalsePath* alloc_sdc_set_false_path() {
     return sdc_set_false_path;
 }
 
-void free_sdc_set_false_path(SetFalsePath* sdc_set_false_path) {
-    if(sdc_set_false_path != NULL) {
-        free_sdc_string_group(sdc_set_false_path->from);
-        free_sdc_string_group(sdc_set_false_path->to);
-
-        free(sdc_set_false_path);
-    }
-}
-
-SetFalsePath* sdc_set_false_path_add_to_from_group(SetFalsePath* sdc_set_false_path, 
-                                                           StringGroup* group, 
+std::shared_ptr<SetFalsePath> sdc_set_false_path_add_to_from_group(std::shared_ptr<SetFalsePath> sdc_set_false_path, 
+                                                           std::shared_ptr<StringGroup> group, 
                                                            FromToType to_from_dir) {
     assert(sdc_set_false_path != NULL);
     assert(group != NULL);
@@ -443,7 +358,7 @@ SetFalsePath* sdc_set_false_path_add_to_from_group(SetFalsePath* sdc_set_false_p
     return sdc_set_false_path;
 }
 
-SdcCommands* add_sdc_set_false_path(SdcCommands* sdc_commands, SetFalsePath* sdc_set_false_path) {
+std::shared_ptr<SdcCommands> add_sdc_set_false_path(std::shared_ptr<SdcCommands> sdc_commands, std::shared_ptr<SetFalsePath> sdc_set_false_path) {
     /*
      * Error checks
      */
@@ -471,9 +386,9 @@ SdcCommands* add_sdc_set_false_path(SdcCommands* sdc_commands, SetFalsePath* sdc
 /*
  * Functions for set_max_delay
  */
-SetMaxDelay* alloc_sdc_set_max_delay() {
+std::shared_ptr<SetMaxDelay> alloc_sdc_set_max_delay() {
     //Allocate
-    SetMaxDelay* sdc_set_max_delay = (SetMaxDelay*) malloc(sizeof(SetMaxDelay));
+    auto sdc_set_max_delay = std::make_shared<SetMaxDelay>();
 
     //Initialize
     sdc_set_max_delay->max_delay = UNINITIALIZED_FLOAT;
@@ -485,15 +400,7 @@ SetMaxDelay* alloc_sdc_set_max_delay() {
     return sdc_set_max_delay;
 }
 
-void free_sdc_set_max_delay(SetMaxDelay* sdc_set_max_delay) {
-    if(sdc_set_max_delay != NULL) {
-        free_sdc_string_group(sdc_set_max_delay->from);
-        free_sdc_string_group(sdc_set_max_delay->to);
-        free(sdc_set_max_delay);
-    }
-}
-
-SetMaxDelay* sdc_set_max_delay_set_max_delay_value(SetMaxDelay* sdc_set_max_delay, double max_delay) {
+std::shared_ptr<SetMaxDelay> sdc_set_max_delay_set_max_delay_value(std::shared_ptr<SetMaxDelay> sdc_set_max_delay, double max_delay) {
     if(sdc_set_max_delay->max_delay != UNINITIALIZED_FLOAT) {
         sdc_error(yylineno, yytext, "Must specify max delay value only once.\n"); 
     }
@@ -501,7 +408,7 @@ SetMaxDelay* sdc_set_max_delay_set_max_delay_value(SetMaxDelay* sdc_set_max_dela
     return sdc_set_max_delay;
 }
 
-SetMaxDelay* sdc_set_max_delay_add_to_from_group(SetMaxDelay* sdc_set_max_delay, StringGroup* group, FromToType to_from_dir) {
+std::shared_ptr<SetMaxDelay> sdc_set_max_delay_add_to_from_group(std::shared_ptr<SetMaxDelay> sdc_set_max_delay, std::shared_ptr<StringGroup> group, FromToType to_from_dir) {
     assert(sdc_set_max_delay != NULL);
     assert(group != NULL);
     assert(group->group_type == StringGroupType::CLOCK || group->group_type == StringGroupType::STRING);
@@ -531,7 +438,7 @@ SetMaxDelay* sdc_set_max_delay_add_to_from_group(SetMaxDelay* sdc_set_max_delay,
     return sdc_set_max_delay;
 }
 
-SdcCommands* add_sdc_set_max_delay(SdcCommands* sdc_commands, SetMaxDelay* sdc_set_max_delay) {
+std::shared_ptr<SdcCommands> add_sdc_set_max_delay(std::shared_ptr<SdcCommands> sdc_commands, std::shared_ptr<SetMaxDelay> sdc_set_max_delay) {
     /*
      * Error checks
      */
@@ -563,10 +470,9 @@ SdcCommands* add_sdc_set_max_delay(SdcCommands* sdc_commands, SetMaxDelay* sdc_s
 /*
  * Functions for set_multicycle_path
  */
-SetMulticyclePath* alloc_sdc_set_multicycle_path() {
+std::shared_ptr<SetMulticyclePath> alloc_sdc_set_multicycle_path() {
     //Allocate
-    SetMulticyclePath* sdc_set_multicycle_path = (SetMulticyclePath*) malloc(sizeof(SetMulticyclePath));
-    assert(sdc_set_multicycle_path != NULL);
+    auto sdc_set_multicycle_path = std::make_shared<SetMulticyclePath>();
 
     //Initialize
     sdc_set_multicycle_path->type = McpType::NONE;
@@ -579,15 +485,8 @@ SetMulticyclePath* alloc_sdc_set_multicycle_path() {
     return sdc_set_multicycle_path;
 
 }
-void free_sdc_set_multicycle_path(SetMulticyclePath* sdc_set_multicycle_path) {
-    if(sdc_set_multicycle_path != NULL) {
-        free_sdc_string_group(sdc_set_multicycle_path->from);
-        free_sdc_string_group(sdc_set_multicycle_path->to);
-        free(sdc_set_multicycle_path);
-    }
-}
 
-SetMulticyclePath* sdc_set_multicycle_path_set_type(SetMulticyclePath* sdc_set_multicycle_path, McpType type) {
+std::shared_ptr<SetMulticyclePath> sdc_set_multicycle_path_set_type(std::shared_ptr<SetMulticyclePath> sdc_set_multicycle_path, McpType type) {
     if(sdc_set_multicycle_path->type != McpType::NONE) {
         sdc_error(yylineno, yytext, "Must specify the type (e.g. '-setup') only once.\n"); 
     }
@@ -595,7 +494,7 @@ SetMulticyclePath* sdc_set_multicycle_path_set_type(SetMulticyclePath* sdc_set_m
     return sdc_set_multicycle_path;
 }
 
-SetMulticyclePath* sdc_set_multicycle_path_set_mcp_value(SetMulticyclePath* sdc_set_multicycle_path, int mcp_value) {
+std::shared_ptr<SetMulticyclePath> sdc_set_multicycle_path_set_mcp_value(std::shared_ptr<SetMulticyclePath> sdc_set_multicycle_path, int mcp_value) {
     if(sdc_set_multicycle_path->mcp_value != UNINITIALIZED_INT) {
         sdc_error(yylineno, yytext, "Must specify multicycle path value only once.\n"); 
     }
@@ -603,8 +502,8 @@ SetMulticyclePath* sdc_set_multicycle_path_set_mcp_value(SetMulticyclePath* sdc_
     return sdc_set_multicycle_path;
 }
 
-SetMulticyclePath* sdc_set_multicycle_path_add_to_from_group(SetMulticyclePath* sdc_set_multicycle_path, 
-                                                                     StringGroup* group, 
+std::shared_ptr<SetMulticyclePath> sdc_set_multicycle_path_add_to_from_group(std::shared_ptr<SetMulticyclePath> sdc_set_multicycle_path, 
+                                                                     std::shared_ptr<StringGroup> group, 
                                                                      FromToType to_from_dir) {
     assert(sdc_set_multicycle_path != NULL);
     assert(group != NULL);
@@ -635,7 +534,7 @@ SetMulticyclePath* sdc_set_multicycle_path_add_to_from_group(SetMulticyclePath* 
     return sdc_set_multicycle_path;
 }
 
-SdcCommands* add_sdc_set_multicycle_path(SdcCommands* sdc_commands, SetMulticyclePath* sdc_set_multicycle_path) {
+std::shared_ptr<SdcCommands> add_sdc_set_multicycle_path(std::shared_ptr<SdcCommands> sdc_commands, std::shared_ptr<SetMulticyclePath> sdc_set_multicycle_path) {
     /*
      * Error checks
      */
@@ -671,46 +570,30 @@ SdcCommands* add_sdc_set_multicycle_path(SdcCommands* sdc_commands, SetMulticycl
 /*
  * Functions for string_group
  */
-StringGroup* alloc_sdc_string_group(StringGroupType type) {
+std::shared_ptr<StringGroup> alloc_sdc_string_group(StringGroupType type) {
     //Allocate and initialize
-    StringGroup* sdc_string_group = (StringGroup*) calloc(1, sizeof(StringGroup)); 
-    assert(sdc_string_group != NULL);
+    auto sdc_string_group = std::make_shared<StringGroup>();
 
     sdc_string_group->group_type = type;
 
     return sdc_string_group;
 }
 
-StringGroup* make_sdc_string_group(StringGroupType type, char* string) {
+std::shared_ptr<StringGroup> make_sdc_string_group(StringGroupType type, const std::string& string) {
     //Convenience function for converting a single string into a group
-    StringGroup* sdc_string_group = alloc_sdc_string_group(type);
+    std::shared_ptr<StringGroup> sdc_string_group = alloc_sdc_string_group(type);
 
     sdc_string_group_add_string(sdc_string_group, string);
 
     return sdc_string_group;
 }
 
-StringGroup* duplicate_sdc_string_group(StringGroup* string_group) {
-    //Allocate
-    StringGroup* new_sdc_string_group = (StringGroup*) calloc(1, sizeof(StringGroup));
-    assert(new_sdc_string_group != NULL);
-
-    //Deep Copy
-    new_sdc_string_group->group_type = string_group->group_type;
-    new_sdc_string_group->strings = string_group->strings;
-
-    return new_sdc_string_group;
+std::shared_ptr<StringGroup> duplicate_sdc_string_group(std::shared_ptr<StringGroup> string_group) {
+    return std::make_shared<StringGroup>(*string_group);
 }
 
-void free_sdc_string_group(StringGroup* sdc_string_group) {
-    if(sdc_string_group != NULL) {
-
-        free(sdc_string_group);
-    }
-}
-
-StringGroup* sdc_string_group_add_string(StringGroup* sdc_string_group, const std::string& string) {
-    assert(sdc_string_group != NULL);
+std::shared_ptr<StringGroup> sdc_string_group_add_string(std::shared_ptr<StringGroup> sdc_string_group, const std::string& string) {
+    assert(sdc_string_group);
 
     //Insert the new string
     sdc_string_group->strings.push_back(string);
@@ -718,7 +601,7 @@ StringGroup* sdc_string_group_add_string(StringGroup* sdc_string_group, const st
     return sdc_string_group;
 }
 
-StringGroup* sdc_string_group_add_strings(StringGroup* sdc_string_group, StringGroup* string_group_to_add) {
+std::shared_ptr<StringGroup> sdc_string_group_add_strings(std::shared_ptr<StringGroup> sdc_string_group, std::shared_ptr<StringGroup> string_group_to_add) {
     for(const auto& string : string_group_to_add->strings) {
         sdc_string_group_add_string(sdc_string_group, string);
     }
