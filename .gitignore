@@ -12,19 +12,10 @@ lex.yy.c
 *.tab.c
 core
 obj/
+build/
 
 #ctags
 tags
-
-#
-# VIM related files
-#
-*.s[a-ce-w][a-bd-z]
-*.un~
-Session.vim
-.netrwhist
-*~
-
 
 #
 # C++ related files
