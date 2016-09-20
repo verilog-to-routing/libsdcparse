@@ -93,7 +93,7 @@ struct SetFalsePath;
 struct SetMaxDelay;
 struct SetMulticyclePath;
 
-struct string_group;
+struct StringGroup;
 
 /*
  * Enumerations to describe specific SDC command types and attributes
