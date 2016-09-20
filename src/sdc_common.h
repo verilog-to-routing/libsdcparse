@@ -6,8 +6,8 @@
 /*
  * Parser info
  */
-extern int yylineno;
-extern char* yytext;
+extern int sdcparse_lineno;
+extern char* sdcparse_text;
 
 namespace sdcparse {
 

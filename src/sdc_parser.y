@@ -30,6 +30,8 @@
 
 %define parser_class_name {Parser}
 
+%define api.prefix {sdcparse_}
+
 /* Extra checks for correct usage */
 %define parse.assert
 
@@ -56,7 +58,7 @@
     #define YY_NULLPTR nullptr
     #endif
 
-    #define YY_DECL sdcparse::Parser::symbol_type yylex(void)
+    #define YY_DECL sdcparse::Parser::symbol_type sdcparse_lex(void)
 }
 
 %{
@@ -69,9 +71,6 @@
 
 #include "sdc_parser.gen.h"
 YY_DECL;
-
-
-int yyerror(const char *msg);
 
 using namespace sdcparse;
 
@@ -258,5 +257,5 @@ int_number: INT_NUMBER { $$ = $1; }
 
 
 void sdcparse::Parser::error(const std::string& msg) {
-    sdc_error(yylineno, yytext, "Error: %s.\n", msg.c_str());
+    sdc_error(sdcparse_lineno, sdcparse_text, "Error: %s.\n", msg.c_str());
 }

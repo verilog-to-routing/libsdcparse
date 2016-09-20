@@ -5,8 +5,7 @@
 #include "sdc_parser.gen.h"
 
 
-extern int yyparse();
-extern FILE	*yyin;
+extern FILE	*sdcparse_in;
 
 namespace sdcparse {
 
@@ -42,7 +41,7 @@ std::shared_ptr<SdcCommands> sdc_parse_filename(char* filename) {
 }
 
 std::shared_ptr<SdcCommands> sdc_parse_file(FILE* sdc_file) {
-    yyin = sdc_file;
+    sdcparse_in = sdc_file;
 
     Parser parser;
     int error = parser.parse();

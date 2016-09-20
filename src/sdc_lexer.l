@@ -39,7 +39,7 @@
  * Use a prefix to avoid name clashes with other
  * flex lexers
  */
-/*%option prefix="sdcparse_" */
+%option prefix="sdcparse_" 
 
 /*
  * Symbol Definitions
