@@ -26,18 +26,23 @@ bool SdcCommands::has_commands() {
  * the sdc commands.  See sdc.h for data structure
  * detials.
  */
-std::shared_ptr<SdcCommands> sdc_parse_filename(char* filename) {
+std::shared_ptr<SdcCommands> sdc_parse_filename(std::string filename) {
+    return sdc_parse_filename(filename.c_str());
+}
+
+std::shared_ptr<SdcCommands> sdc_parse_filename(const char* filename) {
+    std::shared_ptr<SdcCommands> sdc_commands;
+
     FILE* infile = fopen(filename, "r");
     if(infile != NULL) {
-        sdc_parse_file(infile);
+        sdc_commands = sdc_parse_file(infile);
         fclose(infile);
     } else {
         fclose(infile);
         sdc_error(0, "", "Could not open file %s.\n", filename);
     }
 
-
-    return g_sdc_commands;
+    return sdc_commands;
 }
 
 std::shared_ptr<SdcCommands> sdc_parse_file(FILE* sdc_file) {

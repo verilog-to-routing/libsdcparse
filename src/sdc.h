@@ -219,7 +219,8 @@ struct SetMulticyclePath {
 /*
  *  Externally useful functions
  */
-std::shared_ptr<SdcCommands> sdc_parse_filename(char* filename);
+std::shared_ptr<SdcCommands> sdc_parse_filename(std::string filename);
+std::shared_ptr<SdcCommands> sdc_parse_filename(const char* filename);
 std::shared_ptr<SdcCommands> sdc_parse_file(FILE* sdc);
 
 } //namespace
