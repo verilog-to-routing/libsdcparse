@@ -478,7 +478,8 @@ std::shared_ptr<StringGroup> make_sdc_string_group(StringGroupType type, const s
 }
 
 std::shared_ptr<StringGroup> duplicate_sdc_string_group(std::shared_ptr<StringGroup> string_group) {
-    return std::make_shared<StringGroup>(*string_group);
+    //We no longer duplicate since shared_ptr allows sharing ownership
+    return string_group;
 }
 
 std::shared_ptr<StringGroup> sdc_string_group_add_string(std::shared_ptr<StringGroup> sdc_string_group, const std::string& string) {

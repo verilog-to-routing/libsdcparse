@@ -74,6 +74,7 @@
 
 namespace sdcparse {
 
+//Sentinal values
 constexpr double UNINITIALIZED_FLOAT = std::numeric_limits<double>::quiet_NaN();
 constexpr int UNINITIALIZED_INT = -1;
 
