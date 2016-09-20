@@ -70,8 +70,12 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <limits>
 
 namespace sdcparse {
+
+constexpr double UNINITIALIZED_FLOAT = std::numeric_limits<double>::quiet_NaN();
+constexpr int UNINITIALIZED_INT = -1;
 
 /*
  * libsdc uses the sdc_error() function to report errors encountered while parsing an SDC file.  
@@ -118,6 +122,7 @@ enum class McpType {
     NONE, 
     SETUP
 };
+
 enum class StringGroupType {
     STRING, 
     PORT, 
@@ -128,6 +133,8 @@ enum class StringGroupType {
  * Collection of SDC commands
  */
 struct SdcCommands {
+    SdcCommands() = default;
+
     bool has_commands();
 
     std::vector<std::shared_ptr<CreateClock>> create_clock_cmds;
@@ -144,69 +151,69 @@ struct SdcCommands {
  */
 
 struct StringGroup {
-    StringGroupType group_type; //The type of the string group, default is STRING. 
-                                        //Groups derived from 'calls' to [get_clocks {..}] 
-                                        //and [get_ports {..}] will have types SDC_CLOCK 
-                                        //and SDC_PORT respectively.
-    std::vector<std::string> strings;
+    StringGroupType group_type = StringGroupType::STRING;   //The type of the string group, default is STRING. 
+                                                            //Groups derived from 'calls' to [get_clocks {...}] 
+                                                            //and [get_ports {...}] will have types SDC_CLOCK 
+                                                            //and SDC_PORT respectively.
+    std::vector<std::string> strings;                       //The strings in the group
 };
 
 /*
  * Structures defining different SDC commands
  */
 struct CreateClock {
-    double period;          //Clock period
-    std::string name;             //Name of the clock
-    double rise_edge;       //Rise time from waveform definition
-    double fall_edge;       //Fall time from waveform definition
-    std::shared_ptr<StringGroup> targets;   //The set of strings indicating clock sources.
-                            //May be explicit strings or regexs.
-    bool is_virtual;        //Identifies this as a virtual (non-netlist) clock
+    std::string name = "";                          //Name of the clock
+    double period = UNINITIALIZED_FLOAT;            //Clock period
+    double rise_edge = UNINITIALIZED_FLOAT;         //Rise time from waveform definition
+    double fall_edge = UNINITIALIZED_FLOAT;         //Fall time from waveform definition
+    std::shared_ptr<StringGroup> targets = nullptr; //The set of strings indicating clock sources.
+                                                    // May be explicit strings or regexs.
+    bool is_virtual = false;                        //Identifies this as a virtual (non-netlist) clock
 
-    int file_line_number;   //Line number where this command is defined
+    int file_line_number = UNINITIALIZED_INT;       //Line number where this command is defined
 };
 
 struct SetIoDelay {
-    IoDelayType cmd_type; //Identifies whether this represents a
-                                  //set_input_delay or set_output delay
-                                  //command.
-    std::string clock_name;   //Name of the clock this constraint is associated with
-    double max_delay;   //The maximum input delay allowed on the target ports
-    std::shared_ptr<StringGroup> target_ports; //The target ports
+    IoDelayType io_type = IoDelayType::INPUT;               //Identifies whether this represents a
+                                                            // set_input_delay or set_output delay
+                                                            // command.
+    std::string clock_name = "";                            //Name of the clock this constraint is associated with
+    double max_delay = UNINITIALIZED_FLOAT;                 //The maximum input delay allowed on the target ports
+    std::shared_ptr<StringGroup> target_ports = nullptr;    //The target ports
 
-    int file_line_number; //Line number where this command is defined
+    int file_line_number = UNINITIALIZED_INT;               //Line number where this command is defined
 };
 
 struct SetClockGroups {
-    ClockGroupsType type;      //The type of clock group relation being specified
-    std::vector<std::shared_ptr<StringGroup>> clock_groups;
+    ClockGroupsType type = ClockGroupsType::NONE;           //The type of clock group relation being specified
+    std::vector<std::shared_ptr<StringGroup>> clock_groups; //The groups of clocks
 
-    int file_line_number; //Line number where this command is defined
+    int file_line_number = UNINITIALIZED_INT;               //Line number where this command is defined
 };
 
 struct SetFalsePath {
-    std::shared_ptr<StringGroup> from;    //The source list of startpoints or clocks
-    std::shared_ptr<StringGroup> to;      //The target list of endpoints or clocks
+    std::shared_ptr<StringGroup> from = nullptr;  //The source list of startpoints or clocks
+    std::shared_ptr<StringGroup> to = nullptr;    //The target list of endpoints or clocks
 
-    int file_line_number; //Line number where this command is defined
+    int file_line_number = UNINITIALIZED_INT;     //Line number where this command is defined
 };
 
 struct SetMaxDelay {
-    double max_delay;          //The maximum allowed delay between the from
-                               //and to clocks
-    std::shared_ptr<StringGroup> from;  //The source list of startpoints or clocks
-    std::shared_ptr<StringGroup> to;    //The target list of endpoints or clocks
+    double max_delay = UNINITIALIZED_FLOAT;         //The maximum allowed delay between the from
+                                                    // and to clocks
+    std::shared_ptr<StringGroup> from = nullptr;    //The source list of startpoints or clocks
+    std::shared_ptr<StringGroup> to = nullptr;      //The target list of endpoints or clocks
 
-    int file_line_number; //Line number where this command is defined
+    int file_line_number = UNINITIALIZED_INT;       //Line number where this command is defined
 };
 
 struct SetMulticyclePath {
-    McpType type;       //The type of the mcp
-    int mcp_value;             //The number of cycles specifed
-    std::shared_ptr<StringGroup> from;  //The source list of startpoints or clocks
-    std::shared_ptr<StringGroup> to;    //The target list of endpoints or clocks
+    McpType type = McpType::NONE;                   //The type of the mcp
+    int mcp_value = UNINITIALIZED_INT;              //The number of cycles specifed
+    std::shared_ptr<StringGroup> from = nullptr;    //The source list of startpoints or clocks
+    std::shared_ptr<StringGroup> to = nullptr;      //The target list of endpoints or clocks
 
-    int file_line_number; //Line number where this command is defined
+    int file_line_number = UNINITIALIZED_INT;       //Line number where this command is defined
 };
 
 /*
@@ -215,6 +222,6 @@ struct SetMulticyclePath {
 std::shared_ptr<SdcCommands> sdc_parse_filename(char* filename);
 std::shared_ptr<SdcCommands> sdc_parse_file(FILE* sdc);
 
-}
+} //namespace
 
 #endif

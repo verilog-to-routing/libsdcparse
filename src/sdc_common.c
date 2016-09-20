@@ -7,13 +7,11 @@
 #include <cstdlib>
 #include <cstdarg>
 #include <cassert>
+#include <cmath>
 
 #include "sdc_common.h"
 
 namespace sdcparse {
-
-constexpr float UNINITIALIZED_FLOAT = -1.0;
-constexpr int UNINITIALIZED_INT = -1;
 
 /*
  * Data structure to store the SDC SdcCommands
@@ -33,24 +31,12 @@ std::shared_ptr<SdcCommands> alloc_sdc_commands() {
  * Functions for create_clock
  */
 std::shared_ptr<CreateClock> alloc_sdc_create_clock() {
-    auto sdc_create_clock = std::make_shared<CreateClock>();
-
-    //Initialize
-    sdc_create_clock->period = UNINITIALIZED_FLOAT;
-    sdc_create_clock->name = "";
-    sdc_create_clock->rise_edge = UNINITIALIZED_FLOAT;
-    sdc_create_clock->fall_edge = UNINITIALIZED_FLOAT;
-    sdc_create_clock->targets = NULL;
-    sdc_create_clock->is_virtual = false;
-
-    sdc_create_clock->file_line_number = UNINITIALIZED_INT;
-
-    return sdc_create_clock;
+    return std::make_shared<CreateClock>();
 }
 
 std::shared_ptr<CreateClock> sdc_create_clock_set_period(std::shared_ptr<CreateClock> sdc_create_clock, double period) {
     assert(sdc_create_clock);
-    if(sdc_create_clock->period != UNINITIALIZED_FLOAT) {
+    if(!std::isnan(sdc_create_clock->period)) {
         sdc_error(sdcparse_lineno, sdcparse_text, "Can only define a single clock period.\n"); 
     } else {
         sdc_create_clock->period = period;
@@ -72,7 +58,7 @@ std::shared_ptr<CreateClock> sdc_create_clock_set_name(std::shared_ptr<CreateClo
 
 std::shared_ptr<CreateClock> sdc_create_clock_set_waveform(std::shared_ptr<CreateClock> sdc_create_clock, double rise_edge, double fall_edge) {
     assert(sdc_create_clock);
-    if(sdc_create_clock->rise_edge != UNINITIALIZED_FLOAT || sdc_create_clock->fall_edge != UNINITIALIZED_FLOAT) {
+    if(!std::isnan(sdc_create_clock->rise_edge) || !std::isnan(sdc_create_clock->fall_edge)) {
         sdc_error(sdcparse_lineno, sdcparse_text, "Can only define a single waveform.\n"); 
     } else {
         sdc_create_clock->rise_edge = rise_edge;
@@ -110,7 +96,7 @@ std::shared_ptr<SdcCommands> add_sdc_create_clock(std::shared_ptr<SdcCommands> s
     }
 
     //Must have a clock period
-    if(sdc_create_clock->period == UNINITIALIZED_FLOAT) {
+    if(std::isnan(sdc_create_clock->period)) {
         sdc_error(sdcparse_lineno, sdcparse_text, "Must define clock period.\n");
     }
 
@@ -128,12 +114,12 @@ std::shared_ptr<SdcCommands> add_sdc_create_clock(std::shared_ptr<SdcCommands> s
      * Set defaults
      */
     //Determine default rise/fall time for waveform
-    if(sdc_create_clock->rise_edge == UNINITIALIZED_FLOAT && sdc_create_clock->fall_edge == UNINITIALIZED_FLOAT) {
+    if(std::isnan(sdc_create_clock->rise_edge) && std::isnan(sdc_create_clock->fall_edge)) {
         sdc_create_clock->rise_edge = 0.0;
         sdc_create_clock->fall_edge = sdc_create_clock->period / 2;
     }
-    assert(sdc_create_clock->rise_edge != UNINITIALIZED_FLOAT);
-    assert(sdc_create_clock->fall_edge != UNINITIALIZED_FLOAT);
+    assert(!std::isnan(sdc_create_clock->rise_edge));
+    assert(!std::isnan(sdc_create_clock->fall_edge));
     
     //Determine if clock is virtual or not
     if(sdc_create_clock->targets->strings.size() == 0 && !sdc_create_clock->name.empty()) {
@@ -161,17 +147,10 @@ std::shared_ptr<SdcCommands> add_sdc_create_clock(std::shared_ptr<SdcCommands> s
 /*
  * Functions for set_input_delay/set_output_delay
  */
-std::shared_ptr<SetIoDelay> alloc_sdc_set_io_delay(IoDelayType cmd_type) {
-    //Allocate
+std::shared_ptr<SetIoDelay> alloc_sdc_set_io_delay(IoDelayType io_type) {
     auto sdc_set_io_delay = std::make_shared<SetIoDelay>();
 
-    //Initialize
-    sdc_set_io_delay->cmd_type = cmd_type;
-    sdc_set_io_delay->clock_name = "";
-    sdc_set_io_delay->max_delay = UNINITIALIZED_FLOAT;
-    sdc_set_io_delay->target_ports = NULL;
-
-    sdc_set_io_delay->file_line_number = UNINITIALIZED_INT;
+    sdc_set_io_delay->io_type = io_type;
 
     return sdc_set_io_delay;
 }
@@ -190,7 +169,7 @@ std::shared_ptr<SetIoDelay> sdc_set_io_delay_set_clock(std::shared_ptr<SetIoDela
 std::shared_ptr<SetIoDelay> sdc_set_io_delay_set_max_value(std::shared_ptr<SetIoDelay> sdc_set_io_delay, double max_value) {
     assert(sdc_set_io_delay);
 
-    if(sdc_set_io_delay->max_delay != UNINITIALIZED_FLOAT) {
+    if(!std::isnan(sdc_set_io_delay->max_delay)) {
         sdc_error(sdcparse_lineno, sdcparse_text, "Max delay value can only specified once.\n"); 
     }
 
@@ -221,7 +200,7 @@ std::shared_ptr<SdcCommands> add_sdc_set_io_delay(std::shared_ptr<SdcCommands> s
         sdc_error(sdcparse_lineno, sdcparse_text, "Must specify clock name.\n"); 
     }
 
-    if(sdc_set_io_delay->max_delay == UNINITIALIZED_FLOAT) {
+    if(std::isnan(sdc_set_io_delay->max_delay)) {
         sdc_error(sdcparse_lineno, sdcparse_text, "Must specify max delay value.\n"); 
     }
 
@@ -237,10 +216,10 @@ std::shared_ptr<SdcCommands> add_sdc_set_io_delay(std::shared_ptr<SdcCommands> s
     /*
      * Add command
      */
-    if(sdc_set_io_delay->cmd_type == IoDelayType::INPUT) {
+    if(sdc_set_io_delay->io_type == IoDelayType::INPUT) {
         sdc_commands->set_input_delay_cmds.push_back(sdc_set_io_delay);
     } else {
-        assert(sdc_set_io_delay->cmd_type == IoDelayType::OUTPUT);
+        assert(sdc_set_io_delay->io_type == IoDelayType::OUTPUT);
         sdc_commands->set_output_delay_cmds.push_back(sdc_set_io_delay);
     }
 
@@ -251,15 +230,7 @@ std::shared_ptr<SdcCommands> add_sdc_set_io_delay(std::shared_ptr<SdcCommands> s
  * Functions for set_clock_groups
  */
 std::shared_ptr<SetClockGroups> alloc_sdc_set_clock_groups() {
-    //Allocate
-    auto sdc_set_clock_groups = std::make_shared<SetClockGroups>();
-
-    //Initialize
-    sdc_set_clock_groups->type = ClockGroupsType::NONE;
-
-    sdc_set_clock_groups->file_line_number = UNINITIALIZED_INT;
-
-    return sdc_set_clock_groups;
+    return std::make_shared<SetClockGroups>();
 }
 
 std::shared_ptr<SetClockGroups> sdc_set_clock_groups_set_type(std::shared_ptr<SetClockGroups> sdc_set_clock_groups, ClockGroupsType type) {
@@ -314,16 +285,7 @@ std::shared_ptr<SdcCommands> add_sdc_set_clock_groups(std::shared_ptr<SdcCommand
  * Functions for set_false_path
  */
 std::shared_ptr<SetFalsePath> alloc_sdc_set_false_path() {
-    //Allocate
-    auto sdc_set_false_path = std::make_shared<SetFalsePath>();
-
-    //Initialize
-    sdc_set_false_path->from = NULL;
-    sdc_set_false_path->to = NULL;
-
-    sdc_set_false_path->file_line_number = UNINITIALIZED_INT;
-
-    return sdc_set_false_path;
+    return std::make_shared<SetFalsePath>();
 }
 
 std::shared_ptr<SetFalsePath> sdc_set_false_path_add_to_from_group(std::shared_ptr<SetFalsePath> sdc_set_false_path, 
@@ -387,21 +349,11 @@ std::shared_ptr<SdcCommands> add_sdc_set_false_path(std::shared_ptr<SdcCommands>
  * Functions for set_max_delay
  */
 std::shared_ptr<SetMaxDelay> alloc_sdc_set_max_delay() {
-    //Allocate
-    auto sdc_set_max_delay = std::make_shared<SetMaxDelay>();
-
-    //Initialize
-    sdc_set_max_delay->max_delay = UNINITIALIZED_FLOAT;
-    sdc_set_max_delay->from = NULL;
-    sdc_set_max_delay->to = NULL;
-
-    sdc_set_max_delay->file_line_number = UNINITIALIZED_INT;
-
-    return sdc_set_max_delay;
+    return std::make_shared<SetMaxDelay>();
 }
 
 std::shared_ptr<SetMaxDelay> sdc_set_max_delay_set_max_delay_value(std::shared_ptr<SetMaxDelay> sdc_set_max_delay, double max_delay) {
-    if(sdc_set_max_delay->max_delay != UNINITIALIZED_FLOAT) {
+    if(!std::isnan(sdc_set_max_delay->max_delay)) {
         sdc_error(sdcparse_lineno, sdcparse_text, "Must specify max delay value only once.\n"); 
     }
     sdc_set_max_delay->max_delay = max_delay;
@@ -442,7 +394,7 @@ std::shared_ptr<SdcCommands> add_sdc_set_max_delay(std::shared_ptr<SdcCommands> 
     /*
      * Error checks
      */
-    if(sdc_set_max_delay->max_delay == UNINITIALIZED_FLOAT) {
+    if(std::isnan(sdc_set_max_delay->max_delay)) {
         sdc_error(sdcparse_lineno, sdcparse_text, "Must specify the max delay value.\n"); 
     }
 
@@ -471,19 +423,7 @@ std::shared_ptr<SdcCommands> add_sdc_set_max_delay(std::shared_ptr<SdcCommands> 
  * Functions for set_multicycle_path
  */
 std::shared_ptr<SetMulticyclePath> alloc_sdc_set_multicycle_path() {
-    //Allocate
-    auto sdc_set_multicycle_path = std::make_shared<SetMulticyclePath>();
-
-    //Initialize
-    sdc_set_multicycle_path->type = McpType::NONE;
-    sdc_set_multicycle_path->mcp_value = UNINITIALIZED_INT;
-    sdc_set_multicycle_path->from = NULL;
-    sdc_set_multicycle_path->to = NULL;
-
-    sdc_set_multicycle_path->file_line_number = UNINITIALIZED_INT;
-
-    return sdc_set_multicycle_path;
-
+    return std::make_shared<SetMulticyclePath>();
 }
 
 std::shared_ptr<SetMulticyclePath> sdc_set_multicycle_path_set_type(std::shared_ptr<SetMulticyclePath> sdc_set_multicycle_path, McpType type) {
@@ -542,7 +482,7 @@ std::shared_ptr<SdcCommands> add_sdc_set_multicycle_path(std::shared_ptr<SdcComm
         sdc_error(sdcparse_lineno, sdcparse_text, "Must specify the multicycle path type as '-setup'.\n"); 
     }
 
-    if(sdc_set_multicycle_path->mcp_value == UNINITIALIZED_FLOAT) {
+    if(sdc_set_multicycle_path->mcp_value == UNINITIALIZED_INT) {
         sdc_error(sdcparse_lineno, sdcparse_text, "Must specify the multicycle path value.\n"); 
     }
 
