@@ -67,6 +67,8 @@
  *                   | sdc_commands cmd_set_time_format EOL {$$ = add_sdc_set_time_format($1, $2); }
  *
  */
+#include <vector>
+#include <string>
 
 namespace sdcparse {
 
@@ -158,9 +160,10 @@ struct StringGroup {
                                         //Groups derived from 'calls' to [get_clocks {..}] 
                                         //and [get_ports {..}] will have types SDC_CLOCK 
                                         //and SDC_PORT respectively.
-    int num_strings;    //Number of strings in this group
-    char** strings;     //Array of strings [0..num_strings-1]. 
-                        //May be exact string matches or regexs.
+    std::vector<std::string> strings;
+    //int num_strings;    //Number of strings in this group
+    //char** strings;     //Array of strings [0..num_strings-1]. 
+                        ////May be exact string matches or regexs.
 };
 
 /*

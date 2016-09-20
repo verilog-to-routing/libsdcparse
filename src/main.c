@@ -25,8 +25,8 @@ void print_string_group(StringGroup* group) {
     }
 
     printf("%s", start_token);
-    for(int i = 0; i < group->num_strings; i++) {
-        printf("%s ", group->strings[i]);
+    for(const auto& string : group->strings) {
+        printf("%s ", string.c_str());
     }
     printf("%s", end_token);
 }

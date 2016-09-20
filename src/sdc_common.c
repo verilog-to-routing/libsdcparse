@@ -171,12 +171,12 @@ Commands* add_sdc_create_clock(Commands* sdc_commands, CreateClock* sdc_create_c
     }
 
     //Must have either a target (if a netlist clock), or a name (if a virtual clock) 
-    if(sdc_create_clock->targets->num_strings == 0 && sdc_create_clock->name == NULL) {
+    if(sdc_create_clock->targets->strings.size() == 0 && sdc_create_clock->name == NULL) {
         sdc_error(yylineno, yytext, "Must define either a target (for netlist clock) or a name (for virtual clock).\n");
     }
 
     //Currently we do not support defining clock names that differ from the netlist target name
-    if(sdc_create_clock->targets->num_strings != 0 && sdc_create_clock->name != NULL) {
+    if(sdc_create_clock->targets->strings.size() != 0 && sdc_create_clock->name != NULL) {
         sdc_error(yylineno, yytext, "Currently custom names for netlist clocks are unsupported, remove '-name' option or create a virtual clock.\n");
     }
 
@@ -192,11 +192,11 @@ Commands* add_sdc_create_clock(Commands* sdc_commands, CreateClock* sdc_create_c
     assert(sdc_create_clock->fall_edge != UNINITIALIZED_FLOAT);
     
     //Determine if clock is virtual or not
-    if(sdc_create_clock->targets->num_strings == 0 && sdc_create_clock->name != NULL) {
+    if(sdc_create_clock->targets->strings.size() == 0 && sdc_create_clock->name != NULL) {
         //Have a virtual target if there is a name AND no target strings
         sdc_create_clock->is_virtual = true;
     } else {
-        assert(sdc_create_clock->targets->num_strings > 0);
+        assert(sdc_create_clock->targets->strings.size() > 0);
         //Have a real target so this is not a virtual clock
         sdc_create_clock->is_virtual = false;
     }
@@ -724,14 +724,8 @@ StringGroup* duplicate_sdc_string_group(StringGroup* string_group) {
     assert(new_sdc_string_group != NULL);
 
     //Deep Copy
-    new_sdc_string_group->num_strings = string_group->num_strings;
     new_sdc_string_group->group_type = string_group->group_type;
-
-    new_sdc_string_group->strings = (char**) calloc(new_sdc_string_group->num_strings, sizeof(*new_sdc_string_group->strings));
-    assert(new_sdc_string_group->strings != NULL);
-    for(int i = 0; i < new_sdc_string_group->num_strings; i++) {
-        new_sdc_string_group->strings[i] = sdcparse::strdup(string_group->strings[i]);
-    }
+    new_sdc_string_group->strings = string_group->strings;
 
     return new_sdc_string_group;
 }
@@ -739,31 +733,22 @@ StringGroup* duplicate_sdc_string_group(StringGroup* string_group) {
 void free_sdc_string_group(StringGroup* sdc_string_group) {
     if(sdc_string_group != NULL) {
 
-        for(int i = 0; i < sdc_string_group->num_strings; i++) {
-            free(sdc_string_group->strings[i]);
-        }
-        free(sdc_string_group->strings);
         free(sdc_string_group);
     }
 }
 
-StringGroup* sdc_string_group_add_string(StringGroup* sdc_string_group, char* string) {
+StringGroup* sdc_string_group_add_string(StringGroup* sdc_string_group, const std::string& string) {
     assert(sdc_string_group != NULL);
 
-    //Allocate space
-    sdc_string_group->num_strings++;
-    sdc_string_group->strings = (char**) realloc(sdc_string_group->strings, sdc_string_group->num_strings*sizeof(*sdc_string_group->strings));
-    assert(sdc_string_group->strings != NULL);
-
     //Insert the new string
-    sdc_string_group->strings[sdc_string_group->num_strings-1] = sdcparse::strdup(string);
+    sdc_string_group->strings.push_back(string);
     
     return sdc_string_group;
 }
 
 StringGroup* sdc_string_group_add_strings(StringGroup* sdc_string_group, StringGroup* string_group_to_add) {
-    for(int i = 0; i < string_group_to_add->num_strings; i++) {
-        sdc_string_group_add_string(sdc_string_group, string_group_to_add->strings[i]);
+    for(const auto& string : string_group_to_add->strings) {
+        sdc_string_group_add_string(sdc_string_group, string);
     }
     return sdc_string_group;
 }

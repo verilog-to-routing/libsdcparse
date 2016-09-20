@@ -72,7 +72,7 @@ StringGroup* alloc_sdc_string_group(StringGroupType type);
 StringGroup* make_sdc_string_group(StringGroupType type, char* string);
 StringGroup* duplicate_sdc_string_group(StringGroup* string_group);
 void free_sdc_string_group(StringGroup* sdc_string_group);
-StringGroup* sdc_string_group_add_string(StringGroup* sdc_string_group, char* string);
+StringGroup* sdc_string_group_add_string(StringGroup* sdc_string_group, const std::string& string);
 StringGroup* sdc_string_group_add_strings(StringGroup* sdc_string_group, StringGroup* string_group_to_add);
 
 //utility
