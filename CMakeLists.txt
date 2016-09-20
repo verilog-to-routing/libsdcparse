@@ -5,6 +5,7 @@ include(HeadersToIncludeDirs)
 project("libsdcparse")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=leak -fsanitize=undefined")
 
 #Flex and Bison are used to generate the parser
 find_package(BISON REQUIRED)

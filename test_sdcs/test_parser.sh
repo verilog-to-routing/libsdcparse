@@ -7,6 +7,12 @@ do
     do
         echo
         ./sdcparse_test $sdc_file
+        exit_code=$?
+        if [ $exit_code -ne 0 ] 
+        then
+            echo "Error"
+            exit 1
+        fi
     done
 
 done

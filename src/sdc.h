@@ -127,28 +127,15 @@ enum class StringGroupType {
  * Collection of SDC commands
  */
 struct Commands {
-    bool has_commands;                                      //Indicates whether any sdc commands were found
+    bool has_commands();
 
-    int num_create_clock_cmds;                              //Number of create_clock commands
-    CreateClock** create_clock_cmds;                 //Array of create_clock commands [0..num_create_clock_cmds-1]
-
-    int num_set_input_delay_cmds;                           //Number of set_input_delay commands
-    SetIoDelay** set_input_delay_cmds;              //Array of set_input_delay commands [0..num_set_input_delay_cmds-1]
-
-    int num_set_output_delay_cmds;                          //Number of set_output_delay commands
-    SetIoDelay** set_output_delay_cmds;             //Array of set_output_delay commands [0..num_set_output_delay_cmds-1]
-
-    int num_set_clock_groups_cmds;                          //Number of set_clock_groups commands
-    SetClockGroups** set_clock_groups_cmds;         //Array of set_clock_groups commands [0..num_set_clock_groups_cmds-1]
-
-    int num_set_false_path_cmds;                            //Number of set_false_path commands
-    SetFalsePath** set_false_path_cmds;             //Array of set_false_path commands [0..num_set_false_path_cmds-1]
-
-    int num_set_max_delay_cmds;                             //Number of set_max_delay commands
-    SetMaxDelay** set_max_delay_cmds;               //Array of set_max_delay commands [0..num_set_max_delay_cmds-1]
-
-    int num_set_multicycle_path_cmds;                       //Number of set_multicycle_path commands
-    SetMulticyclePath** set_multicycle_path_cmds;   //Array of set_multicycle_path commands [0..num_set_multicycle_path_cmds-1]
+    std::vector<CreateClock*> create_clock_cmds;
+    std::vector<SetIoDelay*> set_input_delay_cmds;
+    std::vector<SetIoDelay*> set_output_delay_cmds;
+    std::vector<SetClockGroups*> set_clock_groups_cmds;
+    std::vector<SetFalsePath*> set_false_path_cmds;
+    std::vector<SetMaxDelay*> set_max_delay_cmds;
+    std::vector<SetMulticyclePath*> set_multicycle_path_cmds;
 };
 
 /*

@@ -69,8 +69,7 @@ int main(int argc, char **argv) {
 
 
     //Print out the commands
-    for(int i = 0; i < sdc_commands->num_create_clock_cmds; i++) {
-        CreateClock* sdc_create_clock = sdc_commands->create_clock_cmds[i];
+    for(const CreateClock* sdc_create_clock : sdc_commands->create_clock_cmds) {
         printf("Line %3d: ", sdc_create_clock->file_line_number);
         if(sdc_create_clock->is_virtual) {
             printf("create_clock -period %f -waveform {%f %f} -name %s\n",
@@ -88,8 +87,7 @@ int main(int argc, char **argv) {
         }
     }
 
-    for(int i = 0; i < sdc_commands->num_set_input_delay_cmds; i++) {
-        SetIoDelay* sdc_set_input_delay = sdc_commands->set_input_delay_cmds[i];
+    for(const SetIoDelay* sdc_set_input_delay : sdc_commands->set_input_delay_cmds) {
         printf("Line %3d: ", sdc_set_input_delay->file_line_number);
         printf("set_input_delay -clock %s -max %f ", 
                     sdc_set_input_delay->clock_name,
@@ -98,8 +96,7 @@ int main(int argc, char **argv) {
         printf("\n");
     }
 
-    for(int i = 0; i < sdc_commands->num_set_output_delay_cmds; i++) {
-        SetIoDelay* sdc_set_output_delay = sdc_commands->set_output_delay_cmds[i];
+    for(const SetIoDelay* sdc_set_output_delay : sdc_commands->set_output_delay_cmds) {
         printf("Line %3d: ", sdc_set_output_delay->file_line_number);
         printf("set_output_delay -clock %s -max %f ", 
                     sdc_set_output_delay->clock_name,
@@ -108,8 +105,7 @@ int main(int argc, char **argv) {
         printf("\n");
     }
 
-    for(int i = 0; i < sdc_commands->num_set_clock_groups_cmds; i++) {
-        SetClockGroups* sdc_set_clock_groups = sdc_commands->set_clock_groups_cmds[i];
+    for(const SetClockGroups* sdc_set_clock_groups : sdc_commands->set_clock_groups_cmds) {
         printf("Line %3d: ", sdc_set_clock_groups->file_line_number);
         printf("set_clock_groups ");
         if(sdc_set_clock_groups->type == ClockGroupsType::EXCLUSIVE) {
@@ -122,24 +118,21 @@ int main(int argc, char **argv) {
         printf("\n");
     }
 
-    for(int i = 0; i < sdc_commands->num_set_false_path_cmds; i++) {
-        SetFalsePath* sdc_set_false_path = sdc_commands->set_false_path_cmds[i];
+    for(const SetFalsePath* sdc_set_false_path : sdc_commands->set_false_path_cmds) {
         printf("Line %3d: ", sdc_set_false_path->file_line_number);
         printf("set_false_path ");
         print_from_to_group(sdc_set_false_path->from, sdc_set_false_path->to);
         printf("\n");
     }
 
-    for(int i = 0; i < sdc_commands->num_set_max_delay_cmds; i++) {
-        SetMaxDelay* sdc_set_max_delay = sdc_commands->set_max_delay_cmds[i];
+    for(const SetMaxDelay* sdc_set_max_delay : sdc_commands->set_max_delay_cmds) {
         printf("Line %3d: ", sdc_set_max_delay->file_line_number);
         printf("set_max_delay %f ", sdc_set_max_delay->max_delay);
         print_from_to_group(sdc_set_max_delay->from, sdc_set_max_delay->to);
         printf("\n");
     }
 
-    for(int i = 0; i < sdc_commands->num_set_multicycle_path_cmds; i++) {
-        SetMulticyclePath* sdc_set_multicycle_path = sdc_commands->set_multicycle_path_cmds[i];
+    for(const SetMulticyclePath* sdc_set_multicycle_path : sdc_commands->set_multicycle_path_cmds) {
         printf("Line %3d: ", sdc_set_multicycle_path->file_line_number);
         printf("set_multicycle_path %d ", sdc_set_multicycle_path->mcp_value);
         if(sdc_set_multicycle_path->type == McpType::SETUP) {

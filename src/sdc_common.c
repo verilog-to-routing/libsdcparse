@@ -29,47 +29,40 @@ Commands* alloc_sdc_commands() {
     Commands* sdc_commands = (Commands*) calloc(1, sizeof(Commands));
 
     assert(sdc_commands != NULL);
-    assert(sdc_commands->has_commands == false);
+    assert(sdc_commands->has_commands() == false);
 
     return sdc_commands;
 }
 
 void free_sdc_commands(Commands* sdc_commands) {
     if(sdc_commands != NULL) {
-        for(int i = 0; i < sdc_commands->num_create_clock_cmds; i++) {
-            free_sdc_create_clock(sdc_commands->create_clock_cmds[i]);
+        for(CreateClock* create_clock_cmd : sdc_commands->create_clock_cmds) {
+            free_sdc_create_clock(create_clock_cmd);
         }
-        free(sdc_commands->create_clock_cmds);
 
-        for(int i = 0; i < sdc_commands->num_set_input_delay_cmds; i++) {
-            free_sdc_set_io_delay(sdc_commands->set_input_delay_cmds[i]);
+        for(SetIoDelay* set_input_delay_cmd :  sdc_commands->set_input_delay_cmds) {
+            free_sdc_set_io_delay(set_input_delay_cmd);
         }
-        free(sdc_commands->set_input_delay_cmds);
 
-        for(int i = 0; i < sdc_commands->num_set_output_delay_cmds; i++) {
-            free_sdc_set_io_delay(sdc_commands->set_output_delay_cmds[i]);
+        for(SetIoDelay* set_output_delay_cmd : sdc_commands->set_output_delay_cmds) {
+            free_sdc_set_io_delay(set_output_delay_cmd);
         }
-        free(sdc_commands->set_output_delay_cmds);
 
-        for(int i = 0; i < sdc_commands->num_set_clock_groups_cmds; i++) {
-            free_sdc_set_clock_groups(sdc_commands->set_clock_groups_cmds[i]);
+        for(SetClockGroups* set_clock_groups_cmd : sdc_commands->set_clock_groups_cmds) {
+            free_sdc_set_clock_groups(set_clock_groups_cmd);
         }
-        free(sdc_commands->set_clock_groups_cmds);
 
-        for(int i = 0; i < sdc_commands->num_set_false_path_cmds; i++) {
-            free_sdc_set_false_path(sdc_commands->set_false_path_cmds[i]);
+        for(SetFalsePath* set_false_path_cmd : sdc_commands->set_false_path_cmds) {
+            free_sdc_set_false_path(set_false_path_cmd);
         }
-        free(sdc_commands->set_false_path_cmds);
 
-        for(int i = 0; i < sdc_commands->num_set_max_delay_cmds; i++) {
-            free_sdc_set_max_delay(sdc_commands->set_max_delay_cmds[i]);
+        for(SetMaxDelay* set_max_delay_cmd : sdc_commands->set_max_delay_cmds) {
+            free_sdc_set_max_delay(set_max_delay_cmd);
         }
-        free(sdc_commands->set_max_delay_cmds);
 
-        for(int i = 0; i < sdc_commands->num_set_multicycle_path_cmds; i++) {
-            free_sdc_set_multicycle_path(sdc_commands->set_multicycle_path_cmds[i]);
+        for(SetMulticyclePath* set_multicycle_path_cmd : sdc_commands->set_multicycle_path_cmds) {
+            free_sdc_set_multicycle_path(set_multicycle_path_cmd);
         }
-        free(sdc_commands->set_multicycle_path_cmds);
 
         free(sdc_commands);
     }
@@ -209,10 +202,7 @@ Commands* add_sdc_create_clock(Commands* sdc_commands, CreateClock* sdc_create_c
     /*
      * Add command
      */
-    sdc_commands->has_commands = true;
-    sdc_commands->num_create_clock_cmds++;
-    sdc_commands->create_clock_cmds = (CreateClock**) realloc(sdc_commands->create_clock_cmds, sdc_commands->num_create_clock_cmds*sizeof(*sdc_commands->create_clock_cmds));
-    sdc_commands->create_clock_cmds[sdc_commands->num_create_clock_cmds-1] = sdc_create_clock;
+    sdc_commands->create_clock_cmds.push_back(sdc_create_clock);
 
     return sdc_commands;
 }
@@ -306,16 +296,10 @@ Commands* add_sdc_set_io_delay(Commands* sdc_commands, SetIoDelay* sdc_set_io_de
      * Add command
      */
     if(sdc_set_io_delay->cmd_type == IoDelayType::INPUT) {
-        sdc_commands->has_commands = true;
-        sdc_commands->num_set_input_delay_cmds++;
-        sdc_commands->set_input_delay_cmds = (SetIoDelay**) realloc(sdc_commands->set_input_delay_cmds, sdc_commands->num_set_input_delay_cmds*sizeof(*sdc_commands->set_input_delay_cmds));
-        sdc_commands->set_input_delay_cmds[sdc_commands->num_set_input_delay_cmds-1] = sdc_set_io_delay;
+        sdc_commands->set_input_delay_cmds.push_back(sdc_set_io_delay);
     } else {
         assert(sdc_set_io_delay->cmd_type == IoDelayType::OUTPUT);
-        sdc_commands->has_commands = true;
-        sdc_commands->num_set_output_delay_cmds++;
-        sdc_commands->set_output_delay_cmds = (SetIoDelay**) realloc(sdc_commands->set_output_delay_cmds, sdc_commands->num_set_output_delay_cmds*sizeof(*sdc_commands->set_output_delay_cmds));
-        sdc_commands->set_output_delay_cmds[sdc_commands->num_set_output_delay_cmds-1] = sdc_set_io_delay;
+        sdc_commands->set_output_delay_cmds.push_back(sdc_set_io_delay);
     }
 
     return sdc_commands;
@@ -397,10 +381,7 @@ Commands* add_sdc_set_clock_groups(Commands* sdc_commands, SetClockGroups* sdc_s
     /*
      * Add command
      */
-    sdc_commands->has_commands = true;
-    sdc_commands->num_set_clock_groups_cmds++;
-    sdc_commands->set_clock_groups_cmds = (SetClockGroups**) realloc(sdc_commands->set_clock_groups_cmds, sdc_commands->num_set_clock_groups_cmds*sizeof(*sdc_commands->set_clock_groups_cmds));
-    sdc_commands->set_clock_groups_cmds[sdc_commands->num_set_clock_groups_cmds-1] = sdc_set_clock_groups;
+    sdc_commands->set_clock_groups_cmds.push_back(sdc_set_clock_groups);
 
     return sdc_commands;
 }
@@ -482,10 +463,7 @@ Commands* add_sdc_set_false_path(Commands* sdc_commands, SetFalsePath* sdc_set_f
     /*
      * Add command
      */
-    sdc_commands->has_commands = true;
-    sdc_commands->num_set_false_path_cmds++;
-    sdc_commands->set_false_path_cmds = (SetFalsePath**) realloc(sdc_commands->set_false_path_cmds, sdc_commands->num_set_false_path_cmds*sizeof(*sdc_commands->set_false_path_cmds));
-    sdc_commands->set_false_path_cmds[sdc_commands->num_set_false_path_cmds-1] = sdc_set_false_path;
+    sdc_commands->set_false_path_cmds.push_back(sdc_set_false_path);
 
     return sdc_commands;
 }
@@ -577,10 +555,7 @@ Commands* add_sdc_set_max_delay(Commands* sdc_commands, SetMaxDelay* sdc_set_max
     /*
      * Add command
      */
-    sdc_commands->has_commands = true;
-    sdc_commands->num_set_max_delay_cmds++;
-    sdc_commands->set_max_delay_cmds = (SetMaxDelay**) realloc(sdc_commands->set_max_delay_cmds, sdc_commands->num_set_max_delay_cmds*sizeof(*sdc_commands->set_max_delay_cmds));
-    sdc_commands->set_max_delay_cmds[sdc_commands->num_set_max_delay_cmds-1] = sdc_set_max_delay;
+    sdc_commands->set_max_delay_cmds.push_back(sdc_set_max_delay);
 
     return sdc_commands;
 
@@ -688,10 +663,7 @@ Commands* add_sdc_set_multicycle_path(Commands* sdc_commands, SetMulticyclePath*
     /*
      * Add command
      */
-    sdc_commands->has_commands = true;
-    sdc_commands->num_set_multicycle_path_cmds++;
-    sdc_commands->set_multicycle_path_cmds = (SetMulticyclePath**) realloc(sdc_commands->set_multicycle_path_cmds, sdc_commands->num_set_multicycle_path_cmds*sizeof(*sdc_commands->set_multicycle_path_cmds));
-    sdc_commands->set_multicycle_path_cmds[sdc_commands->num_set_multicycle_path_cmds-1] = sdc_set_multicycle_path;
+    sdc_commands->set_multicycle_path_cmds.push_back(sdc_set_multicycle_path);
 
     return sdc_commands;
 }
@@ -720,7 +692,7 @@ StringGroup* make_sdc_string_group(StringGroupType type, char* string) {
 
 StringGroup* duplicate_sdc_string_group(StringGroup* string_group) {
     //Allocate
-    StringGroup* new_sdc_string_group = (StringGroup*) malloc(sizeof(StringGroup));
+    StringGroup* new_sdc_string_group = (StringGroup*) calloc(1, sizeof(StringGroup));
     assert(new_sdc_string_group != NULL);
 
     //Deep Copy

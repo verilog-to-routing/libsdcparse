@@ -9,6 +9,17 @@ extern FILE	*yyin;
 
 namespace sdcparse {
 
+bool Commands::has_commands() {
+    if(!create_clock_cmds.empty()) return true;
+    if(!set_input_delay_cmds.empty()) return true;
+    if(!set_output_delay_cmds.empty()) return true;
+    if(!set_clock_groups_cmds.empty()) return true;
+    if(!set_false_path_cmds.empty()) return true;
+    if(!set_max_delay_cmds.empty()) return true;
+    if(!set_multicycle_path_cmds.empty()) return true;
+    return false; 
+}
+
 /*
  * Given a filename parses the file as an SDC file
  * and returns a pointer to a struct containing all
