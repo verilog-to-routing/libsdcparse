@@ -22,7 +22,7 @@
  * After parsing, each SDC command is represented as a C struct.  Typically each
  * command is parsed into a unique type of struct, however some closely related commands
  * (such as set_input_delay and set_output_delay) may share a struct and be identified
- * by a 'cmd_type' field in the struct.
+ * by a 'type' field in the struct.
  *
  * All supported SDC commands are collected into a commands struct which
  * represents the entire SDC file.
