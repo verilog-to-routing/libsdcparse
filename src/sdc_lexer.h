@@ -26,7 +26,6 @@ class Lexer {
  */
 #undef YY_DECL
 #define YY_DECL sdcparse::Parser::symbol_type sdcparse_lex(yyscan_t yyscanner)
-//extern YY_DECL;
 
 } //namespace
 #endif

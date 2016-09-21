@@ -4,8 +4,13 @@ include(HeadersToIncludeDirs)
 
 project("libsdcparse")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=leak -fsanitize=undefined")
+if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+    #Only set compiler settings if we are not a sub-project
+    set(WARN_FLAGS "-Wall -Wextra -Wpedantic -Wcast-qual -Wcast-align -Wshadow -Wformat=2 -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wredundant-decls -Wswitch-default -Wundef -Wunused-variable -Wdisabled-optimization -Wnoexcept -Woverloaded-virtual -Wctor-dtor-privacy -Wnon-virtual-dtor")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11 ${WARN_FLAGS}") 
+    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=leak -fsanitize=undefined") 
+    set(FLEX_BISON_WARN_SUPPRESS_FLAGS "-Wno-switch-default -Wno-unused-parameter -Wno-missing-declarations")
+endif()
 
 #Flex and Bison are used to generate the parser
 find_package(BISON REQUIRED 3.0)
@@ -30,7 +35,7 @@ add_flex_bison_dependency(SdcLexer SdcParser)
 set_source_files_properties(${LIB_SOURCES} ${FLEX_SdcLexer_OUTPUTS} ${BISON_SdcParser_OUTPUT_SOURCE} PROPERTIES LANGUAGE CXX)
 
 #Suppress warnings in Flex/Bison generated files
-if(${FLEX_BISON_WARN_SUPPRESS_FLAGS})
+if(FLEX_BISON_WARN_SUPPRESS_FLAGS)
     set_source_files_properties(${FLEX_SdcLexer_OUTPUTS} ${BISON_SdcParser_OUTPUT_SOURCE}
                                 PROPERTIES COMPILE_FLAGS ${FLEX_BISON_WARN_SUPPRESS_FLAGS})
 endif()
@@ -41,7 +46,7 @@ add_library(libsdcparse STATIC
              ${LIB_SOURCES}
              ${FLEX_SdcLexer_OUTPUTS} 
              ${BISON_SdcParser_OUTPUT_SOURCE})
-         target_include_directories(libsdcparse PUBLIC ${LIB_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(libsdcparse PUBLIC ${LIB_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 set_target_properties(libsdcparse PROPERTIES PREFIX "") #Avoid extra 'lib' prefix
 
 #Create the test executable

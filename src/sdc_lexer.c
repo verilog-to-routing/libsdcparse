@@ -26,4 +26,4 @@ int Lexer::lineno() const {
     return sdcparse_get_lineno(state_);
 }
 
-};
+}

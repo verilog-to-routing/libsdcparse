@@ -212,7 +212,7 @@ std::shared_ptr<SetClockGroups> sdc_set_clock_groups_set_type(const Lexer& lexer
     return sdc_set_clock_groups;
 }
 
-std::shared_ptr<SetClockGroups> sdc_set_clock_groups_add_group(const Lexer& lexer, std::shared_ptr<SetClockGroups> sdc_set_clock_groups, std::shared_ptr<StringGroup> clock_group) {
+std::shared_ptr<SetClockGroups> sdc_set_clock_groups_add_group(const Lexer& /*lexer*/, std::shared_ptr<SetClockGroups> sdc_set_clock_groups, std::shared_ptr<StringGroup> clock_group) {
     assert(sdc_set_clock_groups);
     assert(clock_group);
 

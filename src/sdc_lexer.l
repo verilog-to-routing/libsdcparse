@@ -22,6 +22,9 @@
 /* unistd.h doesn't exist on windows */
 %option nounistd
 
+/* Avoid unused yyunput function warning */
+%option nounput
+
 /* isatty() doesn't exist on windows */
 %option never-interactive
 
