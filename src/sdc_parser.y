@@ -146,7 +146,7 @@ using namespace sdcparse;
 %type <std::shared_ptr<SetMaxDelay>> cmd_set_max_delay
 %type <std::shared_ptr<SetMulticyclePath>> cmd_set_multicycle_path
 
-%type <std::shared_ptr<StringGroup>> stringGroup cmd_get_ports cmd_get_clocks
+%type <StringGroup> stringGroup cmd_get_ports cmd_get_clocks
 
 /* Top level rule */
 %start sdc_commands
@@ -244,18 +244,18 @@ cmd_set_multicycle_path: CMD_SET_MULTICYCLE_PATH                { $$ = std::make
                                                                 }
     ;
 
-cmd_get_ports: CMD_GET_PORTS            { $$ = std::make_shared<StringGroup>(StringGroupType::PORT); }
-    | cmd_get_ports LCPAR stringGroup RCPAR { $$ = sdc_string_group_add_strings($1, $3); }
-    | cmd_get_ports string              { $$ = sdc_string_group_add_string($1, $2); }
+cmd_get_ports: CMD_GET_PORTS            { $$ = StringGroup(StringGroupType::PORT); }
+    | cmd_get_ports LCPAR stringGroup RCPAR { $$ = $1; sdc_string_group_add_strings($$, $3); }
+    | cmd_get_ports string              { $$ = $1; sdc_string_group_add_string($$, $2); }
     ;
 
-cmd_get_clocks: CMD_GET_CLOCKS              { $$ = std::make_shared<StringGroup>(StringGroupType::CLOCK); }
-    | cmd_get_clocks LCPAR stringGroup RCPAR    { $$ = sdc_string_group_add_strings($1, $3); }
-    | cmd_get_clocks string                 { $$ = sdc_string_group_add_string($1, $2); }
+cmd_get_clocks: CMD_GET_CLOCKS              { $$ = StringGroup(StringGroupType::CLOCK); }
+    | cmd_get_clocks LCPAR stringGroup RCPAR    { $$ = $1; sdc_string_group_add_strings($$, $3); }
+    | cmd_get_clocks string                 { $$ = $1; sdc_string_group_add_string($$, $2); }
     ;
 
-stringGroup: /*empty*/   { $$ = std::make_shared<StringGroup>(StringGroupType::STRING); }
-    | stringGroup string { $$ = sdc_string_group_add_string($1, $2); } 
+stringGroup: /*empty*/   { $$ = StringGroup(StringGroupType::STRING); }
+    | stringGroup string { $$ = $1; sdc_string_group_add_string($$, $2); } 
 
 string: STRING         { $$ = $1; }
     | ESCAPED_STRING        { $$ = $1; }

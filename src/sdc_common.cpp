@@ -48,17 +48,17 @@ std::shared_ptr<CreateClock> sdc_create_clock_set_waveform(const Lexer& lexer, s
     return sdc_create_clock;
 }
 
-std::shared_ptr<CreateClock> sdc_create_clock_add_targets(const Lexer& lexer, std::shared_ptr<CreateClock> sdc_create_clock, std::shared_ptr<StringGroup> target_group) {
+std::shared_ptr<CreateClock> sdc_create_clock_add_targets(const Lexer& lexer, std::shared_ptr<CreateClock> sdc_create_clock, StringGroup target_group) {
     assert(sdc_create_clock);
 
-    assert(target_group->group_type == StringGroupType::STRING);
+    assert(target_group.group_type == StringGroupType::STRING);
 
-    if(sdc_create_clock->targets != NULL) {
+    if(!sdc_create_clock->targets.strings.empty()) {
         sdc_error_wrap(lexer.lineno(), lexer.text(), "Can only define a single set of targets for clock creation. "
                   "If you want to define multiple targets specify them as a list (e.g. \"{target1 target2}\".\n");
     }
 
-    sdc_create_clock->targets = duplicate_sdc_string_group(target_group);
+    sdc_create_clock->targets = target_group;
 
     return sdc_create_clock;
 }
@@ -70,23 +70,18 @@ std::shared_ptr<SdcCommands> add_sdc_create_clock(const Lexer& lexer, std::share
     assert(sdc_commands);
     assert(sdc_create_clock);
 
-    //Allocate a default (empty) target if none was defined, since this clock may be virtual
-    if(sdc_create_clock->targets == NULL) {
-        sdc_create_clock->targets = std::make_shared<StringGroup>(StringGroupType::STRING);
-    }
-
     //Must have a clock period
     if(std::isnan(sdc_create_clock->period)) {
         sdc_error_wrap(lexer.lineno(), lexer.text(), "Must define clock period.\n");
     }
 
     //Must have either a target (if a netlist clock), or a name (if a virtual clock) 
-    if(sdc_create_clock->targets->strings.size() == 0 && sdc_create_clock->name.empty()) {
+    if(sdc_create_clock->targets.strings.size() == 0 && sdc_create_clock->name.empty()) {
         sdc_error_wrap(lexer.lineno(), lexer.text(), "Must define either a target (for netlist clock) or a name (for virtual clock).\n");
     }
 
     //Currently we do not support defining clock names that differ from the netlist target name
-    if(sdc_create_clock->targets->strings.size() != 0 && !sdc_create_clock->name.empty()) {
+    if(sdc_create_clock->targets.strings.size() != 0 && !sdc_create_clock->name.empty()) {
         sdc_error_wrap(lexer.lineno(), lexer.text(), "Currently custom names for netlist clocks are unsupported, remove '-name' option or create a virtual clock.\n");
     }
 
@@ -102,11 +97,11 @@ std::shared_ptr<SdcCommands> add_sdc_create_clock(const Lexer& lexer, std::share
     assert(!std::isnan(sdc_create_clock->fall_edge));
     
     //Determine if clock is virtual or not
-    if(sdc_create_clock->targets->strings.size() == 0 && !sdc_create_clock->name.empty()) {
+    if(sdc_create_clock->targets.strings.size() == 0 && !sdc_create_clock->name.empty()) {
         //Have a virtual target if there is a name AND no target strings
         sdc_create_clock->is_virtual = true;
     } else {
-        assert(sdc_create_clock->targets->strings.size() > 0);
+        assert(sdc_create_clock->targets.strings.size() > 0);
         //Have a real target so this is not a virtual clock
         sdc_create_clock->is_virtual = false;
     }
@@ -149,16 +144,15 @@ std::shared_ptr<SetIoDelay> sdc_set_io_delay_set_max_value(const Lexer& lexer, s
     return sdc_set_io_delay;
 }
 
-std::shared_ptr<SetIoDelay> sdc_set_io_delay_set_ports(const Lexer& lexer, std::shared_ptr<SetIoDelay> sdc_set_io_delay, std::shared_ptr<StringGroup> ports) {
+std::shared_ptr<SetIoDelay> sdc_set_io_delay_set_ports(const Lexer& lexer, std::shared_ptr<SetIoDelay> sdc_set_io_delay, StringGroup ports) {
     assert(sdc_set_io_delay);
-    assert(ports);
-    assert(ports->group_type == StringGroupType::PORT);
+    assert(ports.group_type == StringGroupType::PORT);
 
-    if(sdc_set_io_delay->target_ports != NULL) {
+    if(!sdc_set_io_delay->target_ports.strings.empty()) {
         sdc_error_wrap(lexer.lineno(), lexer.text(), "Currently only a single get_ports command is supported.\n"); 
     }
 
-    sdc_set_io_delay->target_ports = duplicate_sdc_string_group(ports);
+    sdc_set_io_delay->target_ports = ports;
     return sdc_set_io_delay;
 }
 
@@ -176,7 +170,7 @@ std::shared_ptr<SdcCommands> add_sdc_set_io_delay(const Lexer& lexer, std::share
         sdc_error_wrap(lexer.lineno(), lexer.text(), "Must specify max delay value.\n"); 
     }
 
-    if(sdc_set_io_delay->target_ports == NULL) {
+    if(sdc_set_io_delay->target_ports.strings.empty()) {
         sdc_error_wrap(lexer.lineno(), lexer.text(), "Must specify target ports using get_ports.\n"); 
     }
 
@@ -212,14 +206,13 @@ std::shared_ptr<SetClockGroups> sdc_set_clock_groups_set_type(const Lexer& lexer
     return sdc_set_clock_groups;
 }
 
-std::shared_ptr<SetClockGroups> sdc_set_clock_groups_add_group(const Lexer& /*lexer*/, std::shared_ptr<SetClockGroups> sdc_set_clock_groups, std::shared_ptr<StringGroup> clock_group) {
+std::shared_ptr<SetClockGroups> sdc_set_clock_groups_add_group(const Lexer& /*lexer*/, std::shared_ptr<SetClockGroups> sdc_set_clock_groups, StringGroup clock_group) {
     assert(sdc_set_clock_groups);
-    assert(clock_group);
 
-    assert(clock_group->group_type == StringGroupType::CLOCK || clock_group->group_type == StringGroupType::STRING);
+    assert(clock_group.group_type == StringGroupType::CLOCK || clock_group.group_type == StringGroupType::STRING);
 
     //Duplicate and insert the clock group
-    sdc_set_clock_groups->clock_groups.push_back(duplicate_sdc_string_group(clock_group));
+    sdc_set_clock_groups->clock_groups.push_back(clock_group);
 
     return sdc_set_clock_groups;
 }
@@ -254,32 +247,31 @@ std::shared_ptr<SdcCommands> add_sdc_set_clock_groups(const Lexer& lexer, std::s
  */
 std::shared_ptr<SetFalsePath> sdc_set_false_path_add_to_from_group(const Lexer& lexer, 
                                                             std::shared_ptr<SetFalsePath> sdc_set_false_path, 
-                                                            std::shared_ptr<StringGroup> group, 
+                                                            StringGroup group, 
                                                             FromToType to_from_dir) {
     assert(sdc_set_false_path != NULL);
-    assert(group != NULL);
-    assert(group->group_type == StringGroupType::CLOCK || group->group_type == StringGroupType::STRING);
+    assert(group.group_type == StringGroupType::CLOCK || group.group_type == StringGroupType::STRING);
 
     //Error checking
     if(to_from_dir == FromToType::FROM) {
         //Check that we haven't already defined the from path    
-        if(sdc_set_false_path->from != NULL) {
+        if(!sdc_set_false_path->from.strings.empty()) {
             sdc_error_wrap(lexer.lineno(), lexer.text(), "Only a single '-from' option is supported.\n"); 
         }
     } else {
         assert(to_from_dir == FromToType::TO);
         //Check that we haven't already defined the from path    
-        if(sdc_set_false_path->to != NULL) {
+        if(!sdc_set_false_path->to.strings.empty()) {
             sdc_error_wrap(lexer.lineno(), lexer.text(), "Only a single '-to' option is supported.\n"); 
         }
     }
 
     //Add the clock group
     if(to_from_dir == FromToType::FROM) {
-        sdc_set_false_path->from = duplicate_sdc_string_group(group);
+        sdc_set_false_path->from = group;
     } else {
         assert(to_from_dir == FromToType::TO);
-        sdc_set_false_path->to = duplicate_sdc_string_group(group);
+        sdc_set_false_path->to = group;
     }
 
     return sdc_set_false_path;
@@ -291,11 +283,11 @@ std::shared_ptr<SdcCommands> add_sdc_set_false_path(const Lexer& lexer,
     /*
      * Error checks
      */
-    if(sdc_set_false_path->from == NULL) {
+    if(sdc_set_false_path->from.strings.empty()) {
         sdc_error_wrap(lexer.lineno(), lexer.text(), "Must specify source clock(s)/object(s) with the '-from' option.\n"); 
     }
 
-    if(sdc_set_false_path->to == NULL) {
+    if(sdc_set_false_path->to.strings.empty()) {
         sdc_error_wrap(lexer.lineno(), lexer.text(), "Must specify target clock(s)/objects(s) with the '-to' option.\n"); 
     }
 
@@ -323,31 +315,30 @@ std::shared_ptr<SetMaxDelay> sdc_set_max_delay_set_max_delay_value(const Lexer& 
     return sdc_set_max_delay;
 }
 
-std::shared_ptr<SetMaxDelay> sdc_set_max_delay_add_to_from_group(const Lexer& lexer, std::shared_ptr<SetMaxDelay> sdc_set_max_delay, std::shared_ptr<StringGroup> group, FromToType to_from_dir) {
+std::shared_ptr<SetMaxDelay> sdc_set_max_delay_add_to_from_group(const Lexer& lexer, std::shared_ptr<SetMaxDelay> sdc_set_max_delay, StringGroup group, FromToType to_from_dir) {
     assert(sdc_set_max_delay != NULL);
-    assert(group != NULL);
-    assert(group->group_type == StringGroupType::CLOCK || group->group_type == StringGroupType::STRING);
+    assert(group.group_type == StringGroupType::CLOCK || group.group_type == StringGroupType::STRING);
 
     //Error checking
     if(to_from_dir == FromToType::FROM) {
         //Check that we haven't already defined the from path    
-        if(sdc_set_max_delay->from != NULL) {
+        if(!sdc_set_max_delay->from.strings.empty()) {
             sdc_error_wrap(lexer.lineno(), lexer.text(), "Only a single '-from' option is supported.\n"); 
         }
     } else {
         assert(to_from_dir == FromToType::TO);
         //Check that we haven't already defined the from path    
-        if(sdc_set_max_delay->to != NULL) {
+        if(!sdc_set_max_delay->to.strings.empty()) {
             sdc_error_wrap(lexer.lineno(), lexer.text(), "Only a single '-to' option is supported.\n"); 
         }
     }
 
     //Add the clock group
     if(to_from_dir == FromToType::FROM) {
-        sdc_set_max_delay->from = duplicate_sdc_string_group(group);
+        sdc_set_max_delay->from = group;
     } else {
         assert(to_from_dir == FromToType::TO);
-        sdc_set_max_delay->to = duplicate_sdc_string_group(group);
+        sdc_set_max_delay->to = group;
     }
 
     return sdc_set_max_delay;
@@ -361,11 +352,11 @@ std::shared_ptr<SdcCommands> add_sdc_set_max_delay(const Lexer& lexer, std::shar
         sdc_error_wrap(lexer.lineno(), lexer.text(), "Must specify the max delay value.\n"); 
     }
 
-    if(sdc_set_max_delay->from == NULL) {
+    if(sdc_set_max_delay->from.strings.empty()) {
         sdc_error_wrap(lexer.lineno(), lexer.text(), "Must specify source clock(s) with the '-from' option.\n"); 
     }
 
-    if(sdc_set_max_delay->to == NULL) {
+    if(sdc_set_max_delay->to.strings.empty()) {
         sdc_error_wrap(lexer.lineno(), lexer.text(), "Must specify source clock(s) with the '-to' option.\n"); 
     }
 
@@ -402,32 +393,31 @@ std::shared_ptr<SetMulticyclePath> sdc_set_multicycle_path_set_mcp_value(const L
 }
 
 std::shared_ptr<SetMulticyclePath> sdc_set_multicycle_path_add_to_from_group(const Lexer& lexer, std::shared_ptr<SetMulticyclePath> sdc_set_multicycle_path, 
-                                                                     std::shared_ptr<StringGroup> group, 
+                                                                     StringGroup group, 
                                                                      FromToType to_from_dir) {
     assert(sdc_set_multicycle_path != NULL);
-    assert(group != NULL);
-    assert(group->group_type == StringGroupType::CLOCK || group->group_type == StringGroupType::STRING);
+    assert(group.group_type == StringGroupType::CLOCK || group.group_type == StringGroupType::STRING);
 
     //Error checking
     if(to_from_dir == FromToType::FROM) {
         //Check that we haven't already defined the from path    
-        if(sdc_set_multicycle_path->from != NULL) {
+        if(!sdc_set_multicycle_path->from.strings.empty()) {
             sdc_error_wrap(lexer.lineno(), lexer.text(), "Only a single '-from' option is supported.\n"); 
         }
     } else {
         assert(to_from_dir == FromToType::TO);
         //Check that we haven't already defined the from path    
-        if(sdc_set_multicycle_path->to != NULL) {
+        if(!sdc_set_multicycle_path->to.strings.empty()) {
             sdc_error_wrap(lexer.lineno(), lexer.text(), "Only a single '-to' option is supported.\n"); 
         }
     }
 
     //Add the clock group
     if(to_from_dir == FromToType::FROM) {
-        sdc_set_multicycle_path->from = duplicate_sdc_string_group(group);
+        sdc_set_multicycle_path->from = group;
     } else {
         assert(to_from_dir == FromToType::TO);
-        sdc_set_multicycle_path->to = duplicate_sdc_string_group(group);
+        sdc_set_multicycle_path->to = group;
     }
 
     return sdc_set_multicycle_path;
@@ -445,11 +435,11 @@ std::shared_ptr<SdcCommands> add_sdc_set_multicycle_path(const Lexer& lexer, std
         sdc_error_wrap(lexer.lineno(), lexer.text(), "Must specify the multicycle path value.\n"); 
     }
 
-    if(sdc_set_multicycle_path->from == NULL) {
+    if(sdc_set_multicycle_path->from.strings.empty()) {
         sdc_error_wrap(lexer.lineno(), lexer.text(), "Must specify source clock(s) with the '-from' option.\n"); 
     }
 
-    if(sdc_set_multicycle_path->to == NULL) {
+    if(sdc_set_multicycle_path->to.strings.empty()) {
         sdc_error_wrap(lexer.lineno(), lexer.text(), "Must specify source clock(s) with the '-to' option.\n"); 
     }
 
@@ -469,34 +459,23 @@ std::shared_ptr<SdcCommands> add_sdc_set_multicycle_path(const Lexer& lexer, std
 /*
  * Functions for string_group
  */
-std::shared_ptr<StringGroup> make_sdc_string_group(StringGroupType type, const std::string& string) {
+StringGroup make_sdc_string_group(StringGroupType type, const std::string& string) {
     //Convenience function for converting a single string into a group
-    auto sdc_string_group = std::make_shared<StringGroup>(type);
-
-    sdc_string_group_add_string(sdc_string_group, string);
+    StringGroup sdc_string_group(type);
+    sdc_string_group.strings.push_back(string);
 
     return sdc_string_group;
 }
 
-std::shared_ptr<StringGroup> duplicate_sdc_string_group(std::shared_ptr<StringGroup> string_group) {
-    //We no longer duplicate since shared_ptr allows sharing ownership
-    return string_group;
-}
-
-std::shared_ptr<StringGroup> sdc_string_group_add_string(std::shared_ptr<StringGroup> sdc_string_group, const std::string& string) {
-    assert(sdc_string_group);
-
+void sdc_string_group_add_string(StringGroup& sdc_string_group, const std::string& string) {
     //Insert the new string
-    sdc_string_group->strings.push_back(string);
-    
-    return sdc_string_group;
+    sdc_string_group.strings.push_back(string);
 }
 
-std::shared_ptr<StringGroup> sdc_string_group_add_strings(std::shared_ptr<StringGroup> sdc_string_group, std::shared_ptr<StringGroup> string_group_to_add) {
-    for(const auto& string : string_group_to_add->strings) {
+void sdc_string_group_add_strings(StringGroup& sdc_string_group, const StringGroup& string_group_to_add) {
+    for(const auto& string : string_group_to_add.strings) {
         sdc_string_group_add_string(sdc_string_group, string);
     }
-    return sdc_string_group;
 }
 
 char* strdup(const char* src) {

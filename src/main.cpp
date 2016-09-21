@@ -5,8 +5,8 @@
 
 using namespace sdcparse;
 
-void print_string_group(std::shared_ptr<StringGroup> group);
-void print_from_to_group(std::shared_ptr<StringGroup> from, std::shared_ptr<StringGroup> to);
+void print_string_group(const StringGroup& group);
+void print_from_to_group(const StringGroup& from, const StringGroup& to);
 void custom_sdc_error(const int lineno, const std::string& near_text, const std::string& msg);
 
 int main(int argc, char **argv) {
@@ -105,17 +105,17 @@ int main(int argc, char **argv) {
     return 0;
 }
 
-void print_string_group(std::shared_ptr<StringGroup> group) {
+void print_string_group(const StringGroup& group) {
     const char *start_token, *end_token;
-    if(group->group_type == StringGroupType::STRING) {
+    if(group.group_type == StringGroupType::STRING) {
         start_token = "{";
         end_token   = "}";
 
-    } else if (group->group_type == StringGroupType::CLOCK) {
+    } else if (group.group_type == StringGroupType::CLOCK) {
         start_token = "[get_clocks {";
         end_token   = "}]";
 
-    } else if (group->group_type == StringGroupType::PORT) {
+    } else if (group.group_type == StringGroupType::PORT) {
         start_token = "[get_ports {";
         end_token   = "}]";
 
@@ -125,13 +125,13 @@ void print_string_group(std::shared_ptr<StringGroup> group) {
     }
 
     printf("%s", start_token);
-    for(const auto& string : group->strings) {
+    for(const auto& string : group.strings) {
         printf("%s ", string.c_str());
     }
     printf("%s", end_token);
 }
 
-void print_from_to_group(std::shared_ptr<StringGroup> from, std::shared_ptr<StringGroup> to) {
+void print_from_to_group(const StringGroup& from, const StringGroup& to) {
     printf("-from ");
     print_string_group(from);
     printf(" -to ");

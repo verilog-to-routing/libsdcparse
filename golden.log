@@ -72,7 +72,9 @@ Line   8: set_max_delay 17.000000 -from [get_clocks {input_clk }] -to [get_clock
 Line   9: set_multicycle_path 5 -setup -from [get_clocks {clk }] -to [get_clocks {clk2 }]
 
 File: ../test_sdcs/test_invalid.sdc
-SDC Error line 2 near '-max': Error: syntax error, unexpected -max, expecting -from or -to or end-of-line.
+Custom Error at line 2 near '-max': syntax error, unexpected -max, expecting -from or -to or end-of-line
+Custom Error at line 0 near '': SDC Error: file failed to parse!
+
 
 File: ../test_sdcs/test6.sdc
 Line   2: create_clock -period 3.000000 -waveform {1.250000 2.750000} {clk }
