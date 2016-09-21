@@ -1,15 +1,13 @@
-/*#include <stdlib.h>*/
-/*#include <stdio.h>*/
-/*#include <stdarg.h>*/
-/*#include <string.h>*/
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
 #include <cstdarg>
 #include <cassert>
 #include <cmath>
+#include <memory>
 
 #include "sdc_common.h"
+#include "sdc_error.h"
 
 namespace sdcparse {
 
@@ -19,7 +17,7 @@ namespace sdcparse {
 std::shared_ptr<CreateClock> sdc_create_clock_set_period(const Lexer& lexer, std::shared_ptr<CreateClock> sdc_create_clock, double period) {
     assert(sdc_create_clock);
     if(!std::isnan(sdc_create_clock->period)) {
-        sdc_error(lexer.lineno(), lexer.text(), "Can only define a single clock period.\n"); 
+        sdc_error_wrap(lexer.lineno(), lexer.text(), "Can only define a single clock period.\n"); 
     } else {
         sdc_create_clock->period = period;
     }
@@ -30,7 +28,7 @@ std::shared_ptr<CreateClock> sdc_create_clock_set_period(const Lexer& lexer, std
 std::shared_ptr<CreateClock> sdc_create_clock_set_name(const Lexer& lexer, std::shared_ptr<CreateClock> sdc_create_clock, const std::string& name) {
     assert(sdc_create_clock);
     if(!sdc_create_clock->name.empty()) {
-        sdc_error(lexer.lineno(), lexer.text(), "Can only define a single clock name.\n");
+        sdc_error_wrap(lexer.lineno(), lexer.text(), "Can only define a single clock name.\n");
     } else {
         sdc_create_clock->name = name;
     }
@@ -41,7 +39,7 @@ std::shared_ptr<CreateClock> sdc_create_clock_set_name(const Lexer& lexer, std::
 std::shared_ptr<CreateClock> sdc_create_clock_set_waveform(const Lexer& lexer, std::shared_ptr<CreateClock> sdc_create_clock, double rise_edge, double fall_edge) {
     assert(sdc_create_clock);
     if(!std::isnan(sdc_create_clock->rise_edge) || !std::isnan(sdc_create_clock->fall_edge)) {
-        sdc_error(lexer.lineno(), lexer.text(), "Can only define a single waveform.\n"); 
+        sdc_error_wrap(lexer.lineno(), lexer.text(), "Can only define a single waveform.\n"); 
     } else {
         sdc_create_clock->rise_edge = rise_edge;
         sdc_create_clock->fall_edge = fall_edge;
@@ -56,7 +54,7 @@ std::shared_ptr<CreateClock> sdc_create_clock_add_targets(const Lexer& lexer, st
     assert(target_group->group_type == StringGroupType::STRING);
 
     if(sdc_create_clock->targets != NULL) {
-        sdc_error(lexer.lineno(), lexer.text(), "Can only define a single set of targets for clock creation. "
+        sdc_error_wrap(lexer.lineno(), lexer.text(), "Can only define a single set of targets for clock creation. "
                   "If you want to define multiple targets specify them as a list (e.g. \"{target1 target2}\".\n");
     }
 
@@ -79,17 +77,17 @@ std::shared_ptr<SdcCommands> add_sdc_create_clock(const Lexer& lexer, std::share
 
     //Must have a clock period
     if(std::isnan(sdc_create_clock->period)) {
-        sdc_error(lexer.lineno(), lexer.text(), "Must define clock period.\n");
+        sdc_error_wrap(lexer.lineno(), lexer.text(), "Must define clock period.\n");
     }
 
     //Must have either a target (if a netlist clock), or a name (if a virtual clock) 
     if(sdc_create_clock->targets->strings.size() == 0 && sdc_create_clock->name.empty()) {
-        sdc_error(lexer.lineno(), lexer.text(), "Must define either a target (for netlist clock) or a name (for virtual clock).\n");
+        sdc_error_wrap(lexer.lineno(), lexer.text(), "Must define either a target (for netlist clock) or a name (for virtual clock).\n");
     }
 
     //Currently we do not support defining clock names that differ from the netlist target name
     if(sdc_create_clock->targets->strings.size() != 0 && !sdc_create_clock->name.empty()) {
-        sdc_error(lexer.lineno(), lexer.text(), "Currently custom names for netlist clocks are unsupported, remove '-name' option or create a virtual clock.\n");
+        sdc_error_wrap(lexer.lineno(), lexer.text(), "Currently custom names for netlist clocks are unsupported, remove '-name' option or create a virtual clock.\n");
     }
 
     /*
@@ -133,7 +131,7 @@ std::shared_ptr<SetIoDelay> sdc_set_io_delay_set_clock(const Lexer& lexer, std::
     assert(sdc_set_io_delay);
 
     if(!sdc_set_io_delay->clock_name.empty()) {
-        sdc_error(lexer.lineno(), lexer.text(), "Can only specify a single clock\n"); 
+        sdc_error_wrap(lexer.lineno(), lexer.text(), "Can only specify a single clock\n"); 
     }
 
     sdc_set_io_delay->clock_name = clock_name;
@@ -144,7 +142,7 @@ std::shared_ptr<SetIoDelay> sdc_set_io_delay_set_max_value(const Lexer& lexer, s
     assert(sdc_set_io_delay);
 
     if(!std::isnan(sdc_set_io_delay->max_delay)) {
-        sdc_error(lexer.lineno(), lexer.text(), "Max delay value can only specified once.\n"); 
+        sdc_error_wrap(lexer.lineno(), lexer.text(), "Max delay value can only specified once.\n"); 
     }
 
     sdc_set_io_delay->max_delay = max_value;
@@ -157,7 +155,7 @@ std::shared_ptr<SetIoDelay> sdc_set_io_delay_set_ports(const Lexer& lexer, std::
     assert(ports->group_type == StringGroupType::PORT);
 
     if(sdc_set_io_delay->target_ports != NULL) {
-        sdc_error(lexer.lineno(), lexer.text(), "Currently only a single get_ports command is supported.\n"); 
+        sdc_error_wrap(lexer.lineno(), lexer.text(), "Currently only a single get_ports command is supported.\n"); 
     }
 
     sdc_set_io_delay->target_ports = duplicate_sdc_string_group(ports);
@@ -171,15 +169,15 @@ std::shared_ptr<SdcCommands> add_sdc_set_io_delay(const Lexer& lexer, std::share
      * Error checks
      */
     if(sdc_set_io_delay->clock_name.empty()) {
-        sdc_error(lexer.lineno(), lexer.text(), "Must specify clock name.\n"); 
+        sdc_error_wrap(lexer.lineno(), lexer.text(), "Must specify clock name.\n"); 
     }
 
     if(std::isnan(sdc_set_io_delay->max_delay)) {
-        sdc_error(lexer.lineno(), lexer.text(), "Must specify max delay value.\n"); 
+        sdc_error_wrap(lexer.lineno(), lexer.text(), "Must specify max delay value.\n"); 
     }
 
     if(sdc_set_io_delay->target_ports == NULL) {
-        sdc_error(lexer.lineno(), lexer.text(), "Must specify target ports using get_ports.\n"); 
+        sdc_error_wrap(lexer.lineno(), lexer.text(), "Must specify target ports using get_ports.\n"); 
     }
 
     /*
@@ -207,7 +205,7 @@ std::shared_ptr<SetClockGroups> sdc_set_clock_groups_set_type(const Lexer& lexer
     assert(sdc_set_clock_groups);
 
     if(sdc_set_clock_groups->type != ClockGroupsType::NONE) {
-        sdc_error(lexer.lineno(), lexer.text(), "Can only specify a single clock groups relation type (e.g. '-exclusive')\n"); 
+        sdc_error_wrap(lexer.lineno(), lexer.text(), "Can only specify a single clock groups relation type (e.g. '-exclusive')\n"); 
     }
 
     sdc_set_clock_groups->type = type;
@@ -231,11 +229,11 @@ std::shared_ptr<SdcCommands> add_sdc_set_clock_groups(const Lexer& lexer, std::s
      * Error checks
      */
     if(sdc_set_clock_groups->type == ClockGroupsType::NONE) {
-        sdc_error(lexer.lineno(), lexer.text(), "Must specify clock relation type as '-exclusive'.\n"); 
+        sdc_error_wrap(lexer.lineno(), lexer.text(), "Must specify clock relation type as '-exclusive'.\n"); 
     }
 
     if(sdc_set_clock_groups->clock_groups.size() < 2) {
-        sdc_error(lexer.lineno(), lexer.text(), "Must specify at least 2 clock groups.\n"); 
+        sdc_error_wrap(lexer.lineno(), lexer.text(), "Must specify at least 2 clock groups.\n"); 
     }
 
     /*
@@ -266,13 +264,13 @@ std::shared_ptr<SetFalsePath> sdc_set_false_path_add_to_from_group(const Lexer& 
     if(to_from_dir == FromToType::FROM) {
         //Check that we haven't already defined the from path    
         if(sdc_set_false_path->from != NULL) {
-            sdc_error(lexer.lineno(), lexer.text(), "Only a single '-from' option is supported.\n"); 
+            sdc_error_wrap(lexer.lineno(), lexer.text(), "Only a single '-from' option is supported.\n"); 
         }
     } else {
         assert(to_from_dir == FromToType::TO);
         //Check that we haven't already defined the from path    
         if(sdc_set_false_path->to != NULL) {
-            sdc_error(lexer.lineno(), lexer.text(), "Only a single '-to' option is supported.\n"); 
+            sdc_error_wrap(lexer.lineno(), lexer.text(), "Only a single '-to' option is supported.\n"); 
         }
     }
 
@@ -294,11 +292,11 @@ std::shared_ptr<SdcCommands> add_sdc_set_false_path(const Lexer& lexer,
      * Error checks
      */
     if(sdc_set_false_path->from == NULL) {
-        sdc_error(lexer.lineno(), lexer.text(), "Must specify source clock(s)/object(s) with the '-from' option.\n"); 
+        sdc_error_wrap(lexer.lineno(), lexer.text(), "Must specify source clock(s)/object(s) with the '-from' option.\n"); 
     }
 
     if(sdc_set_false_path->to == NULL) {
-        sdc_error(lexer.lineno(), lexer.text(), "Must specify target clock(s)/objects(s) with the '-to' option.\n"); 
+        sdc_error_wrap(lexer.lineno(), lexer.text(), "Must specify target clock(s)/objects(s) with the '-to' option.\n"); 
     }
 
     /*
@@ -319,7 +317,7 @@ std::shared_ptr<SdcCommands> add_sdc_set_false_path(const Lexer& lexer,
  */
 std::shared_ptr<SetMaxDelay> sdc_set_max_delay_set_max_delay_value(const Lexer& lexer, std::shared_ptr<SetMaxDelay> sdc_set_max_delay, double max_delay) {
     if(!std::isnan(sdc_set_max_delay->max_delay)) {
-        sdc_error(lexer.lineno(), lexer.text(), "Must specify max delay value only once.\n"); 
+        sdc_error_wrap(lexer.lineno(), lexer.text(), "Must specify max delay value only once.\n"); 
     }
     sdc_set_max_delay->max_delay = max_delay;
     return sdc_set_max_delay;
@@ -334,13 +332,13 @@ std::shared_ptr<SetMaxDelay> sdc_set_max_delay_add_to_from_group(const Lexer& le
     if(to_from_dir == FromToType::FROM) {
         //Check that we haven't already defined the from path    
         if(sdc_set_max_delay->from != NULL) {
-            sdc_error(lexer.lineno(), lexer.text(), "Only a single '-from' option is supported.\n"); 
+            sdc_error_wrap(lexer.lineno(), lexer.text(), "Only a single '-from' option is supported.\n"); 
         }
     } else {
         assert(to_from_dir == FromToType::TO);
         //Check that we haven't already defined the from path    
         if(sdc_set_max_delay->to != NULL) {
-            sdc_error(lexer.lineno(), lexer.text(), "Only a single '-to' option is supported.\n"); 
+            sdc_error_wrap(lexer.lineno(), lexer.text(), "Only a single '-to' option is supported.\n"); 
         }
     }
 
@@ -360,15 +358,15 @@ std::shared_ptr<SdcCommands> add_sdc_set_max_delay(const Lexer& lexer, std::shar
      * Error checks
      */
     if(std::isnan(sdc_set_max_delay->max_delay)) {
-        sdc_error(lexer.lineno(), lexer.text(), "Must specify the max delay value.\n"); 
+        sdc_error_wrap(lexer.lineno(), lexer.text(), "Must specify the max delay value.\n"); 
     }
 
     if(sdc_set_max_delay->from == NULL) {
-        sdc_error(lexer.lineno(), lexer.text(), "Must specify source clock(s) with the '-from' option.\n"); 
+        sdc_error_wrap(lexer.lineno(), lexer.text(), "Must specify source clock(s) with the '-from' option.\n"); 
     }
 
     if(sdc_set_max_delay->to == NULL) {
-        sdc_error(lexer.lineno(), lexer.text(), "Must specify source clock(s) with the '-to' option.\n"); 
+        sdc_error_wrap(lexer.lineno(), lexer.text(), "Must specify source clock(s) with the '-to' option.\n"); 
     }
 
     /*
@@ -389,7 +387,7 @@ std::shared_ptr<SdcCommands> add_sdc_set_max_delay(const Lexer& lexer, std::shar
  */
 std::shared_ptr<SetMulticyclePath> sdc_set_multicycle_path_set_type(const Lexer& lexer, std::shared_ptr<SetMulticyclePath> sdc_set_multicycle_path, McpType type) {
     if(sdc_set_multicycle_path->type != McpType::NONE) {
-        sdc_error(lexer.lineno(), lexer.text(), "Must specify the type (e.g. '-setup') only once.\n"); 
+        sdc_error_wrap(lexer.lineno(), lexer.text(), "Must specify the type (e.g. '-setup') only once.\n"); 
     }
     sdc_set_multicycle_path->type = type;
     return sdc_set_multicycle_path;
@@ -397,7 +395,7 @@ std::shared_ptr<SetMulticyclePath> sdc_set_multicycle_path_set_type(const Lexer&
 
 std::shared_ptr<SetMulticyclePath> sdc_set_multicycle_path_set_mcp_value(const Lexer& lexer, std::shared_ptr<SetMulticyclePath> sdc_set_multicycle_path, int mcp_value) {
     if(sdc_set_multicycle_path->mcp_value != UNINITIALIZED_INT) {
-        sdc_error(lexer.lineno(), lexer.text(), "Must specify multicycle path value only once.\n"); 
+        sdc_error_wrap(lexer.lineno(), lexer.text(), "Must specify multicycle path value only once.\n"); 
     }
     sdc_set_multicycle_path->mcp_value = mcp_value;
     return sdc_set_multicycle_path;
@@ -414,13 +412,13 @@ std::shared_ptr<SetMulticyclePath> sdc_set_multicycle_path_add_to_from_group(con
     if(to_from_dir == FromToType::FROM) {
         //Check that we haven't already defined the from path    
         if(sdc_set_multicycle_path->from != NULL) {
-            sdc_error(lexer.lineno(), lexer.text(), "Only a single '-from' option is supported.\n"); 
+            sdc_error_wrap(lexer.lineno(), lexer.text(), "Only a single '-from' option is supported.\n"); 
         }
     } else {
         assert(to_from_dir == FromToType::TO);
         //Check that we haven't already defined the from path    
         if(sdc_set_multicycle_path->to != NULL) {
-            sdc_error(lexer.lineno(), lexer.text(), "Only a single '-to' option is supported.\n"); 
+            sdc_error_wrap(lexer.lineno(), lexer.text(), "Only a single '-to' option is supported.\n"); 
         }
     }
 
@@ -440,19 +438,19 @@ std::shared_ptr<SdcCommands> add_sdc_set_multicycle_path(const Lexer& lexer, std
      * Error checks
      */
     if(sdc_set_multicycle_path->type != McpType::SETUP) {
-        sdc_error(lexer.lineno(), lexer.text(), "Must specify the multicycle path type as '-setup'.\n"); 
+        sdc_error_wrap(lexer.lineno(), lexer.text(), "Must specify the multicycle path type as '-setup'.\n"); 
     }
 
     if(sdc_set_multicycle_path->mcp_value == UNINITIALIZED_INT) {
-        sdc_error(lexer.lineno(), lexer.text(), "Must specify the multicycle path value.\n"); 
+        sdc_error_wrap(lexer.lineno(), lexer.text(), "Must specify the multicycle path value.\n"); 
     }
 
     if(sdc_set_multicycle_path->from == NULL) {
-        sdc_error(lexer.lineno(), lexer.text(), "Must specify source clock(s) with the '-from' option.\n"); 
+        sdc_error_wrap(lexer.lineno(), lexer.text(), "Must specify source clock(s) with the '-from' option.\n"); 
     }
 
     if(sdc_set_multicycle_path->to == NULL) {
-        sdc_error(lexer.lineno(), lexer.text(), "Must specify source clock(s) with the '-to' option.\n"); 
+        sdc_error_wrap(lexer.lineno(), lexer.text(), "Must specify source clock(s) with the '-to' option.\n"); 
     }
 
     /*
@@ -539,15 +537,5 @@ char* strndup(const char* src, size_t len) {
 /*
  * Error reporting
  */
-#ifndef CUSTOM_ERROR_REPORT
-void sdc_error(const int line_no, const char* near_text, const char* fmt, ...) {
-    fprintf(stderr, "SDC Error line %d near '%s': ", line_no, near_text);
-    va_list args;
-    va_start(args, fmt);
-    vfprintf(stderr, fmt, args);
-    va_end(args);
-    exit(1);
-}
-#endif
 
 } //namespace

@@ -88,6 +88,7 @@
 
 #include "sdc.h"
 #include "sdc_common.h"
+#include "sdc_error.h"
 
 /*#include "sdc_lexer.gen.h"*/
 /*#include "sdc_parser.gen.h"*/
@@ -278,5 +279,5 @@ int_number: INT_NUMBER { $$ = $1; }
 
 
 void sdcparse::Parser::error(const std::string& msg) {
-    sdc_error(lexer.lineno(), lexer.text(), "Error: %s.\n", msg.c_str());
+    sdc_error_wrap(lexer.lineno(), lexer.text(), msg.c_str());
 }

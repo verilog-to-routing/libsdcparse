@@ -4,6 +4,7 @@
 #include "sdc_common.h"
 
 #include "sdc_lexer.h"
+#include "sdc_error.h"
 
 
 extern FILE	*sdcparse_in; //Global input file defined by flex
@@ -29,7 +30,7 @@ std::shared_ptr<SdcCommands> sdc_parse_filename(const char* filename) {
         fclose(infile);
     } else {
         fclose(infile);
-        sdc_error(0, "", "Could not open file %s.\n", filename);
+        sdc_error_wrap(0, "", "Could not open file %s.\n", filename);
     }
 
     return sdc_commands;
@@ -48,11 +49,27 @@ std::shared_ptr<SdcCommands> sdc_parse_file(FILE* sdc_file) {
     //Do the parse
     int error = parser.parse();
     if(error) {
-        sdc_error(0, "", "SDC Error: file failed to parse!\n");
+        sdc_error_wrap(0, "", "SDC Error: file failed to parse!\n");
     }
 
     return sdc_commands;
 }
+
+/*
+ * Error handling
+ */
+void default_sdc_error(const int line_no, const std::string& near_text, const std::string& msg) {
+    fprintf(stderr, "SDC Error line %d near '%s': %s\n", line_no, near_text.c_str(), msg.c_str());
+    exit(1);
+}
+
+void set_sdc_error_handler(std::function<void(const int, const std::string&, const std::string&)> new_sdc_error_handler) {
+    sdc_error = new_sdc_error_handler;
+}
+
+/*
+ * Class member functions
+ */
 
 bool SdcCommands::has_commands() {
     if(!create_clock_cmds.empty()) return true;

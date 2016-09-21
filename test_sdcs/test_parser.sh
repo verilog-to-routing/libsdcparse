@@ -11,10 +11,8 @@ do
         ./sdcparse_test $sdc_file
         exit_code=$?
         if [ $exit_code -ne 0 ]; then
-            if [[ $sdc_file != *"invalid"* ]]; then
-                echo "Error"
-                exit 1
-            fi
+            echo "Error"
+            exit 1
         fi
     done
 

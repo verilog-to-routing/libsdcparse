@@ -71,6 +71,7 @@
 #include <string>
 #include <memory>
 #include <limits>
+#include <functional>
 
 namespace sdcparse {
 
@@ -78,14 +79,25 @@ namespace sdcparse {
 constexpr double UNINITIALIZED_FLOAT = std::numeric_limits<double>::quiet_NaN();
 constexpr int UNINITIALIZED_INT = -1;
 
-/*
- * libsdc uses the sdc_error() function to report errors encountered while parsing an SDC file.  
- * If you wish to define your own error reporting function instead of using the default, simply
- * define the pre-processor directive SDC_CUSTOM_ERROR_REPORT and implement the sdc_error 
- * function as prototyped below.
+/* 
+ * The default sdc_error() implementation.
+ * By default it prints the error mesage to stderr and exits the program.
  */
-//#define SDC_CUSTOM_ERROR_REPORT
-extern void sdc_error(const int line_number, const char* near_text, const char* fmt, ...);
+void default_sdc_error(const int line_number, const std::string& near_text, const std::string& msg);
+
+/*
+ * libsdc calls sdc_error() to report errors encountered while parsing an SDC file.  
+ *
+ * If you wish to define your own error reporting function (e.g. to throw exceptions instead
+ * of exit) you can change the behaviour by providing another callable type which matches the signature.
+ *
+ * The return type is void, while the arguments are:
+ *     1) const int line_no            - the file line number
+ *     2) const std::string& near_text - the text the parser encountered 'near' the error
+ *     3) const std::string& msg       - the error message
+ */
+void set_sdc_error_handler(std::function<void(const int, const std::string&, const std::string&)> new_sdc_error_handler);
+
 
 /*
  * Forward declarations

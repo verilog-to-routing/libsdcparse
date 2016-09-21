@@ -38,19 +38,9 @@ void print_from_to_group(std::shared_ptr<StringGroup> from, std::shared_ptr<Stri
     print_string_group(to);
 }
 
-/*
- * Error handling
- */
-#ifdef SDC_CUSTOM_ERROR_REPORT
-void sdc_error(const int line_no, const char* near_text, const char* fmt, ...) {
-    fprintf(stderr, "Custom SDC Error line %d near '%s': ", line_no, near_text);
-    va_list args;
-    va_start(args, fmt);
-    vfprintf(stderr, fmt, args);
-    va_end(args);
-    exit(1);
+void custom_sdc_error(const int lineno, const std::string& near_text, const std::string& msg) {
+    fprintf(stderr, "Custom Error at line %d near '%s': %s\n", lineno, near_text.c_str(), msg.c_str());
 }
-#endif
 
 int main(int argc, char **argv) {
     if(argc != 2) {
@@ -62,6 +52,9 @@ int main(int argc, char **argv) {
     }
 
     /*printf("File: %s\n", argv[1]);*/
+
+    //Use custom error handling
+    sdcparse::set_sdc_error_handler(custom_sdc_error);
 
     //Parse the file
     auto sdc_commands = sdc_parse_filename(argv[1]);
