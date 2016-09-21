@@ -1,10 +1,10 @@
 #include <stdio.h>
 
-#include "sdc.h"
-#include "sdc_common.h"
+#include "sdc.hpp"
+#include "sdc_common.hpp"
 
-#include "sdc_lexer.h"
-#include "sdc_error.h"
+#include "sdc_lexer.hpp"
+#include "sdc_error.hpp"
 
 
 extern FILE	*sdcparse_in; //Global input file defined by flex

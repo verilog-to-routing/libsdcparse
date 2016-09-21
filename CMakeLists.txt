@@ -16,13 +16,13 @@ endif()
 find_package(BISON REQUIRED 3.0)
 find_package(FLEX REQUIRED)
 
-file(GLOB_RECURSE LIB_SOURCES src/*.c)
-file(GLOB_RECURSE LIB_HEADERS src/*.h)
+file(GLOB_RECURSE LIB_SOURCES src/sdc*.cpp)
+file(GLOB_RECURSE LIB_HEADERS src/sdc*.hpp)
 headers_to_include_dirs(LIB_HEADERS LIB_INCLUDE_DIRS)
 
 #Find the flex and bison input files
-file(GLOB_RECURSE LEXER_SOURCES src/*.l)
-file(GLOB_RECURSE PARSER_SOURCES src/*.y)
+file(GLOB_RECURSE LEXER_SOURCES src/sdc*.l)
+file(GLOB_RECURSE PARSER_SOURCES src/sdc*.y)
 
 #Make the flex and bison targets
 flex_target(SdcLexer ${LEXER_SOURCES} ${CMAKE_CURRENT_BINARY_DIR}/sdc_lexer.gen.c
@@ -50,7 +50,7 @@ target_include_directories(libsdcparse PUBLIC ${LIB_INCLUDE_DIRS} ${CMAKE_CURREN
 set_target_properties(libsdcparse PROPERTIES PREFIX "") #Avoid extra 'lib' prefix
 
 #Create the test executable
-add_executable(sdcparse_test src/main.c)
+add_executable(sdcparse_test src/main.cpp)
 target_link_libraries(sdcparse_test libsdcparse)
 
 install(TARGETS libsdcparse sdcparse_test DESTINATION bin)

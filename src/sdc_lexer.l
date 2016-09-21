@@ -2,10 +2,10 @@
     /*
      * Include Files
      */
-    #include "sdc.h"
-    #include "sdc_common.h"
+    #include "sdc.hpp"
+    #include "sdc_common.hpp"
 
-    #include "sdc_lexer.h"
+    #include "sdc_lexer.hpp"
 
 %}
 

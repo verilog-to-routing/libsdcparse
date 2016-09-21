@@ -1,7 +1,7 @@
-#ifndef SDC_LEXER_H
-#define SDC_LEXER_H
+#ifndef SDC_LEXER_HPP
+#define SDC_LEXER_HPP
 
-#include "sdc_parser.h" //For Parser::symbol_type
+#include "sdc_parser.hpp" //For Parser::symbol_type
 
 namespace sdcparse {
 

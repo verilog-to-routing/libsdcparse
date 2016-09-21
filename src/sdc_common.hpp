@@ -1,8 +1,8 @@
-#ifndef SDC_COMMON_H
-#define SDC_COMMON_H
+#ifndef SDC_COMMON_HPP
+#define SDC_COMMON_HPP
 
-#include "sdc.h"
-#include "sdc_lexer.h"
+#include "sdc.hpp"
+#include "sdc_lexer.hpp"
 
 /*
  * Parser info

@@ -67,12 +67,12 @@
 
 %code requires {
     #include <memory>
-    #include "sdc.h"
-    #include "sdc_lexer_fwd.h"
+    #include "sdc.hpp"
+    #include "sdc_lexer_fwd.hpp"
 }
 
 %code top {
-    #include "sdc_lexer.h"
+    #include "sdc_lexer.hpp"
     //Bison calls sdcparse_lex() to get the next token.
     //We use the Lexer class as the interface to the lexer, so we
     //re-defined the function to tell Bison how to get the next token.
@@ -86,9 +86,9 @@
 #include <stdio.h>
 #include "assert.h"
 
-#include "sdc.h"
-#include "sdc_common.h"
-#include "sdc_error.h"
+#include "sdc.hpp"
+#include "sdc_common.hpp"
+#include "sdc_error.hpp"
 
 using namespace sdcparse;
 

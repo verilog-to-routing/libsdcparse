@@ -1,7 +1,7 @@
 #include <cstdarg>
 #include <cassert>
-#include "sdc_error.h"
-#include "sdc.h"
+#include "sdc_error.hpp"
+#include "sdc.hpp"
 
 namespace sdcparse {
 

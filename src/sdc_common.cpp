@@ -6,8 +6,8 @@
 #include <cmath>
 #include <memory>
 
-#include "sdc_common.h"
-#include "sdc_error.h"
+#include "sdc_common.hpp"
+#include "sdc_error.hpp"
 
 namespace sdcparse {
 

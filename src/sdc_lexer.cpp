@@ -1,5 +1,5 @@
-#include "sdc_lexer.h"
-#include "sdc_lexer.gen.h" //For sdcparse_*()
+#include "sdc_lexer.hpp"
+#include "sdc_lexer.gen.h" //For sdcparse_lex_*()
 
 extern YY_DECL; //For sdcparse_lex()
 

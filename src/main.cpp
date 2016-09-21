@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "sdc.h"
+#include "sdc.hpp"
 
 using namespace sdcparse;
 
