@@ -73,9 +73,9 @@
 
 %code top {
     #include "sdc_lexer.h"
-    //Bison calls yylex() to get the next token.
-    //Since we have re-defined the equivalent function in the lexer
-    //we need to tell Bison how to get the next token.
+    //Bison calls sdcparse_lex() to get the next token.
+    //We use the Lexer class as the interface to the lexer, so we
+    //re-defined the function to tell Bison how to get the next token.
     static sdcparse::Parser::symbol_type sdcparse_lex(sdcparse::Lexer& lexer) {
         return lexer.next_token();
     }
@@ -89,10 +89,6 @@
 #include "sdc.h"
 #include "sdc_common.h"
 #include "sdc_error.h"
-
-/*#include "sdc_lexer.gen.h"*/
-/*#include "sdc_parser.gen.h"*/
-/*YY_DECL;*/
 
 using namespace sdcparse;
 
