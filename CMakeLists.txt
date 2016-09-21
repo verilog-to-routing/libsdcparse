@@ -20,7 +20,8 @@ file(GLOB_RECURSE LEXER_SOURCES src/*.l)
 file(GLOB_RECURSE PARSER_SOURCES src/*.y)
 
 #Make the flex and bison targets
-flex_target(SdcLexer ${LEXER_SOURCES} ${CMAKE_CURRENT_BINARY_DIR}/sdc_lexer.gen.c)
+flex_target(SdcLexer ${LEXER_SOURCES} ${CMAKE_CURRENT_BINARY_DIR}/sdc_lexer.gen.c
+        COMPILE_FLAGS --header-file=${CMAKE_CURRENT_BINARY_DIR}/sdc_lexer.gen.h)
 bison_target(SdcParser ${PARSER_SOURCES} ${CMAKE_CURRENT_BINARY_DIR}/sdc_parser.gen.c)
 add_flex_bison_dependency(SdcLexer SdcParser)
 

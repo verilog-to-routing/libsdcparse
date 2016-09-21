@@ -25,6 +25,11 @@
  */
 %define api.token.prefix {TOKEN_}
 
+/*
+ * Use a re-entrant (no global vars) parser
+ */
+/*%define api.pure full*/
+
 /* Wrap everything in our namespace */
 %define api.namespace {sdcparse}
 
@@ -55,14 +60,25 @@
 /* Generate a table of token names */
 %token-table
 
+%lex-param {Lexer& lexer}
+%parse-param {Lexer& lexer}
 %parse-param {std::shared_ptr<SdcCommands> sdc_commands}
 
-%code requires {
-    #ifndef YY_NULLPTR
-    #define YY_NULLPTR nullptr
-    #endif
 
-    #define YY_DECL sdcparse::Parser::symbol_type sdcparse_lex(void)
+%code requires {
+    #include <memory>
+    #include "sdc.h"
+    #include "sdc_lexer_fwd.h"
+}
+
+%code top {
+    #include "sdc_lexer.h"
+    //Bison calls yylex() to get the next token.
+    //Since we have re-defined the equivalent function in the lexer
+    //we need to tell Bison how to get the next token.
+    static sdcparse::Parser::symbol_type sdcparse_lex(sdcparse::Lexer& lexer) {
+        return lexer.next_token();
+    }
 }
 
 %{
@@ -73,8 +89,9 @@
 #include "sdc.h"
 #include "sdc_common.h"
 
-#include "sdc_parser.gen.h"
-YY_DECL;
+/*#include "sdc_lexer.gen.h"*/
+/*#include "sdc_parser.gen.h"*/
+/*YY_DECL;*/
 
 using namespace sdcparse;
 
@@ -140,91 +157,91 @@ using namespace sdcparse;
 %%
 
 sdc_commands:                                   { $$ = sdc_commands; /* passed as parse-param */ }
-    | sdc_commands cmd_create_clock EOL         { $$ = add_sdc_create_clock($1, $2); }
-    | sdc_commands cmd_set_input_delay EOL      { $$ = add_sdc_set_io_delay($1, $2); }
-    | sdc_commands cmd_set_output_delay EOL     { $$ = add_sdc_set_io_delay($1, $2); }
-    | sdc_commands cmd_set_clock_groups EOL     { $$ = add_sdc_set_clock_groups($1, $2); }
-    | sdc_commands cmd_set_false_path EOL       { $$ = add_sdc_set_false_path($1, $2); }
-    | sdc_commands cmd_set_max_delay EOL        { $$ = add_sdc_set_max_delay($1, $2); }
-    | sdc_commands cmd_set_multicycle_path EOL  { $$ = add_sdc_set_multicycle_path($1, $2); }
+    | sdc_commands cmd_create_clock EOL         { $$ = add_sdc_create_clock(lexer, $1, $2); }
+    | sdc_commands cmd_set_input_delay EOL      { $$ = add_sdc_set_io_delay(lexer, $1, $2); }
+    | sdc_commands cmd_set_output_delay EOL     { $$ = add_sdc_set_io_delay(lexer, $1, $2); }
+    | sdc_commands cmd_set_clock_groups EOL     { $$ = add_sdc_set_clock_groups(lexer, $1, $2); }
+    | sdc_commands cmd_set_false_path EOL       { $$ = add_sdc_set_false_path(lexer, $1, $2); }
+    | sdc_commands cmd_set_max_delay EOL        { $$ = add_sdc_set_max_delay(lexer, $1, $2); }
+    | sdc_commands cmd_set_multicycle_path EOL  { $$ = add_sdc_set_multicycle_path(lexer, $1, $2); }
     | sdc_commands EOL                          { /* Eat stray EOL symbols */ $$ = $1; }
     ;
 
 cmd_create_clock: CMD_CREATE_CLOCK                          { $$ = std::make_shared<CreateClock>(); }
-    | cmd_create_clock ARG_PERIOD number                    { $$ = sdc_create_clock_set_period($1, $3); }
-    | cmd_create_clock ARG_NAME string                      { $$ = sdc_create_clock_set_name($1, $3); }
-    | cmd_create_clock ARG_WAVEFORM LCPAR number number RCPAR   { $$ = sdc_create_clock_set_waveform($1, $4, $5); }
-    | cmd_create_clock LCPAR stringGroup RCPAR                  { $$ = sdc_create_clock_add_targets($1, $3); 
+    | cmd_create_clock ARG_PERIOD number                    { $$ = sdc_create_clock_set_period(lexer, $1, $3); }
+    | cmd_create_clock ARG_NAME string                      { $$ = sdc_create_clock_set_name(lexer, $1, $3); }
+    | cmd_create_clock ARG_WAVEFORM LCPAR number number RCPAR   { $$ = sdc_create_clock_set_waveform(lexer, $1, $4, $5); }
+    | cmd_create_clock LCPAR stringGroup RCPAR                  { $$ = sdc_create_clock_add_targets(lexer, $1, $3); 
                                                             }
-    | cmd_create_clock string                               { $$ = sdc_create_clock_add_targets($1, 
+    | cmd_create_clock string                               { $$ = sdc_create_clock_add_targets(lexer, $1, 
                                                                         make_sdc_string_group(sdcparse::StringGroupType::STRING, $2)); 
                                                             }
     ;
 
 cmd_set_input_delay: CMD_SET_INPUT_DELAY        { $$ = std::make_shared<SetIoDelay>(IoDelayType::INPUT); }
-    | cmd_set_input_delay ARG_CLOCK string      { $$ = sdc_set_io_delay_set_clock($1, $3); }
-    | cmd_set_input_delay ARG_MAX number        { $$ = sdc_set_io_delay_set_max_value($1, $3); }
-    | cmd_set_input_delay LSPAR cmd_get_ports RSPAR { $$ = sdc_set_io_delay_set_ports($1, $3); }
+    | cmd_set_input_delay ARG_CLOCK string      { $$ = sdc_set_io_delay_set_clock(lexer, $1, $3); }
+    | cmd_set_input_delay ARG_MAX number        { $$ = sdc_set_io_delay_set_max_value(lexer, $1, $3); }
+    | cmd_set_input_delay LSPAR cmd_get_ports RSPAR { $$ = sdc_set_io_delay_set_ports(lexer, $1, $3); }
     ;
 
 cmd_set_output_delay: CMD_SET_OUTPUT_DELAY       { $$ = std::make_shared<SetIoDelay>(IoDelayType::OUTPUT); }
-    | cmd_set_output_delay ARG_CLOCK string      { $$ = sdc_set_io_delay_set_clock($1, $3); }
-    | cmd_set_output_delay ARG_MAX number        { $$ = sdc_set_io_delay_set_max_value($1, $3); }
-    | cmd_set_output_delay LSPAR cmd_get_ports RSPAR { $$ = sdc_set_io_delay_set_ports($1, $3); }
+    | cmd_set_output_delay ARG_CLOCK string      { $$ = sdc_set_io_delay_set_clock(lexer, $1, $3); }
+    | cmd_set_output_delay ARG_MAX number        { $$ = sdc_set_io_delay_set_max_value(lexer, $1, $3); }
+    | cmd_set_output_delay LSPAR cmd_get_ports RSPAR { $$ = sdc_set_io_delay_set_ports(lexer, $1, $3); }
     ;
 
 cmd_set_clock_groups: CMD_SET_CLOCK_GROUPS                  { $$ = std::make_shared<SetClockGroups>(); }
-    | cmd_set_clock_groups ARG_EXCLUSIVE                    { $$ = sdc_set_clock_groups_set_type($1, ClockGroupsType::EXCLUSIVE); }
-    | cmd_set_clock_groups ARG_GROUP LSPAR cmd_get_clocks RSPAR { $$ = sdc_set_clock_groups_add_group($1, $4); }
-    | cmd_set_clock_groups ARG_GROUP LCPAR stringGroup RCPAR    { $$ = sdc_set_clock_groups_add_group($1, $4); }
-    | cmd_set_clock_groups ARG_GROUP     string             { $$ = sdc_set_clock_groups_add_group($1, 
+    | cmd_set_clock_groups ARG_EXCLUSIVE                    { $$ = sdc_set_clock_groups_set_type(lexer, $1, ClockGroupsType::EXCLUSIVE); }
+    | cmd_set_clock_groups ARG_GROUP LSPAR cmd_get_clocks RSPAR { $$ = sdc_set_clock_groups_add_group(lexer, $1, $4); }
+    | cmd_set_clock_groups ARG_GROUP LCPAR stringGroup RCPAR    { $$ = sdc_set_clock_groups_add_group(lexer, $1, $4); }
+    | cmd_set_clock_groups ARG_GROUP     string             { $$ = sdc_set_clock_groups_add_group(lexer, $1, 
                                                                     make_sdc_string_group(sdcparse::StringGroupType::STRING, $3)); 
                                                             }
     ;
 
 cmd_set_false_path: CMD_SET_FALSE_PATH                      { $$ = std::make_shared<SetFalsePath>(); }
-    | cmd_set_false_path ARG_FROM LSPAR cmd_get_clocks RSPAR    { $$ = sdc_set_false_path_add_to_from_group($1, $4, FromToType::FROM); }
-    | cmd_set_false_path ARG_TO   LSPAR cmd_get_clocks RSPAR    { $$ = sdc_set_false_path_add_to_from_group($1, $4, FromToType::TO  ); }
-    | cmd_set_false_path ARG_FROM LCPAR stringGroup RCPAR       { $$ = sdc_set_false_path_add_to_from_group($1, $4, FromToType::FROM); }
-    | cmd_set_false_path ARG_TO   LCPAR stringGroup RCPAR       { $$ = sdc_set_false_path_add_to_from_group($1, $4, FromToType::TO  ); }
-    | cmd_set_false_path ARG_FROM     string                { $$ = sdc_set_false_path_add_to_from_group($1, 
+    | cmd_set_false_path ARG_FROM LSPAR cmd_get_clocks RSPAR    { $$ = sdc_set_false_path_add_to_from_group(lexer, $1, $4, FromToType::FROM); }
+    | cmd_set_false_path ARG_TO   LSPAR cmd_get_clocks RSPAR    { $$ = sdc_set_false_path_add_to_from_group(lexer, $1, $4, FromToType::TO  ); }
+    | cmd_set_false_path ARG_FROM LCPAR stringGroup RCPAR       { $$ = sdc_set_false_path_add_to_from_group(lexer, $1, $4, FromToType::FROM); }
+    | cmd_set_false_path ARG_TO   LCPAR stringGroup RCPAR       { $$ = sdc_set_false_path_add_to_from_group(lexer, $1, $4, FromToType::TO  ); }
+    | cmd_set_false_path ARG_FROM     string                { $$ = sdc_set_false_path_add_to_from_group(lexer, $1, 
                                                                     make_sdc_string_group(sdcparse::StringGroupType::STRING, $3), 
                                                                     FromToType::FROM); 
                                                             }
-    | cmd_set_false_path ARG_TO       string                { $$ = sdc_set_false_path_add_to_from_group($1, 
+    | cmd_set_false_path ARG_TO       string                { $$ = sdc_set_false_path_add_to_from_group(lexer, $1, 
                                                                     make_sdc_string_group(sdcparse::StringGroupType::STRING, $3), 
                                                                     FromToType::TO  ); 
                                                             }
     ;
 
 cmd_set_max_delay: CMD_SET_MAX_DELAY                        { $$ = std::make_shared<SetMaxDelay>(); }
-    | cmd_set_max_delay number                              { $$ = sdc_set_max_delay_set_max_delay_value($1, $2); }
-    | cmd_set_max_delay ARG_FROM LSPAR cmd_get_clocks RSPAR     { $$ = sdc_set_max_delay_add_to_from_group($1, $4, FromToType::FROM); }
-    | cmd_set_max_delay ARG_TO   LSPAR cmd_get_clocks RSPAR     { $$ = sdc_set_max_delay_add_to_from_group($1, $4, FromToType::TO  ); }
-    | cmd_set_max_delay ARG_FROM LCPAR stringGroup RCPAR        { $$ = sdc_set_max_delay_add_to_from_group($1, $4, FromToType::FROM); }
-    | cmd_set_max_delay ARG_TO   LCPAR stringGroup RCPAR        { $$ = sdc_set_max_delay_add_to_from_group($1, $4, FromToType::TO  ); }
-    | cmd_set_max_delay ARG_FROM     string                 { $$ = sdc_set_max_delay_add_to_from_group($1, 
+    | cmd_set_max_delay number                              { $$ = sdc_set_max_delay_set_max_delay_value(lexer, $1, $2); }
+    | cmd_set_max_delay ARG_FROM LSPAR cmd_get_clocks RSPAR     { $$ = sdc_set_max_delay_add_to_from_group(lexer, $1, $4, FromToType::FROM); }
+    | cmd_set_max_delay ARG_TO   LSPAR cmd_get_clocks RSPAR     { $$ = sdc_set_max_delay_add_to_from_group(lexer, $1, $4, FromToType::TO  ); }
+    | cmd_set_max_delay ARG_FROM LCPAR stringGroup RCPAR        { $$ = sdc_set_max_delay_add_to_from_group(lexer, $1, $4, FromToType::FROM); }
+    | cmd_set_max_delay ARG_TO   LCPAR stringGroup RCPAR        { $$ = sdc_set_max_delay_add_to_from_group(lexer, $1, $4, FromToType::TO  ); }
+    | cmd_set_max_delay ARG_FROM     string                 { $$ = sdc_set_max_delay_add_to_from_group(lexer, $1, 
                                                                     make_sdc_string_group(sdcparse::StringGroupType::STRING, $3), 
                                                                     FromToType::FROM);
                                                             }
-    | cmd_set_max_delay ARG_TO       string                 { $$ = sdc_set_max_delay_add_to_from_group($1, 
+    | cmd_set_max_delay ARG_TO       string                 { $$ = sdc_set_max_delay_add_to_from_group(lexer, $1, 
                                                                     make_sdc_string_group(sdcparse::StringGroupType::STRING, $3),
                                                                     FromToType::TO);
                                                             }
     ;
 
 cmd_set_multicycle_path: CMD_SET_MULTICYCLE_PATH                { $$ = std::make_shared<SetMulticyclePath>(); }
-    | cmd_set_multicycle_path int_number                        { $$ = sdc_set_multicycle_path_set_mcp_value($1, $2); }
-    | cmd_set_multicycle_path ARG_SETUP                         { $$ = sdc_set_multicycle_path_set_type($1, McpType::SETUP); }
-    | cmd_set_multicycle_path ARG_FROM LSPAR cmd_get_clocks RSPAR   { $$ = sdc_set_multicycle_path_add_to_from_group($1, $4, FromToType::FROM); }
-    | cmd_set_multicycle_path ARG_TO   LSPAR cmd_get_clocks RSPAR   { $$ = sdc_set_multicycle_path_add_to_from_group($1, $4, FromToType::TO); }
-    | cmd_set_multicycle_path ARG_FROM LCPAR stringGroup RCPAR      { $$ = sdc_set_multicycle_path_add_to_from_group($1, $4, FromToType::FROM); }
-    | cmd_set_multicycle_path ARG_TO   LCPAR stringGroup RCPAR      { $$ = sdc_set_multicycle_path_add_to_from_group($1, $4, FromToType::TO); }
-    | cmd_set_multicycle_path ARG_FROM     string               { $$ = sdc_set_multicycle_path_add_to_from_group($1, 
+    | cmd_set_multicycle_path int_number                        { $$ = sdc_set_multicycle_path_set_mcp_value(lexer, $1, $2); }
+    | cmd_set_multicycle_path ARG_SETUP                         { $$ = sdc_set_multicycle_path_set_type(lexer, $1, McpType::SETUP); }
+    | cmd_set_multicycle_path ARG_FROM LSPAR cmd_get_clocks RSPAR   { $$ = sdc_set_multicycle_path_add_to_from_group(lexer, $1, $4, FromToType::FROM); }
+    | cmd_set_multicycle_path ARG_TO   LSPAR cmd_get_clocks RSPAR   { $$ = sdc_set_multicycle_path_add_to_from_group(lexer, $1, $4, FromToType::TO); }
+    | cmd_set_multicycle_path ARG_FROM LCPAR stringGroup RCPAR      { $$ = sdc_set_multicycle_path_add_to_from_group(lexer, $1, $4, FromToType::FROM); }
+    | cmd_set_multicycle_path ARG_TO   LCPAR stringGroup RCPAR      { $$ = sdc_set_multicycle_path_add_to_from_group(lexer, $1, $4, FromToType::TO); }
+    | cmd_set_multicycle_path ARG_FROM     string               { $$ = sdc_set_multicycle_path_add_to_from_group(lexer, $1, 
                                                                         make_sdc_string_group(sdcparse::StringGroupType::STRING, $3), 
                                                                         FromToType::FROM);
                                                                 }
-    | cmd_set_multicycle_path ARG_TO       string               { $$ = sdc_set_multicycle_path_add_to_from_group($1, 
+    | cmd_set_multicycle_path ARG_TO       string               { $$ = sdc_set_multicycle_path_add_to_from_group(lexer, $1, 
                                                                         make_sdc_string_group(sdcparse::StringGroupType::STRING, $3),
                                                                         FromToType::TO);
                                                                 }
@@ -261,5 +278,5 @@ int_number: INT_NUMBER { $$ = $1; }
 
 
 void sdcparse::Parser::error(const std::string& msg) {
-    sdc_error(sdcparse_lineno, sdcparse_text, "Error: %s.\n", msg.c_str());
+    sdc_error(lexer.lineno(), lexer.text(), "Error: %s.\n", msg.c_str());
 }

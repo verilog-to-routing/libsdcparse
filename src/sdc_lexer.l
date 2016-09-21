@@ -2,17 +2,10 @@
     /*
      * Include Files
      */
-    #include "ctype.h"
     #include "sdc.h"
     #include "sdc_common.h"
-    #include "sdc_parser.gen.h"
-    #include "string.h"
 
-    //Called everytime a token matches
-    //This advances the end of the location to the end
-    //of the token.
-    /*#define YY_USER_ACTION loc_.columns(YYLeng());*/
-
+    #include "sdc_lexer.h"
 
 %}
 
@@ -34,6 +27,9 @@
 
 /* no default rule to echo unrecongaized tokens to output */
 %option nodefault
+
+/*%option bison-bridge*/
+%option reentrant
 
 /*
  * Use a prefix to avoid name clashes with other
@@ -71,8 +67,8 @@
 "-to"                           { return sdcparse::Parser::make_ARG_TO(); }
 "-setup"                        { return sdcparse::Parser::make_ARG_SETUP(); }
 
-[-+]?[0-9]+                     { return sdcparse::Parser::make_INT_NUMBER(atoi(yytext)); }
-[-+]?([0-9]*\.?[0-9]+|[0-9]+\.) { return sdcparse::Parser::make_FLOAT_NUMBER(atof(yytext)); }
+[-+]?[0-9]+                     { return sdcparse::Parser::make_INT_NUMBER(atoi(sdcparse_get_text(yyscanner))); }
+[-+]?([0-9]*\.?[0-9]+|[0-9]+\.) { return sdcparse::Parser::make_FLOAT_NUMBER(atof(sdcparse_get_text(yyscanner))); }
 \{[ \t]*[^ \t]*[ \t]*\}         { 
                                   /*
                                    * Any continguous sequence of non-white space characters, 
@@ -82,8 +78,8 @@
                                    * to avoid including the curly braces and the leading/trailing
                                    * white-space.
                                    */
-                                  size_t len = strlen(yytext);
-                                  char* tmp_str = sdcparse::strndup(yytext+1, len-2); //Duplicate and trim braces
+                                  size_t len = strlen(sdcparse_get_text(yyscanner));
+                                  char* tmp_str = sdcparse::strndup(sdcparse_get_text(yyscanner)+1, len-2); //Duplicate and trim braces
 
                                   char* modified_str = tmp_str; //Save the original tmp_str for freeing
 
@@ -111,7 +107,7 @@
                                   return ret; 
                                 }
 [-a-zA-Z0-9_~|:*\\/]*           { 
-                                  return sdcparse::Parser::make_STRING(yytext); 
+                                  return sdcparse::Parser::make_STRING(sdcparse_get_text(yyscanner)); 
                                 }
 \[                              { return sdcparse::Parser::make_LSPAR(); }
 \]                              { return sdcparse::Parser::make_RSPAR(); }

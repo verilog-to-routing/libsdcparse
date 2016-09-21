@@ -2,7 +2,8 @@
 
 #include "sdc.h"
 #include "sdc_common.h"
-#include "sdc_parser.gen.h"
+
+#include "sdc_lexer.h"
 
 
 extern FILE	*sdcparse_in; //Global input file defined by flex
@@ -35,11 +36,16 @@ std::shared_ptr<SdcCommands> sdc_parse_filename(const char* filename) {
 }
 
 std::shared_ptr<SdcCommands> sdc_parse_file(FILE* sdc_file) {
-    sdcparse_in = sdc_file;
+
+    //Initialize the lexer
+    Lexer lexer(sdc_file);
 
     auto sdc_commands = std::make_shared<SdcCommands>();
 
-    Parser parser(sdc_commands);
+    //Setup the pares + lexer
+    Parser parser(lexer, sdc_commands);
+
+    //Do the parse
     int error = parser.parse();
     if(error) {
         sdc_error(0, "", "SDC Error: file failed to parse!\n");
