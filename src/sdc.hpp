@@ -148,13 +148,13 @@ enum class StringGroupType {
 struct SdcCommands {
     bool has_commands();
 
-    std::vector<std::shared_ptr<CreateClock>> create_clock_cmds;
-    std::vector<std::shared_ptr<SetIoDelay>> set_input_delay_cmds;
-    std::vector<std::shared_ptr<SetIoDelay>> set_output_delay_cmds;
-    std::vector<std::shared_ptr<SetClockGroups>> set_clock_groups_cmds;
-    std::vector<std::shared_ptr<SetFalsePath>> set_false_path_cmds;
-    std::vector<std::shared_ptr<SetMaxDelay>> set_max_delay_cmds;
-    std::vector<std::shared_ptr<SetMulticyclePath>> set_multicycle_path_cmds;
+    std::vector<CreateClock> create_clock_cmds;
+    std::vector<SetIoDelay> set_input_delay_cmds;
+    std::vector<SetIoDelay> set_output_delay_cmds;
+    std::vector<SetClockGroups> set_clock_groups_cmds;
+    std::vector<SetFalsePath> set_false_path_cmds;
+    std::vector<SetMaxDelay> set_max_delay_cmds;
+    std::vector<SetMulticyclePath> set_multicycle_path_cmds;
 };
 
 /*
