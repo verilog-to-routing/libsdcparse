@@ -6,9 +6,6 @@
 #include "sdc_lexer.hpp"
 #include "sdc_error.hpp"
 
-
-extern FILE	*sdcparse_in; //Global input file defined by flex
-
 namespace sdcparse {
 
 /*
