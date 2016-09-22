@@ -74,6 +74,26 @@
 #include <functional>
 
 namespace sdcparse {
+/*
+ * Forward declarations
+ */
+enum class IoDelayType;
+enum class ClockGroupsType;
+enum class FromToType;
+enum class McpType;
+enum class StringGroupType;
+
+struct SdcCommands;
+
+struct CreateClock;
+struct SetIoDelay;
+struct SetClockGroups;
+struct SetFalsePath;
+struct SetMaxDelay;
+struct SetMulticyclePath;
+
+struct StringGroup;
+
 
 /*
  * External functions for loading an SDC file
@@ -107,20 +127,6 @@ void set_sdc_error_handler(std::function<void(const int, const std::string&, con
  */
 constexpr double UNINITIALIZED_FLOAT = std::numeric_limits<double>::quiet_NaN();
 constexpr int UNINITIALIZED_INT = -1;
-
-/*
- * Forward declarations
- */
-struct SdcCommands;
-
-struct CreateClock;
-struct SetIoDelay;
-struct SetClockGroups;
-struct SetFalsePath;
-struct SetMaxDelay;
-struct SetMulticyclePath;
-
-struct StringGroup;
 
 /*
  * Enumerations to describe specific SDC command types and attributes
