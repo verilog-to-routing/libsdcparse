@@ -95,32 +95,42 @@ struct SetMulticyclePath;
 struct StringGroup;
 
 
+class Callback {
+
+    public:
+        virtual ~Callback() {};
+
+        //Start of parsing
+        virtual void start_parse() = 0;
+
+        //Sets current filename
+        virtual void filename(std::string fname) = 0;
+
+        //Sets current line number
+        virtual void lineno(int line_num) = 0;
+
+        virtual void create_clock(std::string name, double period, double rise_edge, double fall_edge, StringGroup targets, bool is_virtual) = 0;
+        virtual void set_io_delay(IoDelayType type, std::string clock_name, double max_delay, StringGroup target_ports) = 0;
+        virtual void set_clock_groups(ClockGroupsType type, std::vector<StringGroup> clock_groups) = 0;
+        virtual void set_false_path(StringGroup from, StringGroup to) = 0;
+        virtual void set_max_delay(double max_delay, StringGroup from, StringGroup to) = 0;
+        virtual void set_multicycle_path(McpType type, int mcp_value, StringGroup from, StringGroup to) = 0;
+
+        //End of parsing
+        virtual void finish_parse() = 0;
+
+        //Error during parsing
+        virtual void parse_error(const int curr_lineno, const std::string& near_text, const std::string& msg) = 0;
+};
+
 /*
  * External functions for loading an SDC file
  */
-std::shared_ptr<SdcCommands> sdc_parse_filename(std::string filename);
-std::shared_ptr<SdcCommands> sdc_parse_filename(const char* filename);
-std::shared_ptr<SdcCommands> sdc_parse_file(FILE* sdc);
+void sdc_parse_filename(std::string filename, Callback& callback);
+void sdc_parse_filename(const char* filename, Callback& callback);
 
-
-/* 
- * The default sdc_error() implementation.
- * By default it prints the error mesage to stderr and exits the program.
- */
-void default_sdc_error(const int line_number, const std::string& near_text, const std::string& msg);
-
-/*
- * libsdc calls sdc_error() to report errors encountered while parsing an SDC file.  
- *
- * If you wish to define your own error reporting function (e.g. to throw exceptions instead
- * of exit) you can change the behaviour by providing another callable type which matches the signature.
- *
- * The return type is void, while the arguments are:
- *     1) const int line_no            - the file line number
- *     2) const std::string& near_text - the text the parser encountered 'near' the error
- *     3) const std::string& msg       - the error message
- */
-void set_sdc_error_handler(std::function<void(const int, const std::string&, const std::string&)> new_sdc_error_handler);
+//Loads from 'sdc'. 'filename' only used to pass a filename to callback and can be left unspecified
+void sdc_parse_file(FILE* sdc, Callback& callback, const char* filename=""); 
 
 /*
  * Sentinal values

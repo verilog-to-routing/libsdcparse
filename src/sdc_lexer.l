@@ -2,7 +2,7 @@
     /*
      * Include Files
      */
-    #include "sdc.hpp"
+    #include "sdcparse.hpp"
     #include "sdc_common.hpp"
 
     #include "sdc_lexer.hpp"
