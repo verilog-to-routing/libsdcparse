@@ -40,13 +40,26 @@
  */
 %option prefix="sdcparse_" 
 
+/* Common character classes */
+BACK_SLASH [\\]
+WS [ \t]
+ENDL (\n|\n\r|\r\n)
+DIGIT10 [0-9]
+NAN ((?i:nan)(\([^{WS}]*\))?)
+INF (?i:inf|infinity)
+FLOAT_BASE (({DIGIT10}*\.?{DIGIT10}+)|({DIGIT10}+\.))
+FLOAT_EXP ([eE][-+]?{DIGIT10}+)
+FLOAT_NUMBER ({NAN}|([-+]?({INF}|({FLOAT_BASE}{FLOAT_EXP}?))))
+INT_NUMBER ([-+]?{DIGIT10}+)
+
 /*
  * Symbol Definitions
  */
 %%
-"#".*                           { /* skip comments */ }
-[\n\r]+                         { return sdcparse::Parser::make_EOL(); }
-[ \t]+                          { /* skip white space */ }
+#.*                             { /* skip comments */ }
+{BACK_SLASH}{WS}*{ENDL}         { /* line continuation don't send EOL to parser */ }
+{ENDL}                          { return sdcparse::Parser::make_EOL(); }
+{WS}+                           { /* skip white space */ }
 
 "create_clock"                  { return sdcparse::Parser::make_CMD_CREATE_CLOCK(); }
 "set_input_delay"               { return sdcparse::Parser::make_CMD_SET_INPUT_DELAY(); }
@@ -70,9 +83,9 @@
 "-to"                           { return sdcparse::Parser::make_ARG_TO(); }
 "-setup"                        { return sdcparse::Parser::make_ARG_SETUP(); }
 
-[-+]?[0-9]+                     { return sdcparse::Parser::make_INT_NUMBER(atoi(sdcparse_get_text(yyscanner))); }
-[-+]?([0-9]*\.?[0-9]+|[0-9]+\.) { return sdcparse::Parser::make_FLOAT_NUMBER(atof(sdcparse_get_text(yyscanner))); }
-\{[ \t]*[^ \t]*[ \t]*\}         { 
+{INT_NUMBER}                    { return sdcparse::Parser::make_INT_NUMBER(atoi(sdcparse_get_text(yyscanner))); }
+{FLOAT_NUMBER}                  { return sdcparse::Parser::make_FLOAT_NUMBER(atof(sdcparse_get_text(yyscanner))); }
+\{{WS}*[^{WS}]*{WS}*\}          { 
                                   /*
                                    * Any continguous sequence of non-white space characters, 
                                    * with optional leading and/or trailing whitespace that falls
