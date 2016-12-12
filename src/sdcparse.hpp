@@ -89,9 +89,10 @@ struct CreateClock;
 struct SetIoDelay;
 struct SetClockGroups;
 struct SetFalsePath;
-struct SetMaxDelay;
+struct SetMinMaxDelay;
 struct SetMulticyclePath;
 struct SetClockUncertainty;
+struct SetDisableTiming;
 struct SetTimingDerate;
 
 struct StringGroup;
@@ -115,11 +116,10 @@ class Callback {
         virtual void set_io_delay(const SetIoDelay& cmd) = 0;
         virtual void set_clock_groups(const SetClockGroups& cmd) = 0;
         virtual void set_false_path(const SetFalsePath& cmd) = 0;
-        virtual void set_max_delay(const SetMaxDelay& cmd) = 0;
+        virtual void set_min_max_delay(const SetMinMaxDelay& cmd) = 0;
         virtual void set_multicycle_path(const SetMulticyclePath& cmd) = 0;
         virtual void set_clock_uncertainty(const SetClockUncertainty& cmd) = 0;
-        //virtual void set_clock_latency(const SetClockLatency& cmd) = 0;
-        //virtual void set_disable_timing(const SetDisableTiming& cmd) = 0;
+        virtual void set_disable_timing(const SetDisableTiming& cmd) = 0;
         virtual void set_timing_derate(const SetTimingDerate& cmd) = 0;
 
         //End of parsing
@@ -127,6 +127,9 @@ class Callback {
 
         //Error during parsing
         virtual void parse_error(const int curr_lineno, const std::string& near_text, const std::string& msg) = 0;
+    private:
+        //Future work
+        //virtual void set_clock_latency(const SetClockLatency& cmd) = 0;
 };
 
 /*
@@ -150,6 +153,12 @@ constexpr int UNINITIALIZED_INT = -1;
 enum class IoDelayType {
     INPUT, 
     OUTPUT
+};
+
+enum class MinMaxType {
+    MIN,
+    MAX,
+    NONE
 };
 
 enum class ClockGroupsType {
@@ -178,22 +187,8 @@ enum class StringGroupType {
     STRING, 
     PORT, 
     CLOCK,
-    CELLS
-};
-
-/*
- * Collection of SDC commands
- */
-struct SdcCommands {
-    bool has_commands();
-
-    std::vector<CreateClock> create_clock_cmds;
-    std::vector<SetIoDelay> set_input_delay_cmds;
-    std::vector<SetIoDelay> set_output_delay_cmds;
-    std::vector<SetClockGroups> set_clock_groups_cmds;
-    std::vector<SetFalsePath> set_false_path_cmds;
-    std::vector<SetMaxDelay> set_max_delay_cmds;
-    std::vector<SetMulticyclePath> set_multicycle_path_cmds;
+    CELL,
+    PIN
 };
 
 /*
@@ -248,8 +243,12 @@ struct SetFalsePath {
     StringGroup to;                             //The target list of endpoints or clocks
 };
 
-struct SetMaxDelay {
-    double max_delay = UNINITIALIZED_FLOAT;     //The maximum allowed delay between the from
+struct SetMinMaxDelay {
+    SetMinMaxDelay() = default;
+    SetMinMaxDelay(MinMaxType delay_type)
+        : type(delay_type) {}
+    MinMaxType type = MinMaxType::NONE;         //Whether this is a min or max delay
+    double value = UNINITIALIZED_FLOAT;         //The maximum/minimum allowed delay between the from
                                                 // and to clocks
     StringGroup from;                           //The source list of startpoints or clocks
     StringGroup to;                             //The target list of endpoints or clocks
@@ -268,6 +267,11 @@ struct SetClockUncertainty {
 
     StringGroup from;                           //Launch clock domain(s)
     StringGroup to;                             //Capture clock domain(s)
+};
+
+struct SetDisableTiming {
+    StringGroup from;                           //The source pins
+    StringGroup to;                             //The sink pins
 };
 
 struct SetTimingDerate {

@@ -237,61 +237,61 @@ void add_sdc_set_false_path(Callback& callback, const Lexer& lexer, SetFalsePath
 }
 
 /*
- * Functions for set_max_delay
+ * Functions for set_max_delay/set_min_delay
  */
-void sdc_set_max_delay_set_max_delay_value(Callback& callback, const Lexer& lexer, SetMaxDelay& sdc_set_max_delay, double max_delay) {
-    if(!std::isnan(sdc_set_max_delay.max_delay)) {
+void sdc_set_min_max_delay_set_value(Callback& callback, const Lexer& lexer, SetMinMaxDelay& sdc_set_min_max_delay, double min_max_delay) {
+    if(!std::isnan(sdc_set_min_max_delay.value)) {
         sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Must specify max delay value only once.\n"); 
     }
-    sdc_set_max_delay.max_delay = max_delay;
+    sdc_set_min_max_delay.value = min_max_delay;
 }
 
-void sdc_set_max_delay_add_to_from_group(Callback& callback, const Lexer& lexer, SetMaxDelay& sdc_set_max_delay, StringGroup group, FromToType to_from_dir) {
+void sdc_set_min_max_delay_add_to_from_group(Callback& callback, const Lexer& lexer, SetMinMaxDelay& sdc_set_min_max_delay, StringGroup group, FromToType to_from_dir) {
     assert(group.group_type == StringGroupType::CLOCK || group.group_type == StringGroupType::STRING);
 
     //Error checking
     if(to_from_dir == FromToType::FROM) {
         //Check that we haven't already defined the from path    
-        if(!sdc_set_max_delay.from.strings.empty()) {
+        if(!sdc_set_min_max_delay.from.strings.empty()) {
             sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Only a single '-from' option is supported.\n"); 
         }
     } else {
         assert(to_from_dir == FromToType::TO);
         //Check that we haven't already defined the from path    
-        if(!sdc_set_max_delay.to.strings.empty()) {
+        if(!sdc_set_min_max_delay.to.strings.empty()) {
             sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Only a single '-to' option is supported.\n"); 
         }
     }
 
     //Add the clock group
     if(to_from_dir == FromToType::FROM) {
-        sdc_set_max_delay.from = group;
+        sdc_set_min_max_delay.from = group;
     } else {
         assert(to_from_dir == FromToType::TO);
-        sdc_set_max_delay.to = group;
+        sdc_set_min_max_delay.to = group;
     }
 }
 
-void add_sdc_set_max_delay(Callback& callback, const Lexer& lexer, SetMaxDelay& sdc_set_max_delay) {
+void add_sdc_set_min_max_delay(Callback& callback, const Lexer& lexer, SetMinMaxDelay& sdc_set_min_max_delay) {
     /*
      * Error checks
      */
-    if(std::isnan(sdc_set_max_delay.max_delay)) {
+    if(std::isnan(sdc_set_min_max_delay.value)) {
         sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Must specify the max delay value.\n"); 
     }
 
-    if(sdc_set_max_delay.from.strings.empty()) {
+    if(sdc_set_min_max_delay.from.strings.empty()) {
         sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Must specify source clock(s) with the '-from' option.\n"); 
     }
 
-    if(sdc_set_max_delay.to.strings.empty()) {
+    if(sdc_set_min_max_delay.to.strings.empty()) {
         sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Must specify source clock(s) with the '-to' option.\n"); 
     }
 
     /*
      * Add command
      */
-    callback.set_max_delay(sdc_set_max_delay);
+    callback.set_min_max_delay(sdc_set_min_max_delay);
 
 }
 
@@ -440,6 +440,59 @@ void add_sdc_set_clock_uncertainty(Callback& callback, const Lexer& lexer, SetCl
 }
 
 /*
+ * Functions for set_disable_timing
+ */
+void sdc_set_disable_timing_add_to_from_group(Callback& callback, const Lexer& lexer, 
+                                                            SetDisableTiming& sdc_set_disable_timing, 
+                                                            StringGroup group, 
+                                                            FromToType to_from_dir) {
+
+    //Error checking
+    if (group.group_type != StringGroupType::PIN && group.group_type != StringGroupType::STRING) {
+        sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Only get_pins supported with set_disable_timing.\n"); 
+    }
+
+    if(to_from_dir == FromToType::FROM) {
+        //Check that we haven't already defined the from path    
+        if(!sdc_set_disable_timing.from.strings.empty()) {
+            sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Only a single '-from' option is supported.\n"); 
+        }
+    } else {
+        assert(to_from_dir == FromToType::TO);
+        //Check that we haven't already defined the from path    
+        if(!sdc_set_disable_timing.to.strings.empty()) {
+            sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Only a single '-to' option is supported.\n"); 
+        }
+    }
+
+    //Add the clock group
+    if(to_from_dir == FromToType::FROM) {
+        sdc_set_disable_timing.from = group;
+    } else {
+        assert(to_from_dir == FromToType::TO);
+        sdc_set_disable_timing.to = group;
+    }
+}
+
+void add_sdc_set_disable_timing(Callback& callback, const Lexer& lexer, SetDisableTiming& sdc_set_disable_timing) {
+    /*
+     * Error checks
+     */
+    if(sdc_set_disable_timing.from.strings.empty()) {
+        sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Must specify source clock(s)/object(s) with the '-from' option.\n"); 
+    }
+
+    if(sdc_set_disable_timing.to.strings.empty()) {
+        sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Must specify target clock(s)/objects(s) with the '-to' option.\n"); 
+    }
+
+    /*
+     * Add command
+     */
+    callback.set_disable_timing(sdc_set_disable_timing);
+}
+
+/*
  * Functions for set_timing_derate
  */
 void sdc_set_timing_derate_type(Callback& callback, const Lexer& lexer, SetTimingDerate& sdc_set_timing_derate, EarlyLateType type) {
@@ -479,7 +532,7 @@ void sdc_set_timing_derate_value(Callback& callback, const Lexer& lexer, SetTimi
 }
 
 void sdc_set_timing_derate_targets(Callback& callback, const Lexer& lexer, SetTimingDerate& sdc_set_timing_derate, StringGroup targets) {
-    if(targets.group_type != StringGroupType::CELLS) {
+    if(targets.group_type != StringGroupType::CELL) {
         sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Only get_cells is supported with set_timing_derate.\n"); 
     }
 

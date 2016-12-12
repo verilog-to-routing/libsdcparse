@@ -68,9 +68,14 @@ public:
         print_from_to_group(cmd.from, cmd.to);
         printf("\n");
     }
-    void set_max_delay(const SetMaxDelay& cmd) override {
+    void set_min_max_delay(const SetMinMaxDelay& cmd) override {
         printf("#%s:%d\n", filename_.c_str(), lineno_);
-        printf("set_max_delay %f ", cmd.max_delay);
+        if(cmd.type == MinMaxType::MAX) {
+            printf("set_max_delay");
+        } else {
+            printf("set_min_delay");
+        }
+        printf(" %f ", cmd.value);
         print_from_to_group(cmd.from, cmd.to);
         printf("\n");
     }
@@ -96,6 +101,13 @@ public:
         print_from_to_group(cmd.from, cmd.to);
         printf(" %f ", cmd.value);
         printf("\n");
+    }
+    void set_disable_timing(const SetDisableTiming& cmd) override {
+        printf("#%s:%d\n", filename_.c_str(), lineno_);
+        printf("set_disable_timing ");
+        print_from_to_group(cmd.from, cmd.to);
+        printf("\n");
+
     }
     void set_timing_derate(const SetTimingDerate& cmd) override {
         printf("#%s:%d\n", filename_.c_str(), lineno_);
@@ -180,8 +192,11 @@ void print_string_group(const StringGroup& group) {
         start_token = "[get_ports {";
         end_token   = "}]";
 
-    } else if (group.group_type == StringGroupType::CELLS) {
+    } else if (group.group_type == StringGroupType::CELL) {
         start_token = "[get_cells {";
+        end_token   = "}]";
+    } else if (group.group_type == StringGroupType::PIN) {
+        start_token = "[get_pins {";
         end_token   = "}]";
 
     } else {

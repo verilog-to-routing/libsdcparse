@@ -38,9 +38,10 @@ void sdc_set_false_path_add_to_from_group(Callback& callback, const Lexer& lexer
 void add_sdc_set_false_path(Callback& callback, const Lexer& lexer, SetFalsePath& sdc_set_false_path);
 
 //set_max_delay
-void sdc_set_max_delay_set_max_delay_value(Callback& callback, const Lexer& lexer, SetMaxDelay& sdc_set_max_delay, double max_delay);
-void sdc_set_max_delay_add_to_from_group(Callback& callback, const Lexer& lexer, SetMaxDelay& sdc_set_max_delay, StringGroup group, FromToType to_from_dir);
-void add_sdc_set_max_delay(Callback& callback, const Lexer& lexer, SetMaxDelay& sdc_set_max_delay);
+void sdc_set_min_max_delay_set_type(Callback& callback, const Lexer& lexer, SetMinMaxDelay& sdc_set_max_delay, MinMaxType type);
+void sdc_set_min_max_delay_set_value(Callback& callback, const Lexer& lexer, SetMinMaxDelay& sdc_set_max_delay, double max_delay);
+void sdc_set_min_max_delay_add_to_from_group(Callback& callback, const Lexer& lexer, SetMinMaxDelay& sdc_set_max_delay, StringGroup group, FromToType to_from_dir);
+void add_sdc_set_min_max_delay(Callback& callback, const Lexer& lexer, SetMinMaxDelay& sdc_set_max_delay);
 
 //set_multicycle_path
 void sdc_set_multicycle_path_set_type(Callback& callback, const Lexer& lexer, SetMulticyclePath& sdc_set_multicycle_path, SetupHoldType type);
@@ -53,6 +54,10 @@ void sdc_set_clock_uncertainty_set_type(Callback& callback, const Lexer& lexer, 
 void sdc_set_clock_uncertainty_set_value(Callback& callback, const Lexer& lexer, SetClockUncertainty& sdc_set_clock_uncertainty, float value);
 void sdc_set_clock_uncertainty_add_to_from_group(Callback& callback, const Lexer& lexer, SetClockUncertainty& sdc_set_clock_uncertainty, StringGroup group, FromToType to_from_dir);
 void add_sdc_set_clock_uncertainty(Callback& callback, const Lexer& lexer, SetClockUncertainty& sdc_set_clock_uncertainty);
+
+//set_disable_timing
+void sdc_set_disable_timing_add_to_from_group(Callback& callback, const Lexer& lexer, SetDisableTiming& sdc_set_disable_timing, StringGroup group, FromToType to_from_dir);
+void add_sdc_set_disable_timing(Callback& callback, const Lexer& lexer, SetDisableTiming& sdc_set_disable_timing);
 
 //set_timing_derate
 void sdc_set_timing_derate_type(Callback& callback, const Lexer& lexer, SetTimingDerate& sdc_set_timing_derate, EarlyLateType type);

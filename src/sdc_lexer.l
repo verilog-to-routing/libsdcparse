@@ -74,13 +74,16 @@ STR ({ID}|\*{ID}?)
 "set_clock_groups"              { return sdcparse::Parser::make_CMD_SET_CLOCK_GROUPS(); }
 "set_false_path"                { return sdcparse::Parser::make_CMD_SET_FALSE_PATH(); }
 "set_max_delay"                 { return sdcparse::Parser::make_CMD_SET_MAX_DELAY(); }
+"set_min_delay"                 { return sdcparse::Parser::make_CMD_SET_MIN_DELAY(); }
 "set_multicycle_path"           { return sdcparse::Parser::make_CMD_SET_MULTICYCLE_PATH(); }
 "set_clock_uncertainty"         { return sdcparse::Parser::make_CMD_SET_CLOCK_UNCERTAINTY(); }
+"set_disable_timing"            { return sdcparse::Parser::make_CMD_SET_DISABLE_TIMING(); }
 "set_timing_derate"             { return sdcparse::Parser::make_CMD_SET_TIMING_DERATE(); }
 
 "get_ports"                     { return sdcparse::Parser::make_CMD_GET_PORTS(); }
 "get_clocks"                    { return sdcparse::Parser::make_CMD_GET_CLOCKS(); }
 "get_cells"                     { return sdcparse::Parser::make_CMD_GET_CELLS(); }
+"get_pins"                      { return sdcparse::Parser::make_CMD_GET_PINS(); }
 
 "-period"                       { return sdcparse::Parser::make_ARG_PERIOD(); }
 "-name"                         { return sdcparse::Parser::make_ARG_NAME(); }
