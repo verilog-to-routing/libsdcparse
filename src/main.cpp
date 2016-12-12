@@ -19,42 +19,42 @@ public:
     //Sets current line number
     void lineno(int line_num) override { lineno_ = line_num; }
 
-    void create_clock(std::string name, double period, double rise_edge, double fall_edge, StringGroup targets, bool is_virtual) override {
+    void create_clock(const CreateClock& cmd) override {
         printf("#%s:%d\n", filename_.c_str(), lineno_);
         printf("create_clock -period %f -waveform {%f %f} ",
-                period,
-                rise_edge,
-                fall_edge);
-        if(is_virtual) {
+                cmd.period,
+                cmd.rise_edge,
+                cmd.fall_edge);
+        if(cmd.is_virtual) {
             printf("-name %s",
-                   name.c_str());
+                   cmd.name.c_str());
         } else {
-            print_string_group(targets);
+            print_string_group(cmd.targets);
         }
         printf("\n");
     }
 
-    void set_io_delay(IoDelayType type, std::string clock_name, double max_delay, StringGroup target_ports) override {
+    void set_io_delay(const SetIoDelay& cmd) override {
         printf("#%s:%d\n", filename_.c_str(), lineno_);
-        if(type == IoDelayType::INPUT) {
+        if(cmd.type == IoDelayType::INPUT) {
             printf("set_input_delay");
         } else {
             printf("set_output_delay");
         }
         printf(" -clock %s -max %f ", 
-               clock_name.c_str(),
-               max_delay);
-        print_string_group(target_ports);
+               cmd.clock_name.c_str(),
+               cmd.max_delay);
+        print_string_group(cmd.target_ports);
         printf("\n");
 
     }
-    void set_clock_groups(ClockGroupsType cg_type, std::vector<StringGroup> clock_groups) override {
+    void set_clock_groups(const SetClockGroups& cmd) override {
         printf("#%s:%d\n", filename_.c_str(), lineno_);
         printf("set_clock_groups ");
-        if(cg_type == ClockGroupsType::EXCLUSIVE) {
+        if(cmd.type == ClockGroupsType::EXCLUSIVE) {
             printf(" -exclusive");
         }
-        for(const auto& clk_grp : clock_groups) {
+        for(const auto& clk_grp : cmd.clock_groups) {
             printf(" -group ");
             print_string_group(clk_grp);
         }
@@ -62,25 +62,25 @@ public:
 
     }
 
-    void set_false_path(StringGroup from, StringGroup to) override {
+    void set_false_path(const SetFalsePath& cmd) override {
         printf("#%s:%d\n", filename_.c_str(), lineno_);
         printf("set_false_path ");
-        print_from_to_group(from, to);
+        print_from_to_group(cmd.from, cmd.to);
         printf("\n");
     }
-    void set_max_delay(double max_delay, StringGroup from, StringGroup to) override {
+    void set_max_delay(const SetMaxDelay& cmd) override {
         printf("#%s:%d\n", filename_.c_str(), lineno_);
-        printf("set_max_delay %f ", max_delay);
-        print_from_to_group(from, to);
+        printf("set_max_delay %f ", cmd.max_delay);
+        print_from_to_group(cmd.from, cmd.to);
         printf("\n");
     }
-    void set_multicycle_path(McpType mcp_type, int mcp_value, StringGroup from, StringGroup to) override {
+    void set_multicycle_path(const SetMulticyclePath& cmd) override {
         printf("#%s:%d\n", filename_.c_str(), lineno_);
-        printf("set_multicycle_path %d ", mcp_value);
-        if(mcp_type == McpType::SETUP) {
+        printf("set_multicycle_path %d ", cmd.mcp_value);
+        if(cmd.type == McpType::SETUP) {
             printf("-setup ");
         }
-        print_from_to_group(from, to);
+        print_from_to_group(cmd.from, cmd.to);
         printf("\n");
     }
 
@@ -89,7 +89,20 @@ public:
 
     //Error during parsing
     void parse_error(const int curr_lineno, const std::string& near_text, const std::string& msg) override {
-        fprintf(stderr, "Custom Error at line %d near '%s': %s\n", curr_lineno, near_text.c_str(), msg.c_str());
+        fprintf(stderr, "Custom Error");
+        if(curr_lineno > 0) {
+            fprintf(stderr, " at line %d", curr_lineno);
+        }
+        if(near_text != "") {
+            if(near_text == "\n") {
+                fprintf(stderr, " near '\\n'");
+            } else if(near_text == "\n\r") {
+                fprintf(stderr, " near '\\n\\r'");
+            } else {
+                fprintf(stderr, " near '%s'", near_text.c_str());
+            }
+        }
+        fprintf(stderr, ": %s\n", msg.c_str());
         error_ = true;
     }
 

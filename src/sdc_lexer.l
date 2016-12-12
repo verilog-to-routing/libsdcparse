@@ -51,6 +51,12 @@ FLOAT_BASE (({DIGIT10}*\.?{DIGIT10}+)|({DIGIT10}+\.))
 FLOAT_EXP ([eE][-+]?{DIGIT10}+)
 FLOAT_NUMBER ({NAN}|([-+]?({INF}|({FLOAT_BASE}{FLOAT_EXP}?))))
 INT_NUMBER ([-+]?{DIGIT10}+)
+ALPHA [a-zA-Z_]
+SYMBOL [-~|:*\\/[\]]
+ID_FIRST ({ALPHA})
+ID_LATER ({ALPHA}|{DIGIT10}|{SYMBOL})
+ID ({ID_FIRST}{ID_LATER}*)
+STR ({ID}|\*{ID}?)
 
 /*
  * Symbol Definitions
@@ -85,7 +91,10 @@ INT_NUMBER ([-+]?{DIGIT10}+)
 
 {INT_NUMBER}                    { return sdcparse::Parser::make_INT_NUMBER(atoi(sdcparse_get_text(yyscanner))); }
 {FLOAT_NUMBER}                  { return sdcparse::Parser::make_FLOAT_NUMBER(atof(sdcparse_get_text(yyscanner))); }
-\{{WS}*[^{WS}]*{WS}*\}          { 
+{STR}                           { 
+                                  return sdcparse::Parser::make_STRING(sdcparse_get_text(yyscanner)); 
+                                }
+\{{WS}*{STR}{WS}*\}             { 
                                   /*
                                    * Any continguous sequence of non-white space characters, 
                                    * with optional leading and/or trailing whitespace that falls
@@ -122,9 +131,6 @@ INT_NUMBER ([-+]?{DIGIT10}+)
 
                                   return ret; 
                                 }
-[-a-zA-Z0-9_~|:*\\/]*           { 
-                                  return sdcparse::Parser::make_STRING(sdcparse_get_text(yyscanner)); 
-                                }
 \[                              { return sdcparse::Parser::make_LSPAR(); }
 \]                              { return sdcparse::Parser::make_RSPAR(); }
 \{                              { return sdcparse::Parser::make_LCPAR(); }
@@ -138,5 +144,8 @@ INT_NUMBER ([-+]?{DIGIT10}+)
                                      line IS blank - so the parse must handle those correclty. */
                                   static bool once; return (once = !once) ? sdcparse::Parser::make_EOL() : sdcparse::Parser::make_EOF();
                                 }
-.                               { assert(false); }
+.                               { 
+                                  std::string bad_char = sdcparse_get_text(yyscanner);
+                                  callback.parse_error(sdcparse_get_lineno(yyscanner), bad_char, "Unrecognized character"); 
+                                }
 %%

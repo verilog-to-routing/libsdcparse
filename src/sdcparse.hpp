@@ -109,12 +109,16 @@ class Callback {
         //Sets current line number
         virtual void lineno(int line_num) = 0;
 
-        virtual void create_clock(std::string name, double period, double rise_edge, double fall_edge, StringGroup targets, bool is_virtual) = 0;
-        virtual void set_io_delay(IoDelayType type, std::string clock_name, double max_delay, StringGroup target_ports) = 0;
-        virtual void set_clock_groups(ClockGroupsType type, std::vector<StringGroup> clock_groups) = 0;
-        virtual void set_false_path(StringGroup from, StringGroup to) = 0;
-        virtual void set_max_delay(double max_delay, StringGroup from, StringGroup to) = 0;
-        virtual void set_multicycle_path(McpType type, int mcp_value, StringGroup from, StringGroup to) = 0;
+        virtual void create_clock(const CreateClock& cmd) = 0;
+        virtual void set_io_delay(const SetIoDelay& cmd) = 0;
+        virtual void set_clock_groups(const SetClockGroups& cmd) = 0;
+        virtual void set_false_path(const SetFalsePath& cmd) = 0;
+        virtual void set_max_delay(const SetMaxDelay& cmd) = 0;
+        virtual void set_multicycle_path(const SetMulticyclePath& cmd) = 0;
+        //virtual void set_clock_uncertainty(const SetClockUncertainty& cmd) = 0;
+        //virtual void set_clock_latency(const SetClockLatency& cmd) = 0;
+        //virtual void set_disable_timing(const SetDisableTiming& cmd) = 0;
+        //virtual void set_timing_derate(const SetTimingDerate& cmd) = 0;
 
         //End of parsing
         virtual void finish_parse() = 0;
@@ -209,37 +213,29 @@ struct CreateClock {
     StringGroup targets;                        //The set of strings indicating clock sources.
                                                 // May be explicit strings or regexs.
     bool is_virtual = false;                    //Identifies this as a virtual (non-netlist) clock
-
-    int file_line_number = UNINITIALIZED_INT;   //Line number where this command is defined
 };
 
 struct SetIoDelay {
     SetIoDelay() = default;
-    SetIoDelay(IoDelayType type)
-        : io_type(type) {}
+    SetIoDelay(IoDelayType io_type)
+        : type(io_type) {}
 
-    IoDelayType io_type = IoDelayType::INPUT;       //Identifies whether this represents a
+    IoDelayType type = IoDelayType::INPUT;       //Identifies whether this represents a
                                                     // set_input_delay or set_output delay
                                                     // command.
     std::string clock_name = "";                    //Name of the clock this constraint is associated with
     double max_delay = UNINITIALIZED_FLOAT;         //The maximum input delay allowed on the target ports
     StringGroup target_ports;                       //The target ports
-
-    int file_line_number = UNINITIALIZED_INT;       //Line number where this command is defined
 };
 
 struct SetClockGroups {
-    ClockGroupsType cg_type = ClockGroupsType::NONE;    //The type of clock group relation being specified
-    std::vector<StringGroup> clock_groups;              //The groups of clocks
-
-    int file_line_number = UNINITIALIZED_INT;           //Line number where this command is defined
+    ClockGroupsType type = ClockGroupsType::NONE;   //The type of clock group relation being specified
+    std::vector<StringGroup> clock_groups;          //The groups of clocks
 };
 
 struct SetFalsePath {
     StringGroup from;                           //The source list of startpoints or clocks
     StringGroup to;                             //The target list of endpoints or clocks
-                                                
-    int file_line_number = UNINITIALIZED_INT;   //Line number where this command is defined
 };
 
 struct SetMaxDelay {
@@ -247,17 +243,13 @@ struct SetMaxDelay {
                                                 // and to clocks
     StringGroup from;                           //The source list of startpoints or clocks
     StringGroup to;                             //The target list of endpoints or clocks
-
-    int file_line_number = UNINITIALIZED_INT;   //Line number where this command is defined
 };
 
 struct SetMulticyclePath {
-    McpType mcp_type = McpType::NONE;           //The type of the mcp
+    McpType type = McpType::NONE;               //The type of the mcp
     int mcp_value = UNINITIALIZED_INT;          //The number of cycles specifed
     StringGroup from;                           //The source list of startpoints or clocks
     StringGroup to;                             //The target list of endpoints or clocks
-
-    int file_line_number = UNINITIALIZED_INT;   //Line number where this command is defined
 };
 
 } //namespace

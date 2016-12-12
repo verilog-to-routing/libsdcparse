@@ -44,7 +44,7 @@ void sdc_create_clock_add_targets(Callback& callback, const Lexer& lexer, Create
 
     if(!sdc_create_clock.targets.strings.empty()) {
         sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Can only define a single set of targets for clock creation. "
-                  "If you want to define multiple targets specify them as a list (e.g. \"{target1 target2}\".\n");
+                  "If you want to define multiple targets specify them as a list (e.g. \"{target1 target2}\").\n");
     }
 
     sdc_create_clock.targets = target_group;
@@ -92,19 +92,9 @@ void add_sdc_create_clock(Callback& callback, const Lexer& lexer, CreateClock& s
     }
 
     /*
-     * Set line number
-     */
-    sdc_create_clock.file_line_number = lexer.lineno();
-
-    /*
      * Add command
      */
-    callback.create_clock(sdc_create_clock.name,
-                          sdc_create_clock.period,
-                          sdc_create_clock.rise_edge,
-                          sdc_create_clock.fall_edge,
-                          sdc_create_clock.targets,
-                          sdc_create_clock.is_virtual);
+    callback.create_clock(sdc_create_clock);
 
 }
 
@@ -154,28 +144,20 @@ void add_sdc_set_io_delay(Callback& callback, const Lexer& lexer, SetIoDelay& sd
     }
 
     /*
-     * Set line number
-     */
-    sdc_set_io_delay.file_line_number = lexer.lineno();
-
-    /*
      * Add command
      */
-    callback.set_io_delay(sdc_set_io_delay.io_type,
-                          sdc_set_io_delay.clock_name,
-                          sdc_set_io_delay.max_delay,
-                          sdc_set_io_delay.target_ports);
+    callback.set_io_delay(sdc_set_io_delay);
 }
 
 /*
  * Functions for set_clock_groups
  */
 void sdc_set_clock_groups_set_type(Callback& callback, const Lexer& lexer, SetClockGroups& sdc_set_clock_groups, ClockGroupsType type) {
-    if(sdc_set_clock_groups.cg_type != ClockGroupsType::NONE) {
+    if(sdc_set_clock_groups.type != ClockGroupsType::NONE) {
         sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Can only specify a single clock groups relation type (e.g. '-exclusive')\n"); 
     }
 
-    sdc_set_clock_groups.cg_type = type;
+    sdc_set_clock_groups.type = type;
 }
 
 void sdc_set_clock_groups_add_group(Callback& /*callback*/, const Lexer& /*lexer*/, SetClockGroups& sdc_set_clock_groups, StringGroup clock_group) {
@@ -189,7 +171,7 @@ void add_sdc_set_clock_groups(Callback& callback, const Lexer& lexer, SetClockGr
     /*
      * Error checks
      */
-    if(sdc_set_clock_groups.cg_type == ClockGroupsType::NONE) {
+    if(sdc_set_clock_groups.type == ClockGroupsType::NONE) {
         sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Must specify clock relation type as '-exclusive'.\n"); 
     }
 
@@ -198,15 +180,9 @@ void add_sdc_set_clock_groups(Callback& callback, const Lexer& lexer, SetClockGr
     }
 
     /*
-     * Set line number
-     */
-    sdc_set_clock_groups.file_line_number = lexer.lineno();
-
-    /*
      * Add command
      */
-    callback.set_clock_groups(sdc_set_clock_groups.cg_type,
-                              sdc_set_clock_groups.clock_groups);
+    callback.set_clock_groups(sdc_set_clock_groups);
 }
 
 /*
@@ -241,9 +217,7 @@ void sdc_set_false_path_add_to_from_group(Callback& callback, const Lexer& lexer
     }
 }
 
-void add_sdc_set_false_path(Callback& callback, const Lexer& lexer, 
-                                                    
-                                                    SetFalsePath& sdc_set_false_path) {
+void add_sdc_set_false_path(Callback& callback, const Lexer& lexer, SetFalsePath& sdc_set_false_path) {
     /*
      * Error checks
      */
@@ -256,15 +230,9 @@ void add_sdc_set_false_path(Callback& callback, const Lexer& lexer,
     }
 
     /*
-     * Set line number
-     */
-    sdc_set_false_path.file_line_number = lexer.lineno();
-
-    /*
      * Add command
      */
-    callback.set_false_path(sdc_set_false_path.from,
-                            sdc_set_false_path.to);
+    callback.set_false_path(sdc_set_false_path);
 
 }
 
@@ -321,16 +289,9 @@ void add_sdc_set_max_delay(Callback& callback, const Lexer& lexer, SetMaxDelay& 
     }
 
     /*
-     * Set line number
-     */
-    sdc_set_max_delay.file_line_number = lexer.lineno();
-
-    /*
      * Add command
      */
-    callback.set_max_delay(sdc_set_max_delay.max_delay,
-                           sdc_set_max_delay.from,
-                           sdc_set_max_delay.to);
+    callback.set_max_delay(sdc_set_max_delay);
 
 }
 
@@ -338,10 +299,10 @@ void add_sdc_set_max_delay(Callback& callback, const Lexer& lexer, SetMaxDelay& 
  * Functions for set_multicycle_path
  */
 void sdc_set_multicycle_path_set_type(Callback& callback, const Lexer& lexer, SetMulticyclePath& sdc_set_multicycle_path, McpType type) {
-    if(sdc_set_multicycle_path.mcp_type != McpType::NONE) {
+    if(sdc_set_multicycle_path.type != McpType::NONE) {
         sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Must specify the type (e.g. '-setup') only once.\n"); 
     }
-    sdc_set_multicycle_path.mcp_type = type;
+    sdc_set_multicycle_path.type = type;
 }
 
 void sdc_set_multicycle_path_set_mcp_value(Callback& callback, const Lexer& lexer, SetMulticyclePath& sdc_set_multicycle_path, int mcp_value) {
@@ -383,7 +344,7 @@ void add_sdc_set_multicycle_path(Callback& callback, const Lexer& lexer, SetMult
     /*
      * Error checks
      */
-    if(sdc_set_multicycle_path.mcp_type != McpType::SETUP) {
+    if(sdc_set_multicycle_path.type != McpType::SETUP) {
         sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Must specify the multicycle path type as '-setup'.\n"); 
     }
 
@@ -400,17 +361,9 @@ void add_sdc_set_multicycle_path(Callback& callback, const Lexer& lexer, SetMult
     }
 
     /*
-     * Set line number
-     */
-    sdc_set_multicycle_path.file_line_number = lexer.lineno();
-
-    /*
      * Add command
      */
-    callback.set_multicycle_path(sdc_set_multicycle_path.mcp_type,
-                                 sdc_set_multicycle_path.mcp_value,
-                                 sdc_set_multicycle_path.from,
-                                 sdc_set_multicycle_path.to);
+    callback.set_multicycle_path(sdc_set_multicycle_path);
 
 }
 
