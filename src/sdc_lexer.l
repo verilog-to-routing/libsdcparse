@@ -91,6 +91,7 @@ STR ({ID}|\*{ID}?)
 "-from"                         { return sdcparse::Parser::make_ARG_FROM(); }
 "-to"                           { return sdcparse::Parser::make_ARG_TO(); }
 "-setup"                        { return sdcparse::Parser::make_ARG_SETUP(); }
+"-hold"                         { return sdcparse::Parser::make_ARG_HOLD(); }
 "-early"                        { return sdcparse::Parser::make_ARG_EARLY(); }
 "-late"                         { return sdcparse::Parser::make_ARG_LATE(); }
 "-cell_delay"                   { return sdcparse::Parser::make_ARG_CELL_DELAY(); }

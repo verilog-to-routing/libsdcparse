@@ -116,6 +116,7 @@ using namespace sdcparse;
 %token ARG_FROM "-from"
 %token ARG_TO "-to"
 %token ARG_SETUP "-setup"
+%token ARG_HOLD "-hold"
 %token ARG_CLOCK "-clock"
 %token ARG_MAX "-max"
 %token ARG_EARLY "-early"
@@ -236,7 +237,8 @@ cmd_set_max_delay: CMD_SET_MAX_DELAY                        { $$ = SetMaxDelay()
 
 cmd_set_multicycle_path: CMD_SET_MULTICYCLE_PATH                { $$ = SetMulticyclePath(); }
     | cmd_set_multicycle_path int_number                        { $$ = $1; sdc_set_multicycle_path_set_mcp_value(callback, lexer, $$, $2); }
-    | cmd_set_multicycle_path ARG_SETUP                         { $$ = $1; sdc_set_multicycle_path_set_type(callback, lexer, $$, McpType::SETUP); }
+    | cmd_set_multicycle_path ARG_SETUP                         { $$ = $1; sdc_set_multicycle_path_set_type(callback, lexer, $$, SetupHoldType::SETUP); }
+    | cmd_set_multicycle_path ARG_HOLD                          { $$ = $1; sdc_set_multicycle_path_set_type(callback, lexer, $$, SetupHoldType::HOLD); }
     | cmd_set_multicycle_path ARG_FROM LSPAR cmd_get_clocks RSPAR   { $$ = $1; sdc_set_multicycle_path_add_to_from_group(callback, lexer, $$, $4, FromToType::FROM); }
     | cmd_set_multicycle_path ARG_TO   LSPAR cmd_get_clocks RSPAR   { $$ = $1; sdc_set_multicycle_path_add_to_from_group(callback, lexer, $$, $4, FromToType::TO); }
     | cmd_set_multicycle_path ARG_FROM LCPAR stringGroup RCPAR      { $$ = $1; sdc_set_multicycle_path_add_to_from_group(callback, lexer, $$, $4, FromToType::FROM); }
@@ -252,8 +254,8 @@ cmd_set_multicycle_path: CMD_SET_MULTICYCLE_PATH                { $$ = SetMultic
     ;
 
 cmd_set_timing_derate: CMD_SET_TIMING_DERATE    { $$ = SetTimingDerate(); }
-    | cmd_set_timing_derate ARG_EARLY           { $$ = $1; sdc_set_timing_derate_type(callback, lexer, $$, TimingDerateType::EARLY); }
-    | cmd_set_timing_derate ARG_LATE            { $$ = $1; sdc_set_timing_derate_type(callback, lexer, $$, TimingDerateType::LATE); }
+    | cmd_set_timing_derate ARG_EARLY           { $$ = $1; sdc_set_timing_derate_type(callback, lexer, $$, EarlyLateType::EARLY); }
+    | cmd_set_timing_derate ARG_LATE            { $$ = $1; sdc_set_timing_derate_type(callback, lexer, $$, EarlyLateType::LATE); }
     | cmd_set_timing_derate ARG_CELL_DELAY      { $$ = $1; sdc_set_timing_derate_target_type(callback, lexer, $$, TimingDerateTargetType::NET); }
     | cmd_set_timing_derate ARG_NET_DELAY       { $$ = $1; sdc_set_timing_derate_target_type(callback, lexer, $$, TimingDerateTargetType::CELL); }
     | cmd_set_timing_derate number              { $$ = $1; sdc_set_timing_derate_value(callback, lexer, $$, $2); }

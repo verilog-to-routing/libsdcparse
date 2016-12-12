@@ -77,8 +77,10 @@ public:
     void set_multicycle_path(const SetMulticyclePath& cmd) override {
         printf("#%s:%d\n", filename_.c_str(), lineno_);
         printf("set_multicycle_path %d ", cmd.mcp_value);
-        if(cmd.type == McpType::SETUP) {
+        if(cmd.type == SetupHoldType::SETUP) {
             printf("-setup ");
+        } else if(cmd.type == SetupHoldType::HOLD) {
+            printf("-hold ");
         }
         print_from_to_group(cmd.from, cmd.to);
         printf("\n");
@@ -86,9 +88,9 @@ public:
     void set_timing_derate(const SetTimingDerate& cmd) override {
         printf("#%s:%d\n", filename_.c_str(), lineno_);
         printf("set_timing_derate ");
-        if(cmd.type == TimingDerateType::EARLY) {
+        if(cmd.type == EarlyLateType::EARLY) {
             printf("-early ");
-        } else if(cmd.type == TimingDerateType::LATE) {
+        } else if(cmd.type == EarlyLateType::LATE) {
             printf("-late ");
         }
 

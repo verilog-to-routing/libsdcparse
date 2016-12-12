@@ -43,13 +43,13 @@ void sdc_set_max_delay_add_to_from_group(Callback& callback, const Lexer& lexer,
 void add_sdc_set_max_delay(Callback& callback, const Lexer& lexer, SetMaxDelay& sdc_set_max_delay);
 
 //set_multicycle_path
-void sdc_set_multicycle_path_set_type(Callback& callback, const Lexer& lexer, SetMulticyclePath& sdc_set_multicycle_path, McpType type);
+void sdc_set_multicycle_path_set_type(Callback& callback, const Lexer& lexer, SetMulticyclePath& sdc_set_multicycle_path, SetupHoldType type);
 void sdc_set_multicycle_path_set_mcp_value(Callback& callback, const Lexer& lexer, SetMulticyclePath& sdc_set_multicycle_path, int mcp_value);
 void sdc_set_multicycle_path_add_to_from_group(Callback& callback, const Lexer& lexer, SetMulticyclePath& sdc_set_multicycle_path, StringGroup group, FromToType to_from_dir);
 void add_sdc_set_multicycle_path(Callback& callback, const Lexer& lexer, SetMulticyclePath& sdc_set_multicycle_path);
 
 //set_timing_derate
-void sdc_set_timing_derate_type(Callback& callback, const Lexer& lexer, SetTimingDerate& sdc_set_timing_derate, TimingDerateType type);
+void sdc_set_timing_derate_type(Callback& callback, const Lexer& lexer, SetTimingDerate& sdc_set_timing_derate, EarlyLateType type);
 void sdc_set_timing_derate_target_type(Callback& callback, const Lexer& lexer, SetTimingDerate& sdc_set_timing_derate, TimingDerateTargetType target_type);
 void sdc_set_timing_derate_value(Callback& callback, const Lexer& lexer, SetTimingDerate& sdc_set_timing_derate, float value);
 void sdc_set_timing_derate_targets(Callback& callback, const Lexer& lexer, SetTimingDerate& sdc_set_timing_derate, StringGroup targets);

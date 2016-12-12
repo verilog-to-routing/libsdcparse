@@ -161,14 +161,15 @@ enum class FromToType {
     TO
 };
 
-enum class McpType {
-    NONE, 
-    SETUP
-};
-
-enum class TimingDerateType {
+enum class EarlyLateType {
     EARLY,
     LATE,
+    NONE
+};
+
+enum class SetupHoldType {
+    SETUP,
+    HOLD,
     NONE
 };
 
@@ -254,20 +255,20 @@ struct SetMaxDelay {
 };
 
 struct SetMulticyclePath {
-    McpType type = McpType::NONE;               //The type of the mcp
+    SetupHoldType type = SetupHoldType::NONE;   //The type of the mcp
     int mcp_value = UNINITIALIZED_INT;          //The number of cycles specifed
     StringGroup from;                           //The source list of startpoints or clocks
     StringGroup to;                             //The target list of endpoints or clocks
 };
 
 struct SetTimingDerate {
-    TimingDerateType type = TimingDerateType::NONE;                             //The derate type
-    bool derate_nets = false;                                                   //Should nets be derated?
-    bool derate_cells = false;                                                  //Should cells be derated?
+    EarlyLateType type = EarlyLateType::NONE;   //The derate type
+    bool derate_nets = false;                   //Should nets be derated?
+    bool derate_cells = false;                  //Should cells be derated?
 
-    float value = UNINITIALIZED_FLOAT;                                   //The derate value
+    float value = UNINITIALIZED_FLOAT;          //The derate value
 
-    StringGroup cell_targets;                                                   //The (possibly empty) set of target cells
+    StringGroup cell_targets;                   //The (possibly empty) set of target cells
 };
 
 } //namespace

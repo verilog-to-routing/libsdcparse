@@ -298,9 +298,9 @@ void add_sdc_set_max_delay(Callback& callback, const Lexer& lexer, SetMaxDelay& 
 /*
  * Functions for set_multicycle_path
  */
-void sdc_set_multicycle_path_set_type(Callback& callback, const Lexer& lexer, SetMulticyclePath& sdc_set_multicycle_path, McpType type) {
-    if(sdc_set_multicycle_path.type != McpType::NONE) {
-        sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Must specify the type (e.g. '-setup') only once.\n"); 
+void sdc_set_multicycle_path_set_type(Callback& callback, const Lexer& lexer, SetMulticyclePath& sdc_set_multicycle_path, SetupHoldType type) {
+    if(sdc_set_multicycle_path.type != SetupHoldType::NONE) {
+        sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Must specify the type (e.g. '-setup' or '-hold') only once.\n"); 
     }
     sdc_set_multicycle_path.type = type;
 }
@@ -344,8 +344,8 @@ void add_sdc_set_multicycle_path(Callback& callback, const Lexer& lexer, SetMult
     /*
      * Error checks
      */
-    if(sdc_set_multicycle_path.type != McpType::SETUP) {
-        sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Must specify the multicycle path type as '-setup'.\n"); 
+    if(sdc_set_multicycle_path.type == SetupHoldType::NONE) {
+        sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Must specify the multicycle path type as '-setup' or '-hold'.\n"); 
     }
 
     if(sdc_set_multicycle_path.mcp_value == UNINITIALIZED_INT) {
@@ -370,8 +370,8 @@ void add_sdc_set_multicycle_path(Callback& callback, const Lexer& lexer, SetMult
 /*
  * Functions for set_timing_derate
  */
-void sdc_set_timing_derate_type(Callback& callback, const Lexer& lexer, SetTimingDerate& sdc_set_timing_derate, TimingDerateType type) {
-    if(sdc_set_timing_derate.type != TimingDerateType::NONE) {
+void sdc_set_timing_derate_type(Callback& callback, const Lexer& lexer, SetTimingDerate& sdc_set_timing_derate, EarlyLateType type) {
+    if(sdc_set_timing_derate.type != EarlyLateType::NONE) {
         sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Only a single '-early' or '-late' option is supported.\n"); 
     }
 
@@ -422,7 +422,7 @@ void add_sdc_set_timing_derate(Callback& callback, const Lexer& lexer, SetTiming
     /*
      * Error checks
      */
-    if(sdc_set_timing_derate.type != TimingDerateType::EARLY && sdc_set_timing_derate.type != TimingDerateType::LATE) {
+    if(sdc_set_timing_derate.type == EarlyLateType::NONE) {
         sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Must specify timing derate as '-early' or '-late'\n"); 
     }
 
