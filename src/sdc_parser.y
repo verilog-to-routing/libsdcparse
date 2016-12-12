@@ -104,6 +104,7 @@ using namespace sdcparse;
 %token CMD_SET_INPUT_DELAY "set_input_delay"
 %token CMD_SET_OUTPUT_DELAY "set_output_delay"
 %token CMD_SET_CLOCK_UNCERTAINTY "set_clock_uncertainty"
+%token CMD_SET_CLOCK_LATENCY "set_clock_latency"
 %token CMD_SET_DISABLE_TIMING "set_disable_timing"
 %token CMD_SET_TIMING_DERATE "set_timing_derate"
 
@@ -127,6 +128,7 @@ using namespace sdcparse;
 %token ARG_LATE "-late"
 %token ARG_CELL_DELAY "-cell_delay"
 %token ARG_NET_DELAY "-net_delay"
+%token ARG_SOURCE "-source"
 
 %token LSPAR "["
 %token RSPAR "]"
@@ -156,6 +158,7 @@ using namespace sdcparse;
 %type <SetMinMaxDelay> cmd_set_max_delay cmd_set_min_delay
 %type <SetMulticyclePath> cmd_set_multicycle_path
 %type <SetClockUncertainty> cmd_set_clock_uncertainty
+%type <SetClockLatency> cmd_set_clock_latency
 %type <SetDisableTiming> cmd_set_disable_timing
 %type <SetTimingDerate> cmd_set_timing_derate
 
@@ -176,6 +179,7 @@ sdc_commands:                                    { }
     | sdc_commands cmd_set_min_delay EOL         { callback.lineno(lexer.lineno()-1); add_sdc_set_min_max_delay(callback, lexer, $2); }
     | sdc_commands cmd_set_multicycle_path EOL   { callback.lineno(lexer.lineno()-1); add_sdc_set_multicycle_path(callback, lexer, $2); }
     | sdc_commands cmd_set_clock_uncertainty EOL { callback.lineno(lexer.lineno()-1); add_sdc_set_clock_uncertainty(callback, lexer, $2); }
+    | sdc_commands cmd_set_clock_latency EOL     { callback.lineno(lexer.lineno()-1); add_sdc_set_clock_latency(callback, lexer, $2); }
     | sdc_commands cmd_set_disable_timing EOL    { callback.lineno(lexer.lineno()-1); add_sdc_set_disable_timing(callback, lexer, $2); }
     | sdc_commands cmd_set_timing_derate EOL     { callback.lineno(lexer.lineno()-1); add_sdc_set_timing_derate(callback, lexer, $2); }
     | sdc_commands EOL                           { /* Eat stray EOL symbols */ }
@@ -297,6 +301,15 @@ cmd_set_clock_uncertainty: CMD_SET_CLOCK_UNCERTAINTY            { $$ = SetClockU
                                                                         FromToType::TO);
                                                                 }
     ;
+
+cmd_set_clock_latency: CMD_SET_CLOCK_LATENCY                    { $$ = SetClockLatency(); }
+    | cmd_set_clock_latency ARG_SOURCE                          { $$ = $1; sdc_set_clock_latency_set_type(callback, lexer, $$, ClockLatencyType::SOURCE); }
+    | cmd_set_clock_latency ARG_EARLY                           { $$ = $1; sdc_set_clock_latency_early_late(callback, lexer, $$, EarlyLateType::EARLY); }
+    | cmd_set_clock_latency ARG_LATE                            { $$ = $1; sdc_set_clock_latency_early_late(callback, lexer, $$, EarlyLateType::LATE); }
+    | cmd_set_clock_latency float_number                        { $$ = $1; sdc_set_clock_latency_set_value(callback, lexer, $$, $2); }
+    | cmd_set_clock_latency LSPAR cmd_get_clocks RSPAR          { $$ = $1; sdc_set_clock_latency_set_clocks(callback, lexer, $$, $3); }
+    ;
+
 
 cmd_set_disable_timing: CMD_SET_DISABLE_TIMING                       { $$ = SetDisableTiming(); }
     | cmd_set_disable_timing ARG_FROM LSPAR cmd_get_pins RSPAR { $$ = $1; sdc_set_disable_timing_add_to_from_group(callback, lexer, $$, $4, FromToType::FROM); }

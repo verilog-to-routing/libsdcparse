@@ -53,10 +53,11 @@ FLOAT_EXP ([eE][-+]?{DIGIT10}+)
 FLOAT_NUMBER ({NAN}|([-+]?({INF}|({FLOAT_BASE}{FLOAT_EXP}?))))
 INT_NUMBER ([-+]?{DIGIT10}+)
 ALPHA [a-zA-Z_]
-SYMBOL [-~|:*\\/[\]]
+SYMBOL [-~|:*\\/]
 ID_FIRST ({ALPHA})
-ID_LATER ({ALPHA}|{DIGIT10}|{SYMBOL})
-ID ({ID_FIRST}{ID_LATER}*)
+ID_MID ({ALPHA}|{DIGIT10}|{SYMBOL})
+ID_INDEX (\[{DIGIT10}+\])
+ID ({ID_FIRST}{ID_MID}*{ID_INDEX}?)
 STR ({ID}|\*{ID}?)
 
 /*
@@ -77,6 +78,7 @@ STR ({ID}|\*{ID}?)
 "set_min_delay"                 { return sdcparse::Parser::make_CMD_SET_MIN_DELAY(); }
 "set_multicycle_path"           { return sdcparse::Parser::make_CMD_SET_MULTICYCLE_PATH(); }
 "set_clock_uncertainty"         { return sdcparse::Parser::make_CMD_SET_CLOCK_UNCERTAINTY(); }
+"set_clock_latency"             { return sdcparse::Parser::make_CMD_SET_CLOCK_LATENCY(); }
 "set_disable_timing"            { return sdcparse::Parser::make_CMD_SET_DISABLE_TIMING(); }
 "set_timing_derate"             { return sdcparse::Parser::make_CMD_SET_TIMING_DERATE(); }
 
@@ -100,6 +102,7 @@ STR ({ID}|\*{ID}?)
 "-late"                         { return sdcparse::Parser::make_ARG_LATE(); }
 "-cell_delay"                   { return sdcparse::Parser::make_ARG_CELL_DELAY(); }
 "-net_delay"                    { return sdcparse::Parser::make_ARG_NET_DELAY(); }
+"-source"                       { return sdcparse::Parser::make_ARG_SOURCE(); }
 
 {INT_NUMBER}                    { return sdcparse::Parser::make_INT_NUMBER(atoi(sdcparse_get_text(yyscanner))); }
 {FLOAT_NUMBER}                  { return sdcparse::Parser::make_FLOAT_NUMBER(atof(sdcparse_get_text(yyscanner))); }

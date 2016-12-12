@@ -102,6 +102,21 @@ public:
         printf(" %f ", cmd.value);
         printf("\n");
     }
+    void set_clock_latency(const SetClockLatency& cmd) override {
+        printf("#%s:%d\n", filename_.c_str(), lineno_);
+        printf("set_clock_latency ");
+        if(cmd.type == ClockLatencyType::SOURCE) {
+            printf("-source ");
+        }
+        if(cmd.early_late == EarlyLateType::EARLY) {
+            printf("-early ");
+        } else if(cmd.early_late == EarlyLateType::LATE) {
+            printf("-late ");
+        }
+        printf("%f ", cmd.value);
+        print_string_group(cmd.target_clocks);
+        printf("\n");
+    }
     void set_disable_timing(const SetDisableTiming& cmd) override {
         printf("#%s:%d\n", filename_.c_str(), lineno_);
         printf("set_disable_timing ");
@@ -180,22 +195,22 @@ int main(int argc, char **argv) {
 
 void print_string_group(const StringGroup& group) {
     const char *start_token, *end_token;
-    if(group.group_type == StringGroupType::STRING) {
+    if(group.type == StringGroupType::STRING) {
         start_token = "{";
         end_token   = "}";
 
-    } else if (group.group_type == StringGroupType::CLOCK) {
+    } else if (group.type == StringGroupType::CLOCK) {
         start_token = "[get_clocks {";
         end_token   = "}]";
 
-    } else if (group.group_type == StringGroupType::PORT) {
+    } else if (group.type == StringGroupType::PORT) {
         start_token = "[get_ports {";
         end_token   = "}]";
 
-    } else if (group.group_type == StringGroupType::CELL) {
+    } else if (group.type == StringGroupType::CELL) {
         start_token = "[get_cells {";
         end_token   = "}]";
-    } else if (group.group_type == StringGroupType::PIN) {
+    } else if (group.type == StringGroupType::PIN) {
         start_token = "[get_pins {";
         end_token   = "}]";
 

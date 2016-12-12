@@ -92,6 +92,7 @@ struct SetFalsePath;
 struct SetMinMaxDelay;
 struct SetMulticyclePath;
 struct SetClockUncertainty;
+struct SetClockLatency;
 struct SetDisableTiming;
 struct SetTimingDerate;
 
@@ -119,6 +120,7 @@ class Callback {
         virtual void set_min_max_delay(const SetMinMaxDelay& cmd) = 0;
         virtual void set_multicycle_path(const SetMulticyclePath& cmd) = 0;
         virtual void set_clock_uncertainty(const SetClockUncertainty& cmd) = 0;
+        virtual void set_clock_latency(const SetClockLatency& cmd) = 0;
         virtual void set_disable_timing(const SetDisableTiming& cmd) = 0;
         virtual void set_timing_derate(const SetTimingDerate& cmd) = 0;
 
@@ -183,6 +185,11 @@ enum class SetupHoldType {
     NONE
 };
 
+enum class ClockLatencyType {
+    SOURCE,
+    NONE
+};
+
 enum class StringGroupType {
     STRING, 
     PORT, 
@@ -197,10 +204,10 @@ enum class StringGroupType {
 
 struct StringGroup {
     StringGroup() = default;
-    StringGroup(StringGroupType type)
-        : group_type(type) {}
+    StringGroup(StringGroupType group_type)
+        : type(group_type) {}
 
-    StringGroupType group_type = StringGroupType::STRING;   //The type of the string group, default is STRING. 
+    StringGroupType type = StringGroupType::STRING;   //The type of the string group, default is STRING. 
                                                             // Groups derived from 'calls' to [get_clocks {...}] 
                                                             // and [get_ports {...}] will have types SDC_CLOCK 
                                                             // and SDC_PORT respectively.
@@ -267,6 +274,14 @@ struct SetClockUncertainty {
 
     StringGroup from;                           //Launch clock domain(s)
     StringGroup to;                             //Capture clock domain(s)
+};
+
+struct SetClockLatency {
+    ClockLatencyType type = ClockLatencyType::NONE;//Latency type
+    EarlyLateType early_late = EarlyLateType::NONE; //Is the early or late latency?
+    float value = UNINITIALIZED_FLOAT;          //The latency value
+
+    StringGroup target_clocks;                  //The target clocks
 };
 
 struct SetDisableTiming {

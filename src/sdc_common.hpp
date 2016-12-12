@@ -55,6 +55,13 @@ void sdc_set_clock_uncertainty_set_value(Callback& callback, const Lexer& lexer,
 void sdc_set_clock_uncertainty_add_to_from_group(Callback& callback, const Lexer& lexer, SetClockUncertainty& sdc_set_clock_uncertainty, StringGroup group, FromToType to_from_dir);
 void add_sdc_set_clock_uncertainty(Callback& callback, const Lexer& lexer, SetClockUncertainty& sdc_set_clock_uncertainty);
 
+//set_clock_latency
+void sdc_set_clock_latency_set_type(Callback& callback, const Lexer& lexer, SetClockLatency& sdc_set_clock_latency, ClockLatencyType type);
+void sdc_set_clock_latency_early_late(Callback& callback, const Lexer& lexer, SetClockLatency& sdc_set_clock_latency, EarlyLateType early_late);
+void sdc_set_clock_latency_set_value(Callback& callback, const Lexer& lexer, SetClockLatency& sdc_set_clock_latency, float value);
+void sdc_set_clock_latency_set_clocks(Callback& callback, const Lexer& lexer, SetClockLatency& sdc_set_clock_latency, StringGroup clock_targets);
+void add_sdc_set_clock_latency(Callback& callback, const Lexer& lexer, SetClockLatency& sdc_set_clock_latency);
+
 //set_disable_timing
 void sdc_set_disable_timing_add_to_from_group(Callback& callback, const Lexer& lexer, SetDisableTiming& sdc_set_disable_timing, StringGroup group, FromToType to_from_dir);
 void add_sdc_set_disable_timing(Callback& callback, const Lexer& lexer, SetDisableTiming& sdc_set_disable_timing);
