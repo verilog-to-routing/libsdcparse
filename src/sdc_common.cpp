@@ -368,6 +368,84 @@ void add_sdc_set_multicycle_path(Callback& callback, const Lexer& lexer, SetMult
 }
 
 /*
+ * Functions for set_timing_derate
+ */
+void sdc_set_timing_derate_type(Callback& callback, const Lexer& lexer, SetTimingDerate& sdc_set_timing_derate, TimingDerateType type) {
+    if(sdc_set_timing_derate.type != TimingDerateType::NONE) {
+        sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Only a single '-early' or '-late' option is supported.\n"); 
+    }
+
+    sdc_set_timing_derate.type = type; 
+}
+
+void sdc_set_timing_derate_target_type(Callback& callback, const Lexer& lexer, SetTimingDerate& sdc_set_timing_derate, TimingDerateTargetType target_type) {
+    if(target_type == TimingDerateTargetType::NET) {
+        if(sdc_set_timing_derate.derate_nets) {
+            sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "-net_delay should only be specified once.\n"); 
+        } else {
+            sdc_set_timing_derate.derate_nets = true;
+        }
+    } else if (target_type == TimingDerateTargetType::CELL) {
+        if(sdc_set_timing_derate.derate_cells) {
+            sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "-cell_delay should only be specified once.\n"); 
+        } else {
+            sdc_set_timing_derate.derate_cells = true;
+        }
+    }
+}
+
+void sdc_set_timing_derate_value(Callback& callback, const Lexer& lexer, SetTimingDerate& sdc_set_timing_derate, float value) {
+    if(!std::isnan(sdc_set_timing_derate.value)) {
+        sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Only a single derate value per set_timing_derate command is allowed.\n"); 
+    }
+
+    if(sdc_set_timing_derate.value < 0) {
+        sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Timing derate values must be positive.\n"); 
+    }
+
+    sdc_set_timing_derate.value = value;
+}
+
+void sdc_set_timing_derate_targets(Callback& callback, const Lexer& lexer, SetTimingDerate& sdc_set_timing_derate, StringGroup targets) {
+    if(targets.group_type != StringGroupType::CELLS) {
+        sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Only get_cells is supported with set_timing_derate.\n"); 
+    }
+
+    if(!sdc_set_timing_derate.cell_targets.strings.empty()) {
+        sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Only a single get_cells call is supported with set_timing_derate.\n"); 
+    }
+
+    sdc_set_timing_derate.cell_targets = targets;
+}
+
+void add_sdc_set_timing_derate(Callback& callback, const Lexer& lexer, SetTimingDerate& sdc_set_timing_derate) {
+    /*
+     * Error checks
+     */
+    if(sdc_set_timing_derate.type != TimingDerateType::EARLY && sdc_set_timing_derate.type != TimingDerateType::LATE) {
+        sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Must specify timing derate as '-early' or '-late'\n"); 
+    }
+
+    if(std::isnan(sdc_set_timing_derate.value)) {
+        sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Must specify timing derate value\n"); 
+    }
+
+    /*
+     * Defaults
+     */
+    if(!sdc_set_timing_derate.derate_nets && !sdc_set_timing_derate.derate_cells) {
+        //If unspecified, both cells and nets are derated
+        sdc_set_timing_derate.derate_nets = true;
+        sdc_set_timing_derate.derate_cells = true;
+    }
+
+    /*
+     * Add command
+     */
+    callback.set_timing_derate(sdc_set_timing_derate);
+}
+
+/*
  * Functions for string_group
  */
 StringGroup make_sdc_string_group(StringGroupType type, const std::string& string) {

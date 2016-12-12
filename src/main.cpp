@@ -83,6 +83,25 @@ public:
         print_from_to_group(cmd.from, cmd.to);
         printf("\n");
     }
+    void set_timing_derate(const SetTimingDerate& cmd) override {
+        printf("#%s:%d\n", filename_.c_str(), lineno_);
+        printf("set_timing_derate ");
+        if(cmd.type == TimingDerateType::EARLY) {
+            printf("-early ");
+        } else if(cmd.type == TimingDerateType::LATE) {
+            printf("-late ");
+        }
+
+        if(cmd.derate_nets) {
+            printf("-net_delay ");
+        }
+        if(cmd.derate_cells) {
+            printf("-cell_delay ");
+        }
+        printf("%f ", cmd.value);
+        print_string_group(cmd.cell_targets);
+        printf("\n");
+    }
 
     //End of parsing
     void finish_parse() override { }
@@ -147,20 +166,26 @@ void print_string_group(const StringGroup& group) {
         start_token = "[get_ports {";
         end_token   = "}]";
 
+    } else if (group.group_type == StringGroupType::CELLS) {
+        start_token = "[get_cells {";
+        end_token   = "}]";
+
     } else {
         printf("Unsupported sdc string group type\n");
         exit(1);
     }
 
-    printf("%s", start_token);
-    for(size_t i = 0; i < group.strings.size(); ++i) {
-        printf("%s", group.strings[i].c_str());
+    if(!group.strings.empty()) {
+        printf("%s", start_token);
+        for(size_t i = 0; i < group.strings.size(); ++i) {
+            printf("%s", group.strings[i].c_str());
 
-        if(i != group.strings.size() - 1) {
-            printf(" ");
+            if(i != group.strings.size() - 1) {
+                printf(" ");
+            }
         }
+        printf("%s", end_token);
     }
-    printf("%s", end_token);
 }
 
 void print_from_to_group(const StringGroup& from, const StringGroup& to) {

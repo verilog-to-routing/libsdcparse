@@ -6,6 +6,11 @@
 
 namespace sdcparse {
 
+enum class TimingDerateTargetType {
+    NET,
+    CELL
+};
+
 /*
  * Function Declarations
  */
@@ -43,6 +48,12 @@ void sdc_set_multicycle_path_set_mcp_value(Callback& callback, const Lexer& lexe
 void sdc_set_multicycle_path_add_to_from_group(Callback& callback, const Lexer& lexer, SetMulticyclePath& sdc_set_multicycle_path, StringGroup group, FromToType to_from_dir);
 void add_sdc_set_multicycle_path(Callback& callback, const Lexer& lexer, SetMulticyclePath& sdc_set_multicycle_path);
 
+//set_timing_derate
+void sdc_set_timing_derate_type(Callback& callback, const Lexer& lexer, SetTimingDerate& sdc_set_timing_derate, TimingDerateType type);
+void sdc_set_timing_derate_target_type(Callback& callback, const Lexer& lexer, SetTimingDerate& sdc_set_timing_derate, TimingDerateTargetType target_type);
+void sdc_set_timing_derate_value(Callback& callback, const Lexer& lexer, SetTimingDerate& sdc_set_timing_derate, float value);
+void sdc_set_timing_derate_targets(Callback& callback, const Lexer& lexer, SetTimingDerate& sdc_set_timing_derate, StringGroup targets);
+void add_sdc_set_timing_derate(Callback& callback, const Lexer& lexer, SetTimingDerate& sdc_set_multicycle_path);
 
 //string_group
 StringGroup make_sdc_string_group(StringGroupType type, const std::string& string);

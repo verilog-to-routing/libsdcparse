@@ -102,9 +102,11 @@ using namespace sdcparse;
 %token CMD_SET_MULTICYCLE_PATH "set_multicycle_path"
 %token CMD_SET_INPUT_DELAY "set_input_delay"
 %token CMD_SET_OUTPUT_DELAY "set_output_delay"
+%token CMD_SET_TIMING_DERATE "set_timing_derate"
 
 %token CMD_GET_PORTS "get_ports"
 %token CMD_GET_CLOCKS "get_clocks"
+%token CMD_GET_CELLS "get_cells"
 
 %token ARG_PERIOD "-period"
 %token ARG_WAVEFORM "-waveform"
@@ -116,6 +118,10 @@ using namespace sdcparse;
 %token ARG_SETUP "-setup"
 %token ARG_CLOCK "-clock"
 %token ARG_MAX "-max"
+%token ARG_EARLY "-early"
+%token ARG_LATE "-late"
+%token ARG_CELL_DELAY "-cell_delay"
+%token ARG_NET_DELAY "-net_delay"
 
 %token LSPAR "["
 %token RSPAR "]"
@@ -144,8 +150,9 @@ using namespace sdcparse;
 %type <SetFalsePath> cmd_set_false_path
 %type <SetMaxDelay> cmd_set_max_delay
 %type <SetMulticyclePath> cmd_set_multicycle_path
+%type <SetTimingDerate> cmd_set_timing_derate
 
-%type <StringGroup> stringGroup cmd_get_ports cmd_get_clocks
+%type <StringGroup> stringGroup cmd_get_ports cmd_get_clocks cmd_get_cells
 
 /* Top level rule */
 %start sdc_commands
@@ -160,6 +167,7 @@ sdc_commands:                                   { }
     | sdc_commands cmd_set_false_path EOL       { callback.lineno(lexer.lineno()-1); add_sdc_set_false_path(callback, lexer, $2); }
     | sdc_commands cmd_set_max_delay EOL        { callback.lineno(lexer.lineno()-1); add_sdc_set_max_delay(callback, lexer, $2); }
     | sdc_commands cmd_set_multicycle_path EOL  { callback.lineno(lexer.lineno()-1); add_sdc_set_multicycle_path(callback, lexer, $2); }
+    | sdc_commands cmd_set_timing_derate EOL  { callback.lineno(lexer.lineno()-1); add_sdc_set_timing_derate(callback, lexer, $2); }
     | sdc_commands EOL                          { /* Eat stray EOL symbols */ }
     ;
 
@@ -243,6 +251,15 @@ cmd_set_multicycle_path: CMD_SET_MULTICYCLE_PATH                { $$ = SetMultic
                                                                 }
     ;
 
+cmd_set_timing_derate: CMD_SET_TIMING_DERATE    { $$ = SetTimingDerate(); }
+    | cmd_set_timing_derate ARG_EARLY           { $$ = $1; sdc_set_timing_derate_type(callback, lexer, $$, TimingDerateType::EARLY); }
+    | cmd_set_timing_derate ARG_LATE            { $$ = $1; sdc_set_timing_derate_type(callback, lexer, $$, TimingDerateType::LATE); }
+    | cmd_set_timing_derate ARG_CELL_DELAY      { $$ = $1; sdc_set_timing_derate_target_type(callback, lexer, $$, TimingDerateTargetType::NET); }
+    | cmd_set_timing_derate ARG_NET_DELAY       { $$ = $1; sdc_set_timing_derate_target_type(callback, lexer, $$, TimingDerateTargetType::CELL); }
+    | cmd_set_timing_derate number              { $$ = $1; sdc_set_timing_derate_value(callback, lexer, $$, $2); }
+    | cmd_set_timing_derate LSPAR cmd_get_cells RSPAR { $$ = $1; sdc_set_timing_derate_targets(callback, lexer, $$, $3); }
+    ;
+
 cmd_get_ports: CMD_GET_PORTS            { $$ = StringGroup(StringGroupType::PORT); }
     | cmd_get_ports LCPAR stringGroup RCPAR { $$ = $1; sdc_string_group_add_strings($$, $3); }
     | cmd_get_ports string              { $$ = $1; sdc_string_group_add_string($$, $2); }
@@ -252,6 +269,12 @@ cmd_get_clocks: CMD_GET_CLOCKS              { $$ = StringGroup(StringGroupType::
     | cmd_get_clocks LCPAR stringGroup RCPAR    { $$ = $1; sdc_string_group_add_strings($$, $3); }
     | cmd_get_clocks string                 { $$ = $1; sdc_string_group_add_string($$, $2); }
     ;
+
+cmd_get_cells: CMD_GET_CELLS            { $$ = StringGroup(StringGroupType::CELLS); }
+    | cmd_get_cells LCPAR stringGroup RCPAR { $$ = $1; sdc_string_group_add_strings($$, $3); }
+    | cmd_get_cells string              { $$ = $1; sdc_string_group_add_string($$, $2); }
+    ;
+
 
 stringGroup: /*empty*/   { $$ = StringGroup(StringGroupType::STRING); }
     | stringGroup string { $$ = $1; sdc_string_group_add_string($$, $2); } 

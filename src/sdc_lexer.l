@@ -4,6 +4,7 @@
      */
     #include "sdcparse.hpp"
     #include "sdc_common.hpp"
+    #include "sdc_error.hpp"
 
     #include "sdc_lexer.hpp"
 
@@ -74,9 +75,11 @@ STR ({ID}|\*{ID}?)
 "set_false_path"                { return sdcparse::Parser::make_CMD_SET_FALSE_PATH(); }
 "set_max_delay"                 { return sdcparse::Parser::make_CMD_SET_MAX_DELAY(); }
 "set_multicycle_path"           { return sdcparse::Parser::make_CMD_SET_MULTICYCLE_PATH(); }
+"set_timing_derate"             { return sdcparse::Parser::make_CMD_SET_TIMING_DERATE(); }
 
 "get_ports"                     { return sdcparse::Parser::make_CMD_GET_PORTS(); }
 "get_clocks"                    { return sdcparse::Parser::make_CMD_GET_CLOCKS(); }
+"get_cells"                     { return sdcparse::Parser::make_CMD_GET_CELLS(); }
 
 "-period"                       { return sdcparse::Parser::make_ARG_PERIOD(); }
 "-name"                         { return sdcparse::Parser::make_ARG_NAME(); }
@@ -88,6 +91,10 @@ STR ({ID}|\*{ID}?)
 "-from"                         { return sdcparse::Parser::make_ARG_FROM(); }
 "-to"                           { return sdcparse::Parser::make_ARG_TO(); }
 "-setup"                        { return sdcparse::Parser::make_ARG_SETUP(); }
+"-early"                        { return sdcparse::Parser::make_ARG_EARLY(); }
+"-late"                         { return sdcparse::Parser::make_ARG_LATE(); }
+"-cell_delay"                   { return sdcparse::Parser::make_ARG_CELL_DELAY(); }
+"-net_delay"                    { return sdcparse::Parser::make_ARG_NET_DELAY(); }
 
 {INT_NUMBER}                    { return sdcparse::Parser::make_INT_NUMBER(atoi(sdcparse_get_text(yyscanner))); }
 {FLOAT_NUMBER}                  { return sdcparse::Parser::make_FLOAT_NUMBER(atof(sdcparse_get_text(yyscanner))); }
@@ -145,7 +152,6 @@ STR ({ID}|\*{ID}?)
                                   static bool once; return (once = !once) ? sdcparse::Parser::make_EOL() : sdcparse::Parser::make_EOF();
                                 }
 .                               { 
-                                  std::string bad_char = sdcparse_get_text(yyscanner);
-                                  callback.parse_error(sdcparse_get_lineno(yyscanner), bad_char, "Unrecognized character"); 
+                                  sdc_error_wrap(callback, sdcparse_get_lineno(yyscanner), sdcparse_get_text(yyscanner), "Unrecognized character"); 
                                 }
 %%

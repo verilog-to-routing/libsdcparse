@@ -91,6 +91,7 @@ struct SetClockGroups;
 struct SetFalsePath;
 struct SetMaxDelay;
 struct SetMulticyclePath;
+struct SetTimingDerate;
 
 struct StringGroup;
 
@@ -118,7 +119,7 @@ class Callback {
         //virtual void set_clock_uncertainty(const SetClockUncertainty& cmd) = 0;
         //virtual void set_clock_latency(const SetClockLatency& cmd) = 0;
         //virtual void set_disable_timing(const SetDisableTiming& cmd) = 0;
-        //virtual void set_timing_derate(const SetTimingDerate& cmd) = 0;
+        virtual void set_timing_derate(const SetTimingDerate& cmd) = 0;
 
         //End of parsing
         virtual void finish_parse() = 0;
@@ -165,10 +166,17 @@ enum class McpType {
     SETUP
 };
 
+enum class TimingDerateType {
+    EARLY,
+    LATE,
+    NONE
+};
+
 enum class StringGroupType {
     STRING, 
     PORT, 
-    CLOCK
+    CLOCK,
+    CELLS
 };
 
 /*
@@ -250,6 +258,16 @@ struct SetMulticyclePath {
     int mcp_value = UNINITIALIZED_INT;          //The number of cycles specifed
     StringGroup from;                           //The source list of startpoints or clocks
     StringGroup to;                             //The target list of endpoints or clocks
+};
+
+struct SetTimingDerate {
+    TimingDerateType type = TimingDerateType::NONE;                             //The derate type
+    bool derate_nets = false;                                                   //Should nets be derated?
+    bool derate_cells = false;                                                  //Should cells be derated?
+
+    float value = UNINITIALIZED_FLOAT;                                   //The derate value
+
+    StringGroup cell_targets;                                                   //The (possibly empty) set of target cells
 };
 
 } //namespace
