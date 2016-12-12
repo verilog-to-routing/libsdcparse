@@ -102,6 +102,7 @@ using namespace sdcparse;
 %token CMD_SET_MULTICYCLE_PATH "set_multicycle_path"
 %token CMD_SET_INPUT_DELAY "set_input_delay"
 %token CMD_SET_OUTPUT_DELAY "set_output_delay"
+%token CMD_SET_CLOCK_UNCERTAINTY "set_clock_uncertainty"
 %token CMD_SET_TIMING_DERATE "set_timing_derate"
 
 %token CMD_GET_PORTS "get_ports"
@@ -151,6 +152,7 @@ using namespace sdcparse;
 %type <SetFalsePath> cmd_set_false_path
 %type <SetMaxDelay> cmd_set_max_delay
 %type <SetMulticyclePath> cmd_set_multicycle_path
+%type <SetClockUncertainty> cmd_set_clock_uncertainty
 %type <SetTimingDerate> cmd_set_timing_derate
 
 %type <StringGroup> stringGroup cmd_get_ports cmd_get_clocks cmd_get_cells
@@ -160,16 +162,17 @@ using namespace sdcparse;
 
 %%
 
-sdc_commands:                                   { }
-    | sdc_commands cmd_create_clock EOL         { callback.lineno(lexer.lineno()-1); add_sdc_create_clock(callback, lexer, $2); }
-    | sdc_commands cmd_set_input_delay EOL      { callback.lineno(lexer.lineno()-1); add_sdc_set_io_delay(callback, lexer, $2); }
-    | sdc_commands cmd_set_output_delay EOL     { callback.lineno(lexer.lineno()-1); add_sdc_set_io_delay(callback, lexer, $2); }
-    | sdc_commands cmd_set_clock_groups EOL     { callback.lineno(lexer.lineno()-1); add_sdc_set_clock_groups(callback, lexer, $2); }
-    | sdc_commands cmd_set_false_path EOL       { callback.lineno(lexer.lineno()-1); add_sdc_set_false_path(callback, lexer, $2); }
-    | sdc_commands cmd_set_max_delay EOL        { callback.lineno(lexer.lineno()-1); add_sdc_set_max_delay(callback, lexer, $2); }
-    | sdc_commands cmd_set_multicycle_path EOL  { callback.lineno(lexer.lineno()-1); add_sdc_set_multicycle_path(callback, lexer, $2); }
-    | sdc_commands cmd_set_timing_derate EOL  { callback.lineno(lexer.lineno()-1); add_sdc_set_timing_derate(callback, lexer, $2); }
-    | sdc_commands EOL                          { /* Eat stray EOL symbols */ }
+sdc_commands:                                    { }
+    | sdc_commands cmd_create_clock EOL          { callback.lineno(lexer.lineno()-1); add_sdc_create_clock(callback, lexer, $2); }
+    | sdc_commands cmd_set_input_delay EOL       { callback.lineno(lexer.lineno()-1); add_sdc_set_io_delay(callback, lexer, $2); }
+    | sdc_commands cmd_set_output_delay EOL      { callback.lineno(lexer.lineno()-1); add_sdc_set_io_delay(callback, lexer, $2); }
+    | sdc_commands cmd_set_clock_groups EOL      { callback.lineno(lexer.lineno()-1); add_sdc_set_clock_groups(callback, lexer, $2); }
+    | sdc_commands cmd_set_false_path EOL        { callback.lineno(lexer.lineno()-1); add_sdc_set_false_path(callback, lexer, $2); }
+    | sdc_commands cmd_set_max_delay EOL         { callback.lineno(lexer.lineno()-1); add_sdc_set_max_delay(callback, lexer, $2); }
+    | sdc_commands cmd_set_multicycle_path EOL   { callback.lineno(lexer.lineno()-1); add_sdc_set_multicycle_path(callback, lexer, $2); }
+    | sdc_commands cmd_set_clock_uncertainty EOL { callback.lineno(lexer.lineno()-1); add_sdc_set_clock_uncertainty(callback, lexer, $2); }
+    | sdc_commands cmd_set_timing_derate EOL     { callback.lineno(lexer.lineno()-1); add_sdc_set_timing_derate(callback, lexer, $2); }
+    | sdc_commands EOL                           { /* Eat stray EOL symbols */ }
     ;
 
 cmd_create_clock: CMD_CREATE_CLOCK                          { $$ = CreateClock(); }
@@ -253,6 +256,23 @@ cmd_set_multicycle_path: CMD_SET_MULTICYCLE_PATH                { $$ = SetMultic
                                                                 }
     ;
 
+cmd_set_clock_uncertainty: CMD_SET_CLOCK_UNCERTAINTY            { $$ = SetClockUncertainty(); }
+    | cmd_set_clock_uncertainty ARG_SETUP                         { $$ = $1; sdc_set_clock_uncertainty_set_type(callback, lexer, $$, SetupHoldType::SETUP); }
+    | cmd_set_clock_uncertainty ARG_HOLD                          { $$ = $1; sdc_set_clock_uncertainty_set_type(callback, lexer, $$, SetupHoldType::HOLD); }
+    | cmd_set_clock_uncertainty float_number                        { $$ = $1; sdc_set_clock_uncertainty_set_value(callback, lexer, $$, $2); }
+    | cmd_set_clock_uncertainty ARG_FROM LSPAR cmd_get_clocks RSPAR   { $$ = $1; sdc_set_clock_uncertainty_add_to_from_group(callback, lexer, $$, $4, FromToType::FROM); }
+    | cmd_set_clock_uncertainty ARG_TO   LSPAR cmd_get_clocks RSPAR   { $$ = $1; sdc_set_clock_uncertainty_add_to_from_group(callback, lexer, $$, $4, FromToType::TO); }
+    | cmd_set_clock_uncertainty ARG_FROM LCPAR stringGroup RCPAR      { $$ = $1; sdc_set_clock_uncertainty_add_to_from_group(callback, lexer, $$, $4, FromToType::FROM); }
+    | cmd_set_clock_uncertainty ARG_TO   LCPAR stringGroup RCPAR      { $$ = $1; sdc_set_clock_uncertainty_add_to_from_group(callback, lexer, $$, $4, FromToType::TO); }
+    | cmd_set_clock_uncertainty ARG_FROM     string               { $$ = $1; sdc_set_clock_uncertainty_add_to_from_group(callback, lexer, $$, 
+                                                                        make_sdc_string_group(sdcparse::StringGroupType::STRING, $3), 
+                                                                        FromToType::FROM);
+                                                                }
+    | cmd_set_clock_uncertainty ARG_TO       string               { $$ = $1; sdc_set_clock_uncertainty_add_to_from_group(callback, lexer, $$, 
+                                                                        make_sdc_string_group(sdcparse::StringGroupType::STRING, $3),
+                                                                        FromToType::TO);
+                                                                }
+    ;
 cmd_set_timing_derate: CMD_SET_TIMING_DERATE    { $$ = SetTimingDerate(); }
     | cmd_set_timing_derate ARG_EARLY           { $$ = $1; sdc_set_timing_derate_type(callback, lexer, $$, EarlyLateType::EARLY); }
     | cmd_set_timing_derate ARG_LATE            { $$ = $1; sdc_set_timing_derate_type(callback, lexer, $$, EarlyLateType::LATE); }

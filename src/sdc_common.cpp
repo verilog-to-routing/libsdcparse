@@ -368,6 +368,78 @@ void add_sdc_set_multicycle_path(Callback& callback, const Lexer& lexer, SetMult
 }
 
 /*
+ * Functions for set_clock_uncertainty
+ */
+void sdc_set_clock_uncertainty_set_type(Callback& callback, const Lexer& lexer, SetClockUncertainty& sdc_set_clock_uncertainty, SetupHoldType type) {
+    if(sdc_set_clock_uncertainty.type != SetupHoldType::NONE) {
+        sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Must specify the type (e.g. '-setup' or '-hold') only once.\n"); 
+    }
+    sdc_set_clock_uncertainty.type = type;
+}
+
+void sdc_set_clock_uncertainty_set_value(Callback& callback, const Lexer& lexer, SetClockUncertainty& sdc_set_clock_uncertainty, float value) {
+    if(!std::isnan(sdc_set_clock_uncertainty.value)) {
+        sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Must specify clock uncertainty value only once.\n"); 
+    }
+    sdc_set_clock_uncertainty.value = value;
+}
+
+void sdc_set_clock_uncertainty_add_to_from_group(Callback& callback, const Lexer& lexer, SetClockUncertainty& sdc_set_clock_uncertainty, 
+                                                                     StringGroup group, 
+                                                                     FromToType to_from_dir) {
+    assert(group.group_type == StringGroupType::CLOCK || group.group_type == StringGroupType::STRING);
+
+    //Error checking
+    if(to_from_dir == FromToType::FROM) {
+        //Check that we haven't already defined the from path    
+        if(!sdc_set_clock_uncertainty.from.strings.empty()) {
+            sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Only a single '-from' option is supported.\n"); 
+        }
+    } else {
+        assert(to_from_dir == FromToType::TO);
+        //Check that we haven't already defined the from path    
+        if(!sdc_set_clock_uncertainty.to.strings.empty()) {
+            sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Only a single '-to' option is supported.\n"); 
+        }
+    }
+
+    //Add the clock group
+    if(to_from_dir == FromToType::FROM) {
+        sdc_set_clock_uncertainty.from = group;
+    } else {
+        assert(to_from_dir == FromToType::TO);
+        sdc_set_clock_uncertainty.to = group;
+    }
+}
+
+void add_sdc_set_clock_uncertainty(Callback& callback, const Lexer& lexer, SetClockUncertainty& sdc_set_clock_uncertainty) {
+    /*
+     * Error checks
+     */
+    if(sdc_set_clock_uncertainty.type == SetupHoldType::NONE) {
+        sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Must specify the clock uncertainty type as '-setup' or '-hold'.\n"); 
+    }
+
+    if(std::isnan(sdc_set_clock_uncertainty.value)) {
+        sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Must specify the clock uncertainty value.\n"); 
+    }
+
+    if(sdc_set_clock_uncertainty.from.strings.empty()) {
+        sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Must specify source clock(s) with the '-from' option.\n"); 
+    }
+
+    if(sdc_set_clock_uncertainty.to.strings.empty()) {
+        sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Must specify source clock(s) with the '-to' option.\n"); 
+    }
+
+    /*
+     * Add command
+     */
+    callback.set_clock_uncertainty(sdc_set_clock_uncertainty);
+
+}
+
+/*
  * Functions for set_timing_derate
  */
 void sdc_set_timing_derate_type(Callback& callback, const Lexer& lexer, SetTimingDerate& sdc_set_timing_derate, EarlyLateType type) {

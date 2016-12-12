@@ -48,6 +48,12 @@ void sdc_set_multicycle_path_set_mcp_value(Callback& callback, const Lexer& lexe
 void sdc_set_multicycle_path_add_to_from_group(Callback& callback, const Lexer& lexer, SetMulticyclePath& sdc_set_multicycle_path, StringGroup group, FromToType to_from_dir);
 void add_sdc_set_multicycle_path(Callback& callback, const Lexer& lexer, SetMulticyclePath& sdc_set_multicycle_path);
 
+//set_clock_uncertainty
+void sdc_set_clock_uncertainty_set_type(Callback& callback, const Lexer& lexer, SetClockUncertainty& sdc_set_clock_uncertainty, SetupHoldType type);
+void sdc_set_clock_uncertainty_set_value(Callback& callback, const Lexer& lexer, SetClockUncertainty& sdc_set_clock_uncertainty, float value);
+void sdc_set_clock_uncertainty_add_to_from_group(Callback& callback, const Lexer& lexer, SetClockUncertainty& sdc_set_clock_uncertainty, StringGroup group, FromToType to_from_dir);
+void add_sdc_set_clock_uncertainty(Callback& callback, const Lexer& lexer, SetClockUncertainty& sdc_set_clock_uncertainty);
+
 //set_timing_derate
 void sdc_set_timing_derate_type(Callback& callback, const Lexer& lexer, SetTimingDerate& sdc_set_timing_derate, EarlyLateType type);
 void sdc_set_timing_derate_target_type(Callback& callback, const Lexer& lexer, SetTimingDerate& sdc_set_timing_derate, TimingDerateTargetType target_type);

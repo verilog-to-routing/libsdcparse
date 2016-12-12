@@ -75,6 +75,7 @@ STR ({ID}|\*{ID}?)
 "set_false_path"                { return sdcparse::Parser::make_CMD_SET_FALSE_PATH(); }
 "set_max_delay"                 { return sdcparse::Parser::make_CMD_SET_MAX_DELAY(); }
 "set_multicycle_path"           { return sdcparse::Parser::make_CMD_SET_MULTICYCLE_PATH(); }
+"set_clock_uncertainty"         { return sdcparse::Parser::make_CMD_SET_CLOCK_UNCERTAINTY(); }
 "set_timing_derate"             { return sdcparse::Parser::make_CMD_SET_TIMING_DERATE(); }
 
 "get_ports"                     { return sdcparse::Parser::make_CMD_GET_PORTS(); }

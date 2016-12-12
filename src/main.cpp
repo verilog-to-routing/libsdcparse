@@ -85,6 +85,18 @@ public:
         print_from_to_group(cmd.from, cmd.to);
         printf("\n");
     }
+    void set_clock_uncertainty(const SetClockUncertainty& cmd) override {
+        printf("#%s:%d\n", filename_.c_str(), lineno_);
+        printf("set_clock_uncertainty ");
+        if(cmd.type == SetupHoldType::SETUP) {
+            printf("-setup ");
+        } else if(cmd.type == SetupHoldType::HOLD) {
+            printf("-hold ");
+        }
+        print_from_to_group(cmd.from, cmd.to);
+        printf(" %f ", cmd.value);
+        printf("\n");
+    }
     void set_timing_derate(const SetTimingDerate& cmd) override {
         printf("#%s:%d\n", filename_.c_str(), lineno_);
         printf("set_timing_derate ");

@@ -91,6 +91,7 @@ struct SetClockGroups;
 struct SetFalsePath;
 struct SetMaxDelay;
 struct SetMulticyclePath;
+struct SetClockUncertainty;
 struct SetTimingDerate;
 
 struct StringGroup;
@@ -116,7 +117,7 @@ class Callback {
         virtual void set_false_path(const SetFalsePath& cmd) = 0;
         virtual void set_max_delay(const SetMaxDelay& cmd) = 0;
         virtual void set_multicycle_path(const SetMulticyclePath& cmd) = 0;
-        //virtual void set_clock_uncertainty(const SetClockUncertainty& cmd) = 0;
+        virtual void set_clock_uncertainty(const SetClockUncertainty& cmd) = 0;
         //virtual void set_clock_latency(const SetClockLatency& cmd) = 0;
         //virtual void set_disable_timing(const SetDisableTiming& cmd) = 0;
         virtual void set_timing_derate(const SetTimingDerate& cmd) = 0;
@@ -259,6 +260,14 @@ struct SetMulticyclePath {
     int mcp_value = UNINITIALIZED_INT;          //The number of cycles specifed
     StringGroup from;                           //The source list of startpoints or clocks
     StringGroup to;                             //The target list of endpoints or clocks
+};
+
+struct SetClockUncertainty {
+    SetupHoldType type = SetupHoldType::NONE;   //Analysis type this uncertainty applies to
+    float value = UNINITIALIZED_FLOAT;          //The uncertainty value
+
+    StringGroup from;                           //Launch clock domain(s)
+    StringGroup to;                             //Capture clock domain(s)
 };
 
 struct SetTimingDerate {
