@@ -1,10 +1,19 @@
 #!/usr/bin/env bash
 
+if [ -x ./sdcparse_test ]; then
+    echo "Found test executable"
+else
+    echo "Failed to find test executabe"
+    exit 1
+fi
+
+test_cnt=0
 for path in "$@"
 do
     sdc_files=`find $path -name '*.sdc'`
     for sdc_file in ${sdc_files[@]}
     do
+        test_cnt=$((test_cnt + 1))
         echo
         echo "File: $sdc_file"
         #valgrind --leak-check=full --track-origins=yes ./sdcparse_test $sdc_file
@@ -28,5 +37,5 @@ do
 
 done
 
-echo "ALL TESTS PASSED"
+echo "ALL $test_cnt TESTS PASSED"
 exit 0
