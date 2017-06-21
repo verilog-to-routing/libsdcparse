@@ -1,8 +1,8 @@
 #include "sdc_lexer.hpp"
 
 //Windows doesn't have unistd.h, so we set '%option nounistd' 
-//in sdc_lexer.l, flex still includes it in the generated header
-//unless YY_NO_UNISTD_H is defined to 1
+//in sdc_lexer.l, but flex still includes it in the generated 
+//header unless YY_NO_UNISTD_H is defined to 1
 #define YY_NO_UNISTD_H 1
 #include "sdc_lexer.gen.hpp" //For sdcparse_lex_*()
 
