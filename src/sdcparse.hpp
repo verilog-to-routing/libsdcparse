@@ -168,12 +168,6 @@ enum class FromToType {
     TO
 };
 
-enum class EarlyLateType {
-    EARLY,
-    LATE,
-    NONE
-};
-
 enum class SetupHoldType {
     SETUP,
     HOLD,
@@ -235,7 +229,7 @@ struct SetIoDelay {
                                                     // Note: is_min/is_max correspond to whether the option was 
                                                     // provided, it is up to the application to handle the case 
                                                     // where both are left unspecified (which SDC treats as 
-                                                    // implicitly specify both)
+                                                    // implicitly specifying both)
     std::string clock_name = "";                    //Name of the clock this constraint is associated with
     double delay = UNINITIALIZED_FLOAT;             //The maximum input delay allowed on the target ports
     StringGroup target_ports;                       //The target ports
@@ -279,10 +273,15 @@ struct SetClockUncertainty {
 
 struct SetClockLatency {
     ClockLatencyType type = ClockLatencyType::NONE;//Latency type
-    EarlyLateType early_late = EarlyLateType::NONE; //Is the early or late latency?
-    float value = UNINITIALIZED_FLOAT;          //The latency value
+    bool is_early = false;                         //Does value apply for early transitions?
+    bool is_late = false;                          //Does value apply for late transitions?
+                                                   // Note: is_early/is_late correspond to whether the option was 
+                                                   // provided, it is up to the application to handle the case 
+                                                   // where both are left unspecified (which SDC treats as 
+                                                   // implicitly specifying both)
+    float value = UNINITIALIZED_FLOAT;             //The latency value
 
-    StringGroup target_clocks;                  //The target clocks
+    StringGroup target_clocks;                     //The target clocks
 };
 
 struct SetDisableTiming {
@@ -291,7 +290,12 @@ struct SetDisableTiming {
 };
 
 struct SetTimingDerate {
-    EarlyLateType type = EarlyLateType::NONE;   //The derate type
+    bool is_early = false;                      //Does value apply for early transitions?
+    bool is_late = false;                       //Does value apply for late transitions?
+                                                // Note: is_early/is_late correspond to whether the option was 
+                                                // provided, it is up to the application to handle the case 
+                                                // where both are left unspecified (which SDC treats as 
+                                                // implicitly specifying both)
     bool derate_nets = false;                   //Should nets be derated?
     bool derate_cells = false;                  //Should cells be derated?
 

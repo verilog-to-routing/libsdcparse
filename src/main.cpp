@@ -114,9 +114,10 @@ public:
         if(cmd.type == ClockLatencyType::SOURCE) {
             printf("-source ");
         }
-        if(cmd.early_late == EarlyLateType::EARLY) {
+        if(cmd.is_early) {
             printf("-early ");
-        } else if(cmd.early_late == EarlyLateType::LATE) {
+        }
+        if(cmd.is_late) {
             printf("-late ");
         }
         printf("%f ", cmd.value);
@@ -133,9 +134,10 @@ public:
     void set_timing_derate(const SetTimingDerate& cmd) override {
         printf("#%s:%d\n", filename_.c_str(), lineno_);
         printf("set_timing_derate ");
-        if(cmd.type == EarlyLateType::EARLY) {
+        if(cmd.is_early) {
             printf("-early ");
-        } else if(cmd.type == EarlyLateType::LATE) {
+        }
+        if(cmd.is_late) {
             printf("-late ");
         }
 

@@ -59,7 +59,8 @@ void add_sdc_set_clock_uncertainty(Callback& callback, const Lexer& lexer, SetCl
 
 //set_clock_latency
 void sdc_set_clock_latency_set_type(Callback& callback, const Lexer& lexer, SetClockLatency& sdc_set_clock_latency, ClockLatencyType type);
-void sdc_set_clock_latency_early_late(Callback& callback, const Lexer& lexer, SetClockLatency& sdc_set_clock_latency, EarlyLateType early_late);
+void sdc_set_clock_latency_early(Callback& callback, const Lexer& lexer, SetClockLatency& sdc_set_clock_latency);
+void sdc_set_clock_latency_late(Callback& callback, const Lexer& lexer, SetClockLatency& sdc_set_clock_latency);
 void sdc_set_clock_latency_set_value(Callback& callback, const Lexer& lexer, SetClockLatency& sdc_set_clock_latency, float value);
 void sdc_set_clock_latency_set_clocks(Callback& callback, const Lexer& lexer, SetClockLatency& sdc_set_clock_latency, StringGroup clock_targets);
 void add_sdc_set_clock_latency(Callback& callback, const Lexer& lexer, SetClockLatency& sdc_set_clock_latency);
@@ -69,7 +70,8 @@ void sdc_set_disable_timing_add_to_from_group(Callback& callback, const Lexer& l
 void add_sdc_set_disable_timing(Callback& callback, const Lexer& lexer, SetDisableTiming& sdc_set_disable_timing);
 
 //set_timing_derate
-void sdc_set_timing_derate_type(Callback& callback, const Lexer& lexer, SetTimingDerate& sdc_set_timing_derate, EarlyLateType type);
+void sdc_set_timing_derate_early(Callback& callback, const Lexer& lexer, SetTimingDerate& sdc_set_timing_derate);
+void sdc_set_timing_derate_late(Callback& callback, const Lexer& lexer, SetTimingDerate& sdc_set_timing_derate);
 void sdc_set_timing_derate_target_type(Callback& callback, const Lexer& lexer, SetTimingDerate& sdc_set_timing_derate, TimingDerateTargetType target_type);
 void sdc_set_timing_derate_value(Callback& callback, const Lexer& lexer, SetTimingDerate& sdc_set_timing_derate, float value);
 void sdc_set_timing_derate_targets(Callback& callback, const Lexer& lexer, SetTimingDerate& sdc_set_timing_derate, StringGroup targets);
