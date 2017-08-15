@@ -44,19 +44,19 @@ public:
         printf(" -clock %s", cmd.clock_name.c_str());
 
         if (cmd.is_max) {
-            printf(" -max ");
+            printf(" -max");
         }
         if (cmd.is_min) {
-            printf(" -min ");
+            printf(" -min");
         }
-        printf("%f", cmd.delay);
+        printf(" %f ", cmd.delay);
         print_string_group(cmd.target_ports);
         printf("\n");
 
     }
     void set_clock_groups(const SetClockGroups& cmd) override {
         printf("#%s:%d\n", filename_.c_str(), lineno_);
-        printf("set_clock_groups ");
+        printf("set_clock_groups");
         if(cmd.type == ClockGroupsType::EXCLUSIVE) {
             printf(" -exclusive");
         }
