@@ -99,9 +99,10 @@ public:
     void set_clock_uncertainty(const SetClockUncertainty& cmd) override {
         printf("#%s:%d\n", filename_.c_str(), lineno_);
         printf("set_clock_uncertainty ");
-        if(cmd.type == SetupHoldType::SETUP) {
+        if(cmd.is_setup) {
             printf("-setup ");
-        } else if(cmd.type == SetupHoldType::HOLD) {
+        } 
+        if(cmd.is_hold) {
             printf("-hold ");
         }
         print_from_to_group(cmd.from, cmd.to);

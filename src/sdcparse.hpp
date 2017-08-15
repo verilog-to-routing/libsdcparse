@@ -264,7 +264,12 @@ struct SetMulticyclePath {
 };
 
 struct SetClockUncertainty {
-    SetupHoldType type = SetupHoldType::NONE;   //Analysis type this uncertainty applies to
+    bool is_setup = false;                      //Does value apply for setup?
+    bool is_hold = false;                       //Does value apply for hold?
+                                                // Note: is_setup/is_hold correspond to whether the option was 
+                                                // provided, it is up to the application to handle the case 
+                                                // where both are left unspecified (which SDC treats as 
+                                                // implicitly specifying both)
     float value = UNINITIALIZED_FLOAT;          //The uncertainty value
 
     StringGroup from;                           //Launch clock domain(s)
