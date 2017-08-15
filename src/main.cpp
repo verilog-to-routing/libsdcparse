@@ -41,9 +41,15 @@ public:
         } else {
             printf("set_output_delay");
         }
-        printf(" -clock %s -max %f ", 
-               cmd.clock_name.c_str(),
-               cmd.max_delay);
+        printf(" -clock %s", cmd.clock_name.c_str());
+
+        if (cmd.is_max) {
+            printf(" -max ");
+        }
+        if (cmd.is_min) {
+            printf(" -min ");
+        }
+        printf("%f", cmd.delay);
         print_string_group(cmd.target_ports);
         printf("\n");
 

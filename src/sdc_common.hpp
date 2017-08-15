@@ -24,7 +24,9 @@ void add_sdc_create_clock(Callback& callback, const Lexer& lexer, CreateClock& s
 
 //set_input_delay & set_output_delay
 void sdc_set_io_delay_set_clock(Callback& callback, const Lexer& lexer, SetIoDelay& sdc_set_io_delay, const std::string& clock_name);
-void sdc_set_io_delay_set_max_value(Callback& callback, const Lexer& lexer, SetIoDelay& sdc_set_io_delay, double max_value);
+void sdc_set_io_delay_set_value(Callback& callback, const Lexer& lexer, SetIoDelay& sdc_set_io_delay, double value);
+void sdc_set_io_delay_set_max(Callback& callback, const Lexer& lexer, SetIoDelay& sdc_set_io_delay);
+void sdc_set_io_delay_set_min(Callback& callback, const Lexer& lexer, SetIoDelay& sdc_set_io_delay);
 void sdc_set_io_delay_set_ports(Callback& callback, const Lexer& lexer, SetIoDelay& sdc_set_io_delay, StringGroup ports);
 void add_sdc_set_io_delay(Callback& callback, const Lexer& lexer, SetIoDelay& sdc_set_io_delay);
 

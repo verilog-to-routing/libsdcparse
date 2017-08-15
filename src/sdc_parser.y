@@ -124,6 +124,7 @@ using namespace sdcparse;
 %token ARG_HOLD "-hold"
 %token ARG_CLOCK "-clock"
 %token ARG_MAX "-max"
+%token ARG_MIN "-min"
 %token ARG_EARLY "-early"
 %token ARG_LATE "-late"
 %token ARG_CELL_DELAY "-cell_delay"
@@ -198,13 +199,17 @@ cmd_create_clock: CMD_CREATE_CLOCK                          { $$ = CreateClock()
 
 cmd_set_input_delay: CMD_SET_INPUT_DELAY        { $$ = SetIoDelay(IoDelayType::INPUT); }
     | cmd_set_input_delay ARG_CLOCK string      { $$ = $1; sdc_set_io_delay_set_clock(callback, lexer, $$, $3); }
-    | cmd_set_input_delay ARG_MAX number        { $$ = $1; sdc_set_io_delay_set_max_value(callback, lexer, $$, $3); }
+    | cmd_set_input_delay ARG_MAX               { $$ = $1; sdc_set_io_delay_set_max(callback, lexer, $$); }
+    | cmd_set_input_delay ARG_MIN               { $$ = $1; sdc_set_io_delay_set_min(callback, lexer, $$); }
+    | cmd_set_input_delay number                { $$ = $1; sdc_set_io_delay_set_value(callback, lexer, $$, $2); }
     | cmd_set_input_delay LSPAR cmd_get_ports RSPAR { $$ = $1; sdc_set_io_delay_set_ports(callback, lexer, $$, $3); }
     ;
 
 cmd_set_output_delay: CMD_SET_OUTPUT_DELAY       { $$ = SetIoDelay(IoDelayType::OUTPUT); }
     | cmd_set_output_delay ARG_CLOCK string      { $$ = $1; sdc_set_io_delay_set_clock(callback, lexer, $$, $3); }
-    | cmd_set_output_delay ARG_MAX number        { $$ = $1; sdc_set_io_delay_set_max_value(callback, lexer, $$, $3); }
+    | cmd_set_output_delay ARG_MAX               { $$ = $1; sdc_set_io_delay_set_max(callback, lexer, $$); }
+    | cmd_set_output_delay ARG_MIN               { $$ = $1; sdc_set_io_delay_set_min(callback, lexer, $$); }
+    | cmd_set_output_delay number                { $$ = $1; sdc_set_io_delay_set_value(callback, lexer, $$, $2); }
     | cmd_set_output_delay LSPAR cmd_get_ports RSPAR { $$ = $1; sdc_set_io_delay_set_ports(callback, lexer, $$, $3); }
     ;
 

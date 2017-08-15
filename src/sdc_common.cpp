@@ -109,12 +109,28 @@ void sdc_set_io_delay_set_clock(Callback& callback, const Lexer& lexer, SetIoDel
     sdc_set_io_delay.clock_name = clock_name;
 }
 
-void sdc_set_io_delay_set_max_value(Callback& callback, const Lexer& lexer, SetIoDelay& sdc_set_io_delay, double max_value) {
-    if(!std::isnan(sdc_set_io_delay.max_delay)) {
-        sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Max delay value can only specified once.\n"); 
+void sdc_set_io_delay_set_value(Callback& callback, const Lexer& lexer, SetIoDelay& sdc_set_io_delay, double value) {
+    if(!std::isnan(sdc_set_io_delay.delay)) {
+        sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Delay value can only specified once.\n"); 
     }
 
-    sdc_set_io_delay.max_delay = max_value;
+    sdc_set_io_delay.delay = value;
+}
+
+void sdc_set_io_delay_set_max(Callback& callback, const Lexer& lexer, SetIoDelay& sdc_set_io_delay) {
+    if (sdc_set_io_delay.is_max) {
+        sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "-max can only be specified once.\n"); 
+    }
+
+    sdc_set_io_delay.is_max = true;
+}
+
+void sdc_set_io_delay_set_min(Callback& callback, const Lexer& lexer, SetIoDelay& sdc_set_io_delay) {
+    if (sdc_set_io_delay.is_min) {
+        sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "-min can only be specified once.\n"); 
+    }
+
+    sdc_set_io_delay.is_min = true;
 }
 
 void sdc_set_io_delay_set_ports(Callback& callback, const Lexer& lexer, SetIoDelay& sdc_set_io_delay, StringGroup ports) {
@@ -135,8 +151,8 @@ void add_sdc_set_io_delay(Callback& callback, const Lexer& lexer, SetIoDelay& sd
         sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Must specify clock name.\n"); 
     }
 
-    if(std::isnan(sdc_set_io_delay.max_delay)) {
-        sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Must specify max delay value.\n"); 
+    if(std::isnan(sdc_set_io_delay.delay)) {
+        sdc_error_wrap(callback, lexer.lineno(), lexer.text(), "Must specify delay value.\n"); 
     }
 
     if(sdc_set_io_delay.target_ports.strings.empty()) {

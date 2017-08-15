@@ -227,11 +227,17 @@ struct SetIoDelay {
     SetIoDelay(IoDelayType io_type)
         : type(io_type) {}
 
-    IoDelayType type = IoDelayType::INPUT;       //Identifies whether this represents a
+    IoDelayType type = IoDelayType::INPUT;          //Identifies whether this represents a
                                                     // set_input_delay or set_output delay
                                                     // command.
+    bool is_min = false;                            //Does delay apply for maximum delays?
+    bool is_max = false;                            //Does delay apply for minimum delays?
+                                                    // Note: is_min/is_max correspond to whether the option was 
+                                                    // provided, it is up to the application to handle the case 
+                                                    // where both are left unspecified (which SDC treats as 
+                                                    // implicitly specify both)
     std::string clock_name = "";                    //Name of the clock this constraint is associated with
-    double max_delay = UNINITIALIZED_FLOAT;         //The maximum input delay allowed on the target ports
+    double delay = UNINITIALIZED_FLOAT;             //The maximum input delay allowed on the target ports
     StringGroup target_ports;                       //The target ports
 };
 
