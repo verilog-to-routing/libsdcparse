@@ -17,7 +17,7 @@ set_clock_uncertainty 0.05
 set_clock_uncertainty -hold 0.05 -from [get_clocks {clk}]
 set_clock_uncertainty -setup 0.05 -from [get_clocks {clk}] -to [get_clocks {VIRTUAL_OUTPUT_CLOCK}]
 set_clock_uncertainty -hold -setup 0.05 -from [get_clocks {clk}] -to [get_clocks {VIRTUAL_OUTPUT_CLOCK}]
-set_clock_uncertainty 0.05 -from [get_clocks {clk}] -to [get_clocks {VIRTUAL_OUTPUT_CLOCK}]
+set_clock_uncertainty 5 -from [get_clocks {clk}] -to [get_clocks {VIRTUAL_OUTPUT_CLOCK}]
 
-set_clock_latency -source 1. [get_clocks {clk}]
+set_clock_latency -source 1 [get_clocks {clk}]
 
