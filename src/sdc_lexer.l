@@ -62,6 +62,7 @@ ID_MID ({ALPHA}|{DIGIT10}|{SYMBOL})
 ID_INDEX (\[{DIGIT10}+\])
 ID ({ID_FIRST}{ID_MID}*{ID_INDEX}?)
 STR ({ID}|\*{ID}?)
+ESCAPED_STR (\{{WS}*{STR}{WS}*\})
 
 /*
  * Symbol Definitions
@@ -113,7 +114,7 @@ STR ({ID}|\*{ID}?)
 {STR}                           { 
                                   return sdcparse::Parser::make_STRING(sdcparse_get_text(yyscanner)); 
                                 }
-\{{WS}*{STR}{WS}*\}             { 
+{ESCAPED_STR}                   {
                                   /*
                                    * Any continguous sequence of non-white space characters, 
                                    * with optional leading and/or trailing whitespace that falls
