@@ -160,7 +160,7 @@ STR ({ID}|\*{ID}?)
                                      return 0 (which indicated end of file). This ensures
                                      there will always be an EOL provided to the parser. 
                                      However it may also generate a stray EOL if the last
-                                     line IS blank - so the parse must handle those correclty. */
+                                     line IS blank - so the parse must handle those correctly. */
                                   static bool once; return (once = !once) ? sdcparse::Parser::make_EOL() : sdcparse::Parser::make_EOF();
                                 }
 .                               { 
