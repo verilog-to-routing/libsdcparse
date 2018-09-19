@@ -62,7 +62,7 @@ ID_MID ({ALPHA}|{DIGIT10}|{SYMBOL})
 ID_INDEX (\[{DIGIT10}+\])
 ID ({ID_FIRST}{ID_MID}*{ID_INDEX}?)
 STR ({ID}|\*{ID}?)
-ESCAPED_STR (\{{WS}*{STR}{WS}*\})
+ESCAPED_STR (\{{WS}*[^ \t]*{WS}*\})
 
 /*
  * Symbol Definitions
