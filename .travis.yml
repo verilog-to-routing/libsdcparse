@@ -1,0 +1,68 @@
+language: cpp
+
+dist: trusty
+addons:
+  apt:
+    sources:
+    - george-edison55-precise-backports # For cmake
+    - llvm-toolchain-precise-3.6
+    - llvm-toolchain-trusty-6.0
+    - llvm-toolchain-trusty-7
+    - llvm-toolchain-trusty-8
+    - ubuntu-toolchain-r-test
+    packages:
+    - bison
+    - binutils
+    - binutils-gold
+    - build-essential
+    - cmake
+    - flex
+    # All the compilers!
+    - g++-4.9
+    - gcc-4.9
+    - g++-5
+    - gcc-5
+    - g++-6
+    - gcc-6
+    - g++-8
+    - gcc-8
+    - g++-9
+    - gcc-9
+    - clang-3.6
+    - clang-6.0
+    - clang-8
+
+script:
+  - eval $MATRIX_EVAL
+  - make
+
+jobs:
+  include:
+    - stage: Build
+      name: "GCC 5 (Ubuntu Xenial - 16.04)"
+      env:
+         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+    - stage: Build
+      name: "GCC 6 (Debian Stretch)"
+      env:
+         - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
+    - stage: Build
+      name: "GCC 8 (Ubuntu Latest)"
+      env:
+         - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
+    - stage: Build
+      name: "GCC 9 (Latest Release)"
+      env:
+         - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
+    - stage: Build
+      name: "clang-3.6 (Earliest supported)"
+      env:
+         - MATRIX_EVAL="CC=clang-3.6 && CXX=clang++-3.6"
+    - stage: Build
+      name: "clang-6.0 (Debian + Ubuntu common)"
+      env:
+         - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++-6.0"
+    - stage: Build
+      name: "clang-8 (Latest Release)"
+      env:
+         - MATRIX_EVAL="CC=clang-8 && CXX=clang++-8"
