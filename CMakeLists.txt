@@ -61,7 +61,7 @@ if (USES_IPO)
         CHECK_CXX_COMPILER_FLAG(${flag} CXX_COMPILER_SUPPORTS_${flag})
         if(CXX_COMPILER_SUPPORTS_${flag})
             #Flag supported, so enable it
-            set_target_properties(sdcparse_test PROPERTIES LINK_FLAGS ${IPO_LINK_WARNING_SUPPRESS_FLAGS})
+            set_target_properties(sdcparse_test PROPERTIES LINK_FLAGS ${flag})
         endif()
     endforeach()
 endif()
