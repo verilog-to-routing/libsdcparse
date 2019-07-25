@@ -3,6 +3,7 @@ create_clock -period 3 -waveform {1.25 2.75} clk0 #Integer period, float wavefor
 create_clock -period 3 -waveform {1 2} clk1 #Integer period, integer waveform
 create_clock -period 2.3 clk2 #Float period
 create_clock -period 2 {clk3 clk4} #Multiple targets
+create_clock -period 0 {top^clk}
 
 
 #Virtual Clocks
