@@ -20,4 +20,4 @@ script:
     - make -j2
 
     #Test
-    - ../test_sdcs/test_parser ../test_sdcs/
+    - ../test_sdcs/test_parser.sh ../test_sdcs/
