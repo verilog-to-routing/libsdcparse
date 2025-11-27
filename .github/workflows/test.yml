@@ -1,0 +1,33 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
+
+# If this workflow is already running on a PR or branch, cancel it.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  TestSDCs:
+    name: 'R: Test SDC Parse'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 'Install Dependencies'
+        run: sudo apt update && sudo apt install -y flex bison
+
+      - name: 'Build sdcparse_test'
+        run: |
+          cmake -H. -Bbuild -DCMAKE_COMPILE_WARNING_AS_ERROR=on
+          cmake --build build/ --target sdcparse_test
+
+      - name: 'Run SDC Parse Tests'
+        run: |
+          cd build/
+          ./../test_sdcs/test_parser.sh ../test_sdcs/
