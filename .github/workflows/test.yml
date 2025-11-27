@@ -6,8 +6,6 @@ on:
       - master
   pull_request:
   workflow_dispatch:
-  schedule:
-    - cron: '0 0 * * *' # daily
 
 # If this workflow is already running on a PR or branch, cancel it.
 concurrency:
