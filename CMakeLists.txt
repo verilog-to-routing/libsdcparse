@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.16)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 include(HeadersToIncludeDirs)
 
@@ -13,7 +13,7 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
 
 #Flex and Bison are used to generate the parser
-find_package(BISON REQUIRED 3.0)
+find_package(BISON REQUIRED 3.3)
 find_package(FLEX REQUIRED)
 
 file(GLOB_RECURSE LIB_SOURCES src/sdc*.cpp)
@@ -61,9 +61,9 @@ if (USES_IPO)
         CHECK_CXX_COMPILER_FLAG(${flag} CXX_COMPILER_SUPPORTS_${flag})
         if(CXX_COMPILER_SUPPORTS_${flag})
             #Flag supported, so enable it
-            set_target_properties(sdcparse_test PROPERTIES LINK_FLAGS ${flag})
+            set_property(TARGET sdcparse_test APPEND PROPERTY LINK_FLAGS ${flag})
         endif()
     endforeach()
 endif()
 
-install(TARGETS libsdcparse sdcparse_test DESTINATION bin)
+install(TARGETS libsdcparse DESTINATION bin)
