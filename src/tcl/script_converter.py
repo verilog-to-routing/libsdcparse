@@ -1,0 +1,22 @@
+# TODO: Move this file to somewhere that makes more sense.
+import sys
+
+if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        print("Invalid number of arguments")
+
+    input_file_path = sys.argv[1];
+    output_file_path = sys.argv[2];
+
+    with open(output_file_path, 'w') as output_file:
+        # TODO: There is some optimizations we can do to have this take up less
+        #       space.
+        output_file.write("#include \"sdc_wrapper.h\"\n")
+        output_file.write("const char* get_sdc_wrapper_script() {\n")
+        output_file.write("\treturn\n")
+
+        with open(input_file_path, 'r') as input_file:
+            for line in input_file:
+                output_file.write(f"\t\"{line.strip().replace('\"', '\\"')}\\n\"\n")
+
+        output_file.write(";\n}")

@@ -6,6 +6,9 @@
 #include "sdc_lexer.hpp"
 #include "sdc_error.hpp"
 
+// FIXME: Better handle the header files.
+#include "tcl/tcl_interpreter.h"
+
 namespace sdcparse {
 
 void sdc_parse_filename(std::string filename, Callback& callback) {
@@ -13,6 +16,12 @@ void sdc_parse_filename(std::string filename, Callback& callback) {
 }
 
 void sdc_parse_filename(const char* filename, Callback& callback) {
+    // FIXME: Make this more proper.
+    TclInterpreter interpreter;
+    std::string result = interpreter.eval_file(filename);
+    std::cout << result << std::endl;
+    return;
+
     FILE* infile = std::fopen(filename, "r");
     if(infile != NULL) {
         //Parse the file

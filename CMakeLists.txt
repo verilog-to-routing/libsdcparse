@@ -40,14 +40,67 @@ if(FLEX_BISON_WARN_SUPPRESS_FLAGS)
                                 PROPERTIES COMPILE_FLAGS ${FLEX_BISON_WARN_SUPPRESS_FLAGS})
 endif()
 
+# TCL Interpreter stuff =======
+
+# FIXME: Should TCL be required?
+find_package(TCL)
+find_package(SWIG REQUIRED)
+include(UseSWIG)
+
+set_property(SOURCE src/tcl/sdc_commands.i PROPERTY CPLUSPLUS ON)
+swig_add_library(sdc_commands
+    TYPE STATIC
+    LANGUAGE tcl
+    SOURCES src/tcl/sdc_commands.i src/tcl/sdc_commands.cpp
+)
+target_include_directories(sdc_commands
+    PRIVATE
+    ${TCL_INCLUDE_PATH}
+    ${CMAKE_SOURCE_DIR}/src/tcl
+)
+
+# Some goofy stuff to turn the sdc_wrapper tcl file into a C string which can
+# be parsed by the TCL interpreter directly.
+# TODO: Turn this into a cmake module to clean it up.
+set(TCL_SCRIPT_IN ${CMAKE_CURRENT_SOURCE_DIR}/src/tcl/sdc_wrapper.tcl)
+set(TCL_SCRIPT_OUT ${CMAKE_CURRENT_BINARY_DIR}/sdc_wrapper.cpp)
+add_custom_command(
+    OUTPUT ${TCL_SCRIPT_OUT}
+    COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/src/tcl/script_converter.py ${TCL_SCRIPT_IN} ${TCL_SCRIPT_OUT}
+    DEPENDS ${TCL_SCRIPT_IN} ${CMAKE_CURRENT_SOURCE_DIR}/src/tcl/script_converter.py
+    COMMENT "Generating C source file from Tcl script..."
+)
+
 #Create the library
 add_library(libsdcparse STATIC
+             ${TCL_SCRIPT_OUT}
+             ${sdc_commands_WRAPPER_SOURCE}
              ${LIB_HEADERS}
              ${LIB_SOURCES}
              ${FLEX_SdcLexer_OUTPUTS} 
              ${BISON_SdcParser_OUTPUT_SOURCE})
 target_include_directories(libsdcparse PUBLIC ${LIB_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 set_target_properties(libsdcparse PROPERTIES PREFIX "") #Avoid extra 'lib' prefix
+
+target_link_libraries(libsdcparse
+    PRIVATE
+    ${TCL_LIBRARY}
+    sdc_commands
+)
+
+target_include_directories(libsdcparse
+    PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/tcl
+    ${SWIG_INCLUDE_DIRS}
+    ${TCL_INCLUDE_PATH}
+)
+
+# Set properties for the SWIG-generated source to ensure it compiles correctly
+# This ensures C++ compiler standards are applied to the wrapper file
+# TODO: See if this is necessary.
+set_source_files_properties(${sdc_commands_WRAPPER_SOURCE}
+    PROPERTIES COMPILE_FLAGS "-fPIC"  # Common flag for shared/static libraries
+)
 
 #Create the test executable
 add_executable(sdcparse_test src/main.cpp)
