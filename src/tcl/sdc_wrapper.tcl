@@ -120,10 +120,10 @@ proc create_clock {args} {
     set params [generic_sdc_parser "create_clock" $spec $args]
     
     # Internal logic call
-    puts "Executing internal create_clock..."
-    puts "  Period:  [dict get $params -period]"
-    puts "  Targets: [dict get $params targets]"
-    if {[dict get $params -add]} { puts "  Mode:    Add (True)" }
+    # puts "Executing internal create_clock..."
+    # puts "  Period:  [dict get $params -period]"
+    # puts "  Targets: [dict get $params targets]"
+    # if {[dict get $params -add]} { puts "  Mode:    Add (True)" }
     
     create_clock_internal [dict get $params -period] [dict get $params targets]
 }

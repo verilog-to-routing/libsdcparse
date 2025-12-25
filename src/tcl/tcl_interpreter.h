@@ -6,6 +6,7 @@
 
 #include "sdc_commands.h"
 #include "sdc_wrapper.h"
+#include "sdcparse.hpp"
 
 extern "C" {
     extern int Sdc_commands_Init(Tcl_Interp* interp);
@@ -48,6 +49,9 @@ class TclInterpreter {
             std::cout << Tcl_GetStringResult(interp) << std::endl;
             throw new std::runtime_error("Failed to evaluate SDC wrapper.");
         }
+
+        // Reset the callback if it was set.
+        g_callback = nullptr;
     }
 
     ~TclInterpreter() {
@@ -55,7 +59,9 @@ class TclInterpreter {
             Tcl_DeleteInterp(interp);
     }
 
-    // TODO: Add a method to register the callback.
+    void register_callback(Callback* callback) {
+        g_callback = callback;
+    }
 
     std::string eval_file(const std::string& filename) {
         int code = Tcl_EvalFile(interp, filename.c_str());

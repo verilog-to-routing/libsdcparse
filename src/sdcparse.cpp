@@ -18,6 +18,7 @@ void sdc_parse_filename(std::string filename, Callback& callback) {
 void sdc_parse_filename(const char* filename, Callback& callback) {
     // FIXME: Make this more proper.
     TclInterpreter interpreter;
+    interpreter.register_callback(&callback);
     std::string result = interpreter.eval_file(filename);
     std::cout << result << std::endl;
     return;
