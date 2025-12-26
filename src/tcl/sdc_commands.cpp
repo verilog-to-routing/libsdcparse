@@ -9,6 +9,10 @@
 
 sdcparse::Callback* sdcparse::g_callback = nullptr;
 
+void lineno_internal(int line_num) {
+    sdcparse::g_callback->lineno(line_num);
+}
+
 void create_clock_internal(double period,
                            const std::string& name,
                            const std::vector<double>& waveform,
@@ -42,6 +46,7 @@ void create_clock_internal(double period,
 
     create_clock_cmd.targets.strings = targets;
 
+    // TODO: This can probably be made into an assert.
     if (sdcparse::g_callback == nullptr) {
         // FIXME: Make this a proper error.
         throw new std::runtime_error("Callback not registered!.");

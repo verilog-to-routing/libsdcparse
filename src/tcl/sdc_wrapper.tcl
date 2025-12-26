@@ -109,6 +109,12 @@ proc generic_sdc_parser {cmd_name spec raw_args} {
 }
 
 proc create_clock {args} {
+    # Set the line number from the caller's frame
+    # TODO: Can this be made more general?
+    set frame_info [info frame -1]
+    set line_num [dict get $frame_info line]
+    lineno_internal $line_num
+
     # TODO: Either target or name is required. Need to improve the parser to handle
     #       this.
     # TODO: The add command appears to only work if it comes before the positional
@@ -143,6 +149,11 @@ proc create_clock {args} {
 }
 
 proc set_input_delay {args} {
+    # Set the line number from the caller's frame
+    set frame_info [info frame -1]
+    set line_num [dict get $frame_info line]
+    lineno_internal $line_num
+
     set spec {
         flags   {-clock}
         bools   {-max -min}
@@ -157,6 +168,11 @@ proc set_input_delay {args} {
 }
 
 proc get_ports {args} {
+    # Set the line number from the caller's frame
+    set frame_info [info frame -1]
+    set line_num [dict get $frame_info line]
+    lineno_internal $line_num
+
     set spec {
         flags   {}
         bools   {-regexp -nocase -quiet}

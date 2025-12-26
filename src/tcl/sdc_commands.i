@@ -12,6 +12,8 @@ namespace std {
     %template(DoubleVector) vector<double>;
 }
 
+void lineno_internal(int line_num);
+
 // TODO: Update the prototype of this.
 void create_clock_internal(double period,
                            const std::string& name,

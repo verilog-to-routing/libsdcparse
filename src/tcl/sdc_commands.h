@@ -12,6 +12,8 @@ extern Callback* g_callback;
 
 } // namespace sdcparse
 
+void lineno_internal(int line_num);
+
 void create_clock_internal(double period,
                            const std::string& name,
                            const std::vector<double>& waveform,

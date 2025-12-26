@@ -64,6 +64,16 @@ class TclInterpreter {
     }
 
     std::string eval_file(const std::string& filename) {
+        if (g_callback == nullptr) {
+            std::cout << "Callback has not been registered!\n";
+            throw new std::runtime_error("Callback not registered");
+        }
+
+        g_callback->start_parse();
+
+        // Set the filename.
+        g_callback->filename(filename);
+
         int code = Tcl_EvalFile(interp, filename.c_str());
 
         if (code >= TCL_ERROR) {
@@ -71,6 +81,8 @@ class TclInterpreter {
             std::cout << Tcl_GetStringResult(interp) << std::endl;
             throw Tcl_GetStringResult(interp);
         }
+
+        g_callback->finish_parse();
 
         return std::string(Tcl_GetStringResult(interp));
     }
