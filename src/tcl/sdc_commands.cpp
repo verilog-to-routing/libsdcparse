@@ -69,3 +69,12 @@ void set_input_delay_internal(bool max_delay_flag,
     }
     sdcparse::g_callback->set_io_delay(set_input_delay_cmd);
 }
+
+std::vector<std::string> all_ports_internal() {
+    if (sdcparse::g_callback == nullptr) {
+        // FIXME: Make this a proper error.
+        throw new std::runtime_error("Callback not registered!.");
+    }
+
+    return sdcparse::g_callback->all_ports();
+}

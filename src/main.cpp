@@ -154,6 +154,10 @@ public:
         printf("\n");
     }
 
+    std::vector<std::string> all_ports() override {
+        return {"in1", "in2", "in3"};
+    }
+
     //End of parsing
     void finish_parse() override { }
 

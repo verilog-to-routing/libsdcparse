@@ -122,6 +122,8 @@ class Callback {
         virtual void set_disable_timing(const SetDisableTiming& cmd) = 0;
         virtual void set_timing_derate(const SetTimingDerate& cmd) = 0;
 
+        virtual std::vector<std::string> all_ports() = 0;
+
         //End of parsing
         virtual void finish_parse() = 0;
 

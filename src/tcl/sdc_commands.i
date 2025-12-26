@@ -25,4 +25,7 @@ void set_input_delay_internal(bool max_delay_flag,
                               double delay,
                               const std::vector<std::string>& targets);
 
+// TODO: Investigate if this is too poor for performance
+std::vector<std::string> all_ports_internal();
+
 // TODO: Add more commands.

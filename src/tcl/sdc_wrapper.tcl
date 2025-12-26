@@ -155,3 +155,43 @@ proc set_input_delay {args} {
 
     set_input_delay_internal [dict get $params -max] [dict get $params -min] [dict get $params -clock] [dict get $params delay] [dict get $params targets]
 }
+
+proc get_ports {args} {
+    set spec {
+        flags   {}
+        bools   {-regexp -nocase -quiet}
+        pos     {patterns}
+        require {patterns}
+        types   {}
+    }
+
+    set params [generic_sdc_parser "get_ports" $spec $args]
+
+    # TODO: Handle regexp, nocase, and quiet args
+
+    set search_options {-all -inline}
+    if {[dict get $params -regexp]} {
+        lappend search_options -regexp
+    }
+    if {[dict get $params -nocase]} {
+        lappend search_options -nocase
+    }
+
+    # TODO: This may become very slow if we need to get all the ports everytime
+    #       we search. We may be able to create a global variable which gets loaded
+    #       once per circuit.
+    set matched_items {}
+
+    foreach pattern [dict get $params patterns] {
+        set matches [lsearch {*}$search_options [all_ports_internal] $pattern]
+        lappend matched_items {*}$matches
+    }
+    set unique_matches [lsort -unique $matched_items]
+
+    # If unique matches is empty, raise error unless quiet is active.
+    if {[llength $unique_matches] == 0 && ![dict get $params -quiet]} {
+        puts "Warning: no matches found for get_ports $args"
+    }
+
+    return $unique_matches
+}
