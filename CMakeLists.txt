@@ -59,6 +59,14 @@ target_include_directories(sdc_commands
     ${CMAKE_SOURCE_DIR}/src
     ${CMAKE_SOURCE_DIR}/src/tcl
 )
+# NOTE: This also suppresses the warnings for sdc_commands.cpp. May want to undo
+#       that if possible.
+set(SWIG_SUPPRESS_FLAGS "-Wno-cast-qual")
+target_compile_options(sdc_commands
+    PRIVATE
+    -Wno-cast-qual
+    -Wno-shadow
+)
 
 # Some goofy stuff to turn the sdc_wrapper tcl file into a C string which can
 # be parsed by the TCL interpreter directly.
@@ -75,7 +83,6 @@ add_custom_command(
 #Create the library
 add_library(libsdcparse STATIC
              ${TCL_SCRIPT_OUT}
-             ${sdc_commands_WRAPPER_SOURCE}
              ${LIB_HEADERS}
              ${LIB_SOURCES}
              ${FLEX_SdcLexer_OUTPUTS} 
@@ -94,13 +101,6 @@ target_include_directories(libsdcparse
     ${CMAKE_CURRENT_SOURCE_DIR}/src/tcl
     ${SWIG_INCLUDE_DIRS}
     ${TCL_INCLUDE_PATH}
-)
-
-# Set properties for the SWIG-generated source to ensure it compiles correctly
-# This ensures C++ compiler standards are applied to the wrapper file
-# TODO: See if this is necessary.
-set_source_files_properties(${sdc_commands_WRAPPER_SOURCE}
-    PROPERTIES COMPILE_FLAGS "-fPIC"  # Common flag for shared/static libraries
 )
 
 #Create the test executable

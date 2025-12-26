@@ -4,7 +4,7 @@
 %include "std_vector.i"
 %{
 #include "sdc_commands.h"
-extern int Sdc_commands_Init(Tcl_Interp* interp);
+extern int Sdc_commands_SafeInit(Tcl_Interp* interp);
 %}
 
 namespace std {
