@@ -141,3 +141,17 @@ proc create_clock {args} {
     #       without messing with the strings?
     create_clock_internal [dict get $params -period] [dict get $params -name] [dict get $params -waveform] [dict get $params -add] [dict get $params targets]
 }
+
+proc set_input_delay {args} {
+    set spec {
+        flags   {-clock}
+        bools   {-max -min}
+        pos     {delay targets}
+        require {-clock targets}
+        types   {delay double}
+    }
+
+    set params [generic_sdc_parser "set_input_delay" $spec $args]
+
+    set_input_delay_internal [dict get $params -max] [dict get $params -min] [dict get $params -clock] [dict get $params delay] [dict get $params targets]
+}

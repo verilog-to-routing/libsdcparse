@@ -19,4 +19,10 @@ void create_clock_internal(double period,
                            bool add,
                            const std::vector<std::string>& targets);
 
+void set_input_delay_internal(bool max_delay_flag,
+                              bool min_delay_flag,
+                              const std::string& clock_name,
+                              double delay,
+                              const std::vector<std::string>& targets);
+
 // TODO: Add more commands.

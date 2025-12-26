@@ -48,3 +48,24 @@ void create_clock_internal(double period,
     }
     sdcparse::g_callback->create_clock(create_clock_cmd);
 }
+
+void set_input_delay_internal(bool max_delay_flag,
+                              bool min_delay_flag,
+                              const std::string& clock_name,
+                              double delay,
+                              const std::vector<std::string>& targets) {
+
+    sdcparse::SetIoDelay set_input_delay_cmd;
+    set_input_delay_cmd.is_max = max_delay_flag;
+    set_input_delay_cmd.is_min = min_delay_flag;
+    set_input_delay_cmd.clock_name = clock_name;
+    set_input_delay_cmd.delay = delay;
+    set_input_delay_cmd.target_ports.strings = targets;
+    set_input_delay_cmd.type = sdcparse::IoDelayType::INPUT;
+
+    if (sdcparse::g_callback == nullptr) {
+        // FIXME: Make this a proper error.
+        throw new std::runtime_error("Callback not registered!.");
+    }
+    sdcparse::g_callback->set_io_delay(set_input_delay_cmd);
+}
