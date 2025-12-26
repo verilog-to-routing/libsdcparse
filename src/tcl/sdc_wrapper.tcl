@@ -128,9 +128,6 @@ proc create_clock {args} {
         types   {-period double}
     }
 
-    # TODO: If this command is to fail, is there a way for us to print the line
-    #       number of the calling function? The user would never see this file.
-
     set params [generic_sdc_parser "create_clock" $spec $args]
 
     # Internal logic call
@@ -202,8 +199,7 @@ proc get_ports {args} {
 
     set params [generic_sdc_parser "get_ports" $spec $args]
 
-    # TODO: Handle regexp, nocase, and quiet args
-
+    # Create the options for the search.
     set search_options {-all -inline}
     if {[dict get $params -regexp]} {
         lappend search_options -regexp
@@ -217,10 +213,12 @@ proc get_ports {args} {
     #       once per circuit.
     set matched_items {}
 
+    # Go through each pattern and collect all matches.
     foreach pattern [dict get $params patterns] {
         set matches [lsearch {*}$search_options [all_ports_internal] $pattern]
         lappend matched_items {*}$matches
     }
+    # De-dupe the matches
     set unique_matches [lsort -unique $matched_items]
 
     # If unique matches is empty, raise error unless quiet is active.
@@ -228,5 +226,11 @@ proc get_ports {args} {
         puts "Warning: no matches found for get_ports $args"
     }
 
+    # TODO: I am not sure if this function should return strings or not.
+    #       From what I can tell, other tools use "pointers" to objects which
+    #       have a name that matches the pattern. This may be a more robust
+    #       way of doing things since we may need to know if something is a port
+    #       or a pin.
+    #       This can be fixed by creating an internal database here in TCL.
     return $unique_matches
 }
