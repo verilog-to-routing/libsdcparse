@@ -109,21 +109,35 @@ proc generic_sdc_parser {cmd_name spec raw_args} {
 }
 
 proc create_clock {args} {
+    # TODO: Either target or name is required. Need to improve the parser to handle
+    #       this.
+    # TODO: The add command appears to only work if it comes before the positional
+    #       arguments. This should be supported. Thus the generic parser needs to
+    #       be corrected.
     set spec {
         flags   {-period -waveform -name}
         bools   {-add}
         pos     {targets}
-        require {-period targets}
+        require {-period}
         types   {-period double}
     }
-    
+
+    # TODO: If this command is to fail, is there a way for us to print the line
+    #       number of the calling function? The user would never see this file.
+
     set params [generic_sdc_parser "create_clock" $spec $args]
-    
+
     # Internal logic call
     # puts "Executing internal create_clock..."
     # puts "  Period:  [dict get $params -period]"
     # puts "  Targets: [dict get $params targets]"
     # if {[dict get $params -add]} { puts "  Mode:    Add (True)" }
-    
-    create_clock_internal [dict get $params -period] [dict get $params targets]
+
+    # TODO: Verify in TCL land that waveform has length two and maybe that
+    #       the first element is smaller than the second.
+
+
+    # TODO: Can we improve this function interface to wrap onto multiple lines
+    #       without messing with the strings?
+    create_clock_internal [dict get $params -period] [dict get $params -name] [dict get $params -waveform] [dict get $params -add] [dict get $params targets]
 }

@@ -12,4 +12,8 @@ extern Callback* g_callback;
 
 } // namespace sdcparse
 
-void create_clock_internal(double period, const std::string& name);
+void create_clock_internal(double period,
+                           const std::string& name,
+                           const std::vector<double>& waveform,
+                           bool add,
+                           const std::vector<std::string>& targets);
