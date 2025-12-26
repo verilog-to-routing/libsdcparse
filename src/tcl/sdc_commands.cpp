@@ -75,6 +75,28 @@ void set_input_delay_internal(bool max_delay_flag,
     sdcparse::g_callback->set_io_delay(set_input_delay_cmd);
 }
 
+void set_output_delay_internal(bool max_delay_flag,
+                               bool min_delay_flag,
+                               const std::string& clock_name,
+                               double delay,
+                               const std::vector<std::string>& targets) {
+
+    sdcparse::SetIoDelay set_output_delay_cmd;
+    set_output_delay_cmd.is_max = max_delay_flag;
+    set_output_delay_cmd.is_min = min_delay_flag;
+    set_output_delay_cmd.clock_name = clock_name;
+    set_output_delay_cmd.delay = delay;
+    set_output_delay_cmd.target_ports.strings = targets;
+    set_output_delay_cmd.type = sdcparse::IoDelayType::OUTPUT;
+
+    if (sdcparse::g_callback == nullptr) {
+        // FIXME: Make this a proper error.
+        throw new std::runtime_error("Callback not registered!.");
+    }
+    sdcparse::g_callback->set_io_delay(set_output_delay_cmd);
+}
+
+
 std::vector<std::string> all_ports_internal() {
     if (sdcparse::g_callback == nullptr) {
         // FIXME: Make this a proper error.

@@ -26,4 +26,10 @@ void set_input_delay_internal(bool max_delay_flag,
                               double delay,
                               const std::vector<std::string>& targets);
 
+void set_output_delay_internal(bool max_delay_flag,
+                               bool min_delay_flag,
+                               const std::string& clock_name,
+                               double delay,
+                               const std::vector<std::string>& targets);
+
 std::vector<std::string> all_ports_internal();

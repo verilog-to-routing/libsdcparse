@@ -167,6 +167,25 @@ proc set_input_delay {args} {
     set_input_delay_internal [dict get $params -max] [dict get $params -min] [dict get $params -clock] [dict get $params delay] [dict get $params targets]
 }
 
+proc set_output_delay {args} {
+    # Set the line number from the caller's frame
+    set frame_info [info frame -1]
+    set line_num [dict get $frame_info line]
+    lineno_internal $line_num
+
+    set spec {
+        flags   {-clock}
+        bools   {-max -min}
+        pos     {delay targets}
+        require {-clock targets}
+        types   {delay double}
+    }
+
+    set params [generic_sdc_parser "set_output_delay" $spec $args]
+
+    set_output_delay_internal [dict get $params -max] [dict get $params -min] [dict get $params -clock] [dict get $params delay] [dict get $params targets]
+}
+
 proc get_ports {args} {
     # Set the line number from the caller's frame
     set frame_info [info frame -1]
