@@ -21,15 +21,19 @@ public:
 
     void create_clock(const CreateClock& cmd) override {
         printf("#%s:%d\n", filename_.c_str(), lineno_);
-        printf("create_clock -period %f -waveform {%f %f} ",
+        printf("create_clock -period %f -waveform {%f %f}",
                 cmd.period,
                 cmd.rise_edge,
                 cmd.fall_edge);
         if(cmd.is_virtual) {
-            printf("-name %s",
+            printf(" -name %s",
                    cmd.name.c_str());
         } else {
+            printf(" ");
             print_string_group(cmd.targets);
+        }
+        if (cmd.add) {
+            printf(" -add");
         }
         printf("\n");
     }

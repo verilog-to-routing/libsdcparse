@@ -41,7 +41,9 @@ proc generic_sdc_parser {cmd_name spec raw_args} {
         
         if {[string index $arg 0] ne "-"} {
             # Not a flag, move to positional processing
-            break
+            lappend positional_values $arg
+            set remaining [lrange $remaining 1 end]
+            continue
         }
 
         if {$arg in $val_flags} {
@@ -59,7 +61,6 @@ proc generic_sdc_parser {cmd_name spec raw_args} {
     }
 
     # --- 2. Parse Positional Arguments ---
-    set positional_values $remaining
     set i 0
     foreach name $pos_names {
         if {$i < [llength $positional_values]} {
@@ -117,9 +118,6 @@ proc create_clock {args} {
 
     # TODO: Either target or name is required. Need to improve the parser to handle
     #       this.
-    # TODO: The add command appears to only work if it comes before the positional
-    #       arguments. This should be supported. Thus the generic parser needs to
-    #       be corrected.
     set spec {
         flags   {-period -waveform -name}
         bools   {-add}
@@ -130,15 +128,8 @@ proc create_clock {args} {
 
     set params [generic_sdc_parser "create_clock" $spec $args]
 
-    # Internal logic call
-    # puts "Executing internal create_clock..."
-    # puts "  Period:  [dict get $params -period]"
-    # puts "  Targets: [dict get $params targets]"
-    # if {[dict get $params -add]} { puts "  Mode:    Add (True)" }
-
     # TODO: Verify in TCL land that waveform has length two and maybe that
     #       the first element is smaller than the second.
-
 
     # TODO: Can we improve this function interface to wrap onto multiple lines
     #       without messing with the strings?

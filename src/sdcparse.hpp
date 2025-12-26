@@ -210,6 +210,7 @@ struct CreateClock {
     StringGroup targets;                        //The set of strings indicating clock sources.
                                                 // May be explicit strings or regexs.
     bool is_virtual = false;                    //Identifies this as a virtual (non-netlist) clock
+    bool add = false;
 };
 
 struct SetIoDelay {

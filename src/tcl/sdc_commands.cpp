@@ -21,11 +21,6 @@ void create_clock_internal(double period,
     // TODO: Have this call the proper callback.
     // std::cout << "create_clock with period " << period << " named: " << name << std::endl;
 
-    if (add) {
-        std::cout << "Add command unsupported." << std::endl;
-        throw new std::runtime_error("Add command unsupported");
-    }
-
     sdcparse::CreateClock create_clock_cmd;
     create_clock_cmd.name = name;
     create_clock_cmd.period = period;
@@ -45,6 +40,8 @@ void create_clock_internal(double period,
         create_clock_cmd.is_virtual = false;
 
     create_clock_cmd.targets.strings = targets;
+
+    create_clock_cmd.add = add;
 
     // TODO: This can probably be made into an assert.
     if (sdcparse::g_callback == nullptr) {
