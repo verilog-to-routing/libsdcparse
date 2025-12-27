@@ -19,6 +19,8 @@ public:
         obj_database.create_port_object("clk3");
         obj_database.create_port_object("clk4");
         obj_database.create_port_object("clk5");
+
+        obj_database.create_pin_object("my_inst.in1");
     }
 
     //Sets current filename

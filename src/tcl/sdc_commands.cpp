@@ -207,6 +207,15 @@ std::vector<std::string> all_clocks_internal() {
     return sdcparse::g_callback->obj_database.get_clock_objects();
 }
 
+std::vector<std::string> all_pins_internal() {
+    if (sdcparse::g_callback == nullptr) {
+        // FIXME: Make this a proper error.
+        throw new std::runtime_error("Callback not registered!.");
+    }
+
+    return sdcparse::g_callback->obj_database.get_pin_objects();
+}
+
 std::string get_name_internal(std::string object_id) {
     if (sdcparse::g_callback == nullptr) {
         // FIXME: Make this a proper error.

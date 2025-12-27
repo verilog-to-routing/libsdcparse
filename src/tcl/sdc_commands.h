@@ -59,6 +59,8 @@ std::vector<std::string> all_ports_internal();
 
 std::vector<std::string> all_clocks_internal();
 
+std::vector<std::string> all_pins_internal();
+
 std::string get_name_internal(std::string object_id);
 
 bool is_object_id_internal(std::string object_id);

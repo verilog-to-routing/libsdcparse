@@ -105,6 +105,7 @@ class TimingObjectDatabase {
     std::unordered_map<std::string, std::string> object_name;
     std::vector<std::string> port_objects;
     std::vector<std::string> clock_objects;
+    std::vector<std::string> pin_objects;
   public:
     std::string create_port_object(std::string port_name) {
         // TODO: We should make this a strong ID which happens to hold a string.
@@ -123,6 +124,16 @@ class TimingObjectDatabase {
         clock_objects.push_back(clock_object_id);
         return clock_object_id;
     }
+
+    std::string create_pin_object(std::string pin_name) {
+        // TODO: We should make this a strong ID which happens to hold a string.
+        std::string pin_object_id = "__vtr_obj_pin_" + std::to_string(pin_objects.size());
+        // TODO: Assert that the object id does not already exist anywhere else.
+        object_name[pin_object_id] = pin_name;
+        pin_objects.push_back(pin_object_id);
+        return pin_object_id;
+    }
+
 
     inline bool is_object_id(std::string object_id) const {
         if (object_id.rfind("__vtr_obj_", 0) == 0) {
@@ -144,6 +155,10 @@ class TimingObjectDatabase {
 
     const std::vector<std::string>& get_clock_objects() const {
         return clock_objects;
+    }
+
+    const std::vector<std::string>& get_pin_objects() const {
+        return pin_objects;
     }
 };
 

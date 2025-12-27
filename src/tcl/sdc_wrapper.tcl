@@ -376,6 +376,9 @@ proc get_name {object_id} {
 }
 
 proc _query_get_impl {cmd_name all_func params} {
+    # TODO: Square brackets are not currently supported. Need to figure out
+    #       how those are parsed. This may move this query method into C++.
+
     # Create the options for the search.
     set search_options {}
     if {[dict get $params -nocase]} {
@@ -452,6 +455,27 @@ proc get_clocks {args} {
     set params [generic_sdc_parser "get_clocks" $spec $args]
 
     set matches [_query_get_impl "get_clocks" all_clocks_internal $params]
+
+    return $matches
+}
+
+proc get_pins {args} {
+    # Set the line number from the caller's frame
+    set frame_info [info frame -1]
+    set line_num [dict get $frame_info line]
+    lineno_internal $line_num
+
+    set spec {
+        flags   {}
+        bools   {-regexp -nocase -quiet}
+        pos     {patterns}
+        require {patterns}
+        types   {}
+    }
+
+    set params [generic_sdc_parser "get_pins" $spec $args]
+
+    set matches [_query_get_impl "get_pins" all_pins_internal $params]
 
     return $matches
 }
