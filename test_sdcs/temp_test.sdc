@@ -5,7 +5,7 @@ create_clock -period 6.0 clk4 -add
 
 create_clock -period 7.0 -add clk5
 
-create_clock -period 2.0 {clk3 clk4}
+create_clock -period 2.0 {clk3 clk4} -name Test
 
 create_clock -period 5 -name Jeff
 

@@ -99,16 +99,29 @@ struct StringGroup;
 
 class TimingObjectDatabase {
   private:
-    std::unordered_map<std::string, std::string> port_object_name;
+    // TODO: In the future, we may want to make this a more complex struct
+    //       to hold more information. For example, a clock may have data that
+    //       a port does not have.
+    std::unordered_map<std::string, std::string> object_name;
     std::vector<std::string> port_objects;
+    std::vector<std::string> clock_objects;
   public:
     std::string create_port_object(std::string port_name) {
         // TODO: We should make this a strong ID which happens to hold a string.
         std::string port_object_id = "__vtr_obj_port_" + std::to_string(port_objects.size());
         // TODO: Assert that the object id does not already exist anywhere else.
-        port_object_name[port_object_id] = port_name;
+        object_name[port_object_id] = port_name;
         port_objects.push_back(port_object_id);
         return port_object_id;
+    }
+
+    std::string create_clock_object(std::string clock_name) {
+        // TODO: We should make this a strong ID which happens to hold a string.
+        std::string clock_object_id = "__vtr_obj_clock_" + std::to_string(clock_objects.size());
+        // TODO: Assert that the object id does not already exist anywhere else.
+        object_name[clock_object_id] = clock_name;
+        port_objects.push_back(clock_object_id);
+        return clock_object_id;
     }
 
     inline bool is_object_id(std::string object_id) const {
@@ -121,7 +134,7 @@ class TimingObjectDatabase {
 
     inline std::string get_object_name(std::string object_id) const {
         // TODO: Assert that the object exists.
-        auto it = port_object_name.find(object_id);
+        auto it = object_name.find(object_id);
         return it->second;
     }
 
@@ -129,8 +142,8 @@ class TimingObjectDatabase {
         return port_objects;
     }
 
-    const std::unordered_map<std::string, std::string>& get_port_object_name_map() const {
-        return port_object_name;
+    const std::vector<std::string>& get_clock_objects() const {
+        return clock_objects;
     }
 };
 
@@ -218,7 +231,8 @@ enum class StringGroupType {
     PORT, 
     CLOCK,
     CELL,
-    PIN
+    PIN,
+    OBJECT
 };
 
 /*
