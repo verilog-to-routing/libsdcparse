@@ -21,6 +21,8 @@ public:
         obj_database.create_port_object("clk5");
 
         obj_database.create_pin_object("my_inst.in1");
+        obj_database.create_pin_object("FFA.Q0");
+        obj_database.create_pin_object("to_FFD.in0");
     }
 
     //Sets current filename

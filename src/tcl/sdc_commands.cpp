@@ -188,6 +188,65 @@ void set_output_delay_internal(bool max_delay_flag,
     sdcparse::g_callback->set_io_delay(set_output_delay_cmd);
 }
 
+void set_clock_uncertainty_internal(bool is_setup,
+                                    bool is_hold,
+                                    const std::vector<std::string>& from_list,
+                                    const std::vector<std::string>& to_list,
+                                    double uncertainty) {
+    sdcparse::SetClockUncertainty set_clock_uncertainty_cmd;
+    set_clock_uncertainty_cmd.is_setup = is_setup;
+    set_clock_uncertainty_cmd.is_hold = is_hold;
+    set_clock_uncertainty_cmd.from.strings = from_list;
+    set_clock_uncertainty_cmd.from.type = sdcparse::StringGroupType::OBJECT;
+    set_clock_uncertainty_cmd.to.strings = to_list;
+    set_clock_uncertainty_cmd.to.type = sdcparse::StringGroupType::OBJECT;
+    set_clock_uncertainty_cmd.value = uncertainty;
+
+    if (sdcparse::g_callback == nullptr) {
+        // FIXME: Make this a proper error.
+        throw new std::runtime_error("Callback not registered!.");
+    }
+    sdcparse::g_callback->set_clock_uncertainty(set_clock_uncertainty_cmd);
+}
+
+void set_clock_latency_internal(bool is_source,
+                                bool is_early,
+                                bool is_late,
+                                double latency,
+                                const std::vector<std::string>& targets) {
+    sdcparse::SetClockLatency set_clock_latency_cmd;
+    if (is_source) {
+        set_clock_latency_cmd.type = sdcparse::ClockLatencyType::SOURCE;
+    } else {
+        set_clock_latency_cmd.type = sdcparse::ClockLatencyType::NONE;
+    }
+    set_clock_latency_cmd.is_early = is_early;
+    set_clock_latency_cmd.is_late = is_late;
+    set_clock_latency_cmd.value = latency;
+    set_clock_latency_cmd.target_clocks.strings = targets;
+    set_clock_latency_cmd.target_clocks.type = sdcparse::StringGroupType::OBJECT;
+
+    if (sdcparse::g_callback == nullptr) {
+        // FIXME: Make this a proper error.
+        throw new std::runtime_error("Callback not registered!.");
+    }
+    sdcparse::g_callback->set_clock_latency(set_clock_latency_cmd);
+}
+
+void set_disable_timing_internal(const std::vector<std::string>& from_list,
+                                 const std::vector<std::string>& to_list) {
+    sdcparse::SetDisableTiming set_disable_timing_cmd;
+    set_disable_timing_cmd.from.strings = from_list;
+    set_disable_timing_cmd.from.type = sdcparse::StringGroupType::OBJECT;
+    set_disable_timing_cmd.to.strings = to_list;
+    set_disable_timing_cmd.to.type = sdcparse::StringGroupType::OBJECT;
+
+    if (sdcparse::g_callback == nullptr) {
+        // FIXME: Make this a proper error.
+        throw new std::runtime_error("Callback not registered!.");
+    }
+    sdcparse::g_callback->set_disable_timing(set_disable_timing_cmd);
+}
 
 std::vector<std::string> all_ports_internal() {
     if (sdcparse::g_callback == nullptr) {

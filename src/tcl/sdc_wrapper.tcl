@@ -159,6 +159,15 @@ proc _convert_to_objects {cmd_name targets object_type_list} {
                             }
                         }
                     }
+                    "pins" {
+                        foreach id [all_pins_internal] {
+                            set name [get_name_internal $id]
+                            if {[string match $item $name]} {
+                                lappend id_targets $id
+                                set found 1
+                            }
+                        }
+                    }
                 }
                 if {$found} {break}
             }
@@ -318,8 +327,7 @@ proc set_multicycle_path {args} {
     set params [generic_sdc_parser "set_multicycle_path" $spec $args]
 
     set from_list [_convert_to_objects "set_multicycle_path" [dict get $params -from] {clocks}]
-    # TODO: Support pins as well.
-    set to_list [_convert_to_objects "set_multicycle_path" [dict get $params -to] {clocks}]
+    set to_list [_convert_to_objects "set_multicycle_path" [dict get $params -to] {clocks pins}]
 
     set_multicycle_path_internal [dict get $params -setup] [dict get $params -hold] $from_list $to_list [dict get $params path_multiplier]
 }
@@ -364,6 +372,71 @@ proc set_output_delay {args} {
     set id_targets [_convert_to_objects "set_input_delay" [dict get $params targets] {ports}]
 
     set_output_delay_internal [dict get $params -max] [dict get $params -min] [dict get $params -clock] [dict get $params delay] $id_targets
+}
+
+proc set_clock_uncertainty {args} {
+    # Set the line number from the caller's frame
+    set frame_info [info frame -1]
+    set line_num [dict get $frame_info line]
+    lineno_internal $line_num
+
+    set spec {
+        flags   {-from -to}
+        bools   {-setup -hold}
+        pos     {uncertainty}
+        require {uncertainty}
+        types   {uncertainty double}
+    }
+
+    set params [generic_sdc_parser "set_clock_uncertainty" $spec $args]
+
+    set from_list [_convert_to_objects "set_clock_uncertainty" [dict get $params -from] {clocks}]
+    set to_list [_convert_to_objects "set_clock_uncertainty" [dict get $params -to] {clocks}]
+
+    set_clock_uncertainty_internal [dict get $params -setup] [dict get $params -hold] $from_list $to_list [dict get $params uncertainty]
+}
+
+proc set_clock_latency {args} {
+    # Set the line number from the caller's frame
+    set frame_info [info frame -1]
+    set line_num [dict get $frame_info line]
+    lineno_internal $line_num
+
+    set spec {
+        flags   {}
+        bools   {-source -early -late}
+        pos     {latency targets}
+        require {-source latency targets}
+        types   {latency double}
+    }
+
+    set params [generic_sdc_parser "set_clock_latency" $spec $args]
+
+    set target_list [_convert_to_objects "set_clock_latency" [dict get $params targets] {clocks}]
+
+    set_clock_latency_internal [dict get $params -source] [dict get $params -early] [dict get $params -late] [dict get $params latency] $target_list
+}
+
+proc set_disable_timing {args} {
+    # Set the line number from the caller's frame
+    set frame_info [info frame -1]
+    set line_num [dict get $frame_info line]
+    lineno_internal $line_num
+
+    set spec {
+        flags   {-from -to}
+        bools   {}
+        pos     {}
+        require {}
+        types   {}
+    }
+
+    set params [generic_sdc_parser "set_disable_timing" $spec $args]
+
+    set from_list [_convert_to_objects "set_disable_timing" [dict get $params -from] {pins}]
+    set to_list [_convert_to_objects "set_disable_timing" [dict get $params -to] {pins}]
+
+    set_disable_timing_internal $from_list $to_list
 }
 
 proc get_name {object_id} {

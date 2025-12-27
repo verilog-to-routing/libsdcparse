@@ -55,6 +55,21 @@ void set_output_delay_internal(bool max_delay_flag,
                                double delay,
                                const std::vector<std::string>& targets);
 
+void set_clock_uncertainty_internal(bool is_setup,
+                                    bool is_hold,
+                                    const std::vector<std::string>& from_list,
+                                    const std::vector<std::string>& to_list,
+                                    double uncertainty);
+
+void set_clock_latency_internal(bool is_source,
+                                bool is_early,
+                                bool is_late,
+                                double latency,
+                                const std::vector<std::string>& targets);
+
+void set_disable_timing_internal(const std::vector<std::string>& from_list,
+                                 const std::vector<std::string>& to_list);
+
 std::vector<std::string> all_ports_internal();
 
 std::vector<std::string> all_clocks_internal();

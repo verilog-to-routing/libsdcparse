@@ -34,3 +34,11 @@ set_min_delay 2 -from [get_clocks clk1] -to [get_clocks clk3]
 set_multicycle_path -from [get_clocks clk1] -to [get_clocks clk3] 4
 set_multicycle_path -setup -from [get_clocks {clk1}] -to [get_clocks {clk3}] 3
 set_multicycle_path -hold -from [get_clocks {clk1}] -to [get_clocks {clk3}] 2
+
+set_clock_uncertainty 0.025
+set_clock_uncertainty -from [get_clocks {clk1}] 0.05
+set_clock_uncertainty -from [get_clocks {clk1}]  -to [get_clocks {clk3}] 0.75
+
+set_clock_latency -source 1.0 [get_clocks {clk1}]
+
+set_disable_timing -from [get_pins {FFA.Q0}] -to [get_pins {to_FFD.in0}]
