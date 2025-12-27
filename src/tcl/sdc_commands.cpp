@@ -87,6 +87,42 @@ void set_false_path_internal(const std::vector<std::string>& from_list,
     sdcparse::g_callback->set_false_path(set_false_path_cmd);
 }
 
+void set_min_delay_internal(double delay,
+                            const std::vector<std::string>& from_list,
+                            const std::vector<std::string>& to_list) {
+    sdcparse::SetMinMaxDelay set_min_delay_cmd;
+    set_min_delay_cmd.type = sdcparse::MinMaxType::MIN;
+    set_min_delay_cmd.value = delay;
+    set_min_delay_cmd.from.strings = from_list;
+    set_min_delay_cmd.from.type = sdcparse::StringGroupType::OBJECT;
+    set_min_delay_cmd.to.strings = to_list;
+    set_min_delay_cmd.to.type = sdcparse::StringGroupType::OBJECT;
+
+    if (sdcparse::g_callback == nullptr) {
+        // FIXME: Make this a proper error.
+        throw new std::runtime_error("Callback not registered!.");
+    }
+    sdcparse::g_callback->set_min_max_delay(set_min_delay_cmd);
+}
+
+void set_max_delay_internal(double delay,
+                            const std::vector<std::string>& from_list,
+                            const std::vector<std::string>& to_list) {
+    sdcparse::SetMinMaxDelay set_max_delay_cmd;
+    set_max_delay_cmd.type = sdcparse::MinMaxType::MAX;
+    set_max_delay_cmd.value = delay;
+    set_max_delay_cmd.from.strings = from_list;
+    set_max_delay_cmd.from.type = sdcparse::StringGroupType::OBJECT;
+    set_max_delay_cmd.to.strings = to_list;
+    set_max_delay_cmd.to.type = sdcparse::StringGroupType::OBJECT;
+
+    if (sdcparse::g_callback == nullptr) {
+        // FIXME: Make this a proper error.
+        throw new std::runtime_error("Callback not registered!.");
+    }
+    sdcparse::g_callback->set_min_max_delay(set_max_delay_cmd);
+}
+
 void set_input_delay_internal(bool max_delay_flag,
                               bool min_delay_flag,
                               const std::string& clock_name,

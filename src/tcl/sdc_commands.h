@@ -29,6 +29,14 @@ void set_clock_groups_internal(const std::vector<std::string>& clock_list,
 void set_false_path_internal(const std::vector<std::string>& from_list,
                              const std::vector<std::string>& to_list);
 
+void set_min_delay_internal(double delay,
+                            const std::vector<std::string>& from_list,
+                            const std::vector<std::string>& to_list);
+
+void set_max_delay_internal(double delay,
+                            const std::vector<std::string>& from_list,
+                            const std::vector<std::string>& to_list);
+
 void set_input_delay_internal(bool max_delay_flag,
                               bool min_delay_flag,
                               const std::string& clock_name,

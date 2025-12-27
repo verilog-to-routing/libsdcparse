@@ -27,3 +27,6 @@ set_clock_groups -exclusive -group {clk3 clk4} -group {clk1 clk5}
 set_clock_groups -exclusive -group [get_clocks Jeff] -group [get_clocks Test] -group clk1
 
 set_false_path -from [get_clocks clk1] -to [get_clocks clk3]
+
+set_max_delay 17 -from [get_clocks clk1] -to [get_clocks clk3]
+set_min_delay 2 -from [get_clocks clk1] -to [get_clocks clk3]

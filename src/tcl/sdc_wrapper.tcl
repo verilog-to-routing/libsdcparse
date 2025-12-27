@@ -257,6 +257,50 @@ proc set_false_path {args} {
     set_false_path_internal $from_list $to_list
 }
 
+proc set_max_delay {args} {
+    # Set the line number from the caller's frame
+    set frame_info [info frame -1]
+    set line_num [dict get $frame_info line]
+    lineno_internal $line_num
+
+    set spec {
+        flags   {-from -to}
+        bools   {}
+        pos     {delay}
+        require {delay}
+        types   {delay double}
+    }
+
+    set params [generic_sdc_parser "set_max_delay" $spec $args]
+
+    set from_list [_convert_to_objects "set_max_delay" [dict get $params -from] {clocks}]
+    set to_list [_convert_to_objects "set_max_delay" [dict get $params -to] {clocks}]
+
+    set_max_delay_internal [dict get $params delay] $from_list $to_list
+}
+
+proc set_min_delay {args} {
+    # Set the line number from the caller's frame
+    set frame_info [info frame -1]
+    set line_num [dict get $frame_info line]
+    lineno_internal $line_num
+
+    set spec {
+        flags   {-from -to}
+        bools   {}
+        pos     {delay}
+        require {delay}
+        types   {delay double}
+    }
+
+    set params [generic_sdc_parser "set_min_delay" $spec $args]
+
+    set from_list [_convert_to_objects "set_min_delay" [dict get $params -from] {clocks}]
+    set to_list [_convert_to_objects "set_min_delay" [dict get $params -to] {clocks}]
+
+    set_min_delay_internal [dict get $params delay] $from_list $to_list
+}
+
 proc set_input_delay {args} {
     # Set the line number from the caller's frame
     set frame_info [info frame -1]
