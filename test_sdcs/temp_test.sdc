@@ -30,3 +30,7 @@ set_false_path -from [get_clocks clk1] -to [get_clocks clk3]
 
 set_max_delay 17 -from [get_clocks clk1] -to [get_clocks clk3]
 set_min_delay 2 -from [get_clocks clk1] -to [get_clocks clk3]
+
+set_multicycle_path -from [get_clocks clk1] -to [get_clocks clk3] 4
+set_multicycle_path -setup -from [get_clocks {clk1}] -to [get_clocks {clk3}] 3
+set_multicycle_path -hold -from [get_clocks {clk1}] -to [get_clocks {clk3}] 2

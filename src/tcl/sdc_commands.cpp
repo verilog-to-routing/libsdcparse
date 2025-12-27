@@ -123,6 +123,27 @@ void set_max_delay_internal(double delay,
     sdcparse::g_callback->set_min_max_delay(set_max_delay_cmd);
 }
 
+void set_multicycle_path_internal(bool is_setup,
+                                  bool is_hold,
+                                  const std::vector<std::string>& from_list,
+                                  const std::vector<std::string>& to_list,
+                                  int path_multiplier) {
+    sdcparse::SetMulticyclePath set_multicycle_path_cmd;
+    set_multicycle_path_cmd.is_setup = is_setup;
+    set_multicycle_path_cmd.is_hold = is_hold;
+    set_multicycle_path_cmd.from.strings = from_list;
+    set_multicycle_path_cmd.from.type = sdcparse::StringGroupType::OBJECT;
+    set_multicycle_path_cmd.to.strings = to_list;
+    set_multicycle_path_cmd.to.type = sdcparse::StringGroupType::OBJECT;
+    set_multicycle_path_cmd.mcp_value = path_multiplier;
+
+    if (sdcparse::g_callback == nullptr) {
+        // FIXME: Make this a proper error.
+        throw new std::runtime_error("Callback not registered!.");
+    }
+    sdcparse::g_callback->set_multicycle_path(set_multicycle_path_cmd);
+}
+
 void set_input_delay_internal(bool max_delay_flag,
                               bool min_delay_flag,
                               const std::string& clock_name,

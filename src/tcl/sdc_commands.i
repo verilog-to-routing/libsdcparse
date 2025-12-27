@@ -38,6 +38,12 @@ void set_max_delay_internal(double delay,
                             const std::vector<std::string>& from_list,
                             const std::vector<std::string>& to_list);
 
+void set_multicycle_path_internal(bool is_setup,
+                                  bool is_hold,
+                                  const std::vector<std::string>& from_list,
+                                  const std::vector<std::string>& to_list,
+                                  int path_multiplier);
+
 void set_input_delay_internal(bool max_delay_flag,
                               bool min_delay_flag,
                               const std::string& clock_name,

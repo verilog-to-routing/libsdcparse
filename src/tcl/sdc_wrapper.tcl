@@ -301,6 +301,29 @@ proc set_min_delay {args} {
     set_min_delay_internal [dict get $params delay] $from_list $to_list
 }
 
+proc set_multicycle_path {args} {
+    # Set the line number from the caller's frame
+    set frame_info [info frame -1]
+    set line_num [dict get $frame_info line]
+    lineno_internal $line_num
+
+    set spec {
+        flags   {-from -to}
+        bools   {-setup -hold}
+        pos     {path_multiplier}
+        require {path_multiplier}
+        types   {path_multiplier integer}
+    }
+
+    set params [generic_sdc_parser "set_multicycle_path" $spec $args]
+
+    set from_list [_convert_to_objects "set_multicycle_path" [dict get $params -from] {clocks}]
+    # TODO: Support pins as well.
+    set to_list [_convert_to_objects "set_multicycle_path" [dict get $params -to] {clocks}]
+
+    set_multicycle_path_internal [dict get $params -setup] [dict get $params -hold] $from_list $to_list [dict get $params path_multiplier]
+}
+
 proc set_input_delay {args} {
     # Set the line number from the caller's frame
     set frame_info [info frame -1]
