@@ -58,6 +58,7 @@ public:
         } else {
             // TODO: Figure out what to do in this case. Should we just not create
             //       the clock object? Or maybe give it a random name?
+            // I wonder if each target would get its own clock?
             printf("Cannot create a name for the clock.\n");
             exit(1);
         }

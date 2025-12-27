@@ -120,7 +120,7 @@ class TimingObjectDatabase {
         std::string clock_object_id = "__vtr_obj_clock_" + std::to_string(clock_objects.size());
         // TODO: Assert that the object id does not already exist anywhere else.
         object_name[clock_object_id] = clock_name;
-        port_objects.push_back(clock_object_id);
+        clock_objects.push_back(clock_object_id);
         return clock_object_id;
     }
 

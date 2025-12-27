@@ -219,29 +219,14 @@ proc get_name {object_id} {
     get_name_internal object_id
 }
 
-proc get_ports {args} {
-    # Set the line number from the caller's frame
-    set frame_info [info frame -1]
-    set line_num [dict get $frame_info line]
-    lineno_internal $line_num
-
-    set spec {
-        flags   {}
-        bools   {-regexp -nocase -quiet}
-        pos     {patterns}
-        require {patterns}
-        types   {}
-    }
-
-    set params [generic_sdc_parser "get_ports" $spec $args]
-
+proc _query_get_impl {cmd_name all_func params} {
     # Create the options for the search.
     set search_options {}
     if {[dict get $params -nocase]} {
         lappend search_options -nocase
     }
 
-    set matches [lmap id [all_ports_internal] {
+    set matches [lmap id [$all_func] {
         set name [get_name_internal $id]
 
         set match 0
@@ -267,8 +252,59 @@ proc get_ports {args} {
 
     # If unique matches is empty, raise error unless quiet is active.
     if {[llength $matches] == 0 && ![dict get $params -quiet]} {
-        puts "Warning: no matches found for get_ports $args"
+        puts "Warning: no matches found for $cmd_name [dict get $params patterns]"
     }
 
     return $matches
+}
+
+proc get_ports {args} {
+    # Set the line number from the caller's frame
+    set frame_info [info frame -1]
+    set line_num [dict get $frame_info line]
+    lineno_internal $line_num
+
+    set spec {
+        flags   {}
+        bools   {-regexp -nocase -quiet}
+        pos     {patterns}
+        require {patterns}
+        types   {}
+    }
+
+    set params [generic_sdc_parser "get_ports" $spec $args]
+
+    set matches [_query_get_impl "get_ports" all_ports_internal $params]
+
+    return $matches
+}
+
+proc get_clocks {args} {
+    # Set the line number from the caller's frame
+    set frame_info [info frame -1]
+    set line_num [dict get $frame_info line]
+    lineno_internal $line_num
+
+    set spec {
+        flags   {}
+        bools   {-regexp -nocase -quiet}
+        pos     {patterns}
+        require {patterns}
+        types   {}
+    }
+
+    set params [generic_sdc_parser "get_clocks" $spec $args]
+
+    set matches [_query_get_impl "get_clocks" all_clocks_internal $params]
+
+    return $matches
+}
+
+proc all_clocks {} {
+    # Set the line number from the caller's frame
+    set frame_info [info frame -1]
+    set line_num [dict get $frame_info line]
+    lineno_internal $line_num
+
+    return [all_clocks_internal]
 }
