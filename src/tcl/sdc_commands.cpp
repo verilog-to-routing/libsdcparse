@@ -72,6 +72,21 @@ void set_clock_groups_internal(const std::vector<std::string>& clock_list,
     sdcparse::g_callback->set_clock_groups(set_clock_groups_cmd);
 }
 
+void set_false_path_internal(const std::vector<std::string>& from_list,
+                             const std::vector<std::string>& to_list) {
+    sdcparse::SetFalsePath set_false_path_cmd;
+    set_false_path_cmd.from.strings = from_list;
+    set_false_path_cmd.from.type = sdcparse::StringGroupType::OBJECT;
+    set_false_path_cmd.to.strings = to_list;
+    set_false_path_cmd.to.type = sdcparse::StringGroupType::OBJECT;
+
+    if (sdcparse::g_callback == nullptr) {
+        // FIXME: Make this a proper error.
+        throw new std::runtime_error("Callback not registered!.");
+    }
+    sdcparse::g_callback->set_false_path(set_false_path_cmd);
+}
+
 void set_input_delay_internal(bool max_delay_flag,
                               bool min_delay_flag,
                               const std::string& clock_name,

@@ -235,6 +235,28 @@ proc set_clock_groups {args} {
     set_clock_groups_internal $clock_list $clock_group_start_pos
 }
 
+proc set_false_path {args} {
+    # Set the line number from the caller's frame
+    set frame_info [info frame -1]
+    set line_num [dict get $frame_info line]
+    lineno_internal $line_num
+
+    set spec {
+        flags   {-from -to}
+        bools   {}
+        pos     {}
+        require {}
+        types   {}
+    }
+
+    set params [generic_sdc_parser "set_false_path" $spec $args]
+
+    set from_list [_convert_to_objects "set_false_path" [dict get $params -from] {clocks}]
+    set to_list [_convert_to_objects "set_false_path" [dict get $params -to] {clocks}]
+
+    set_false_path_internal $from_list $to_list
+}
+
 proc set_input_delay {args} {
     # Set the line number from the caller's frame
     set frame_info [info frame -1]

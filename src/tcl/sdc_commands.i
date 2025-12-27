@@ -27,6 +27,9 @@ void create_clock_internal(double period,
 void set_clock_groups_internal(const std::vector<std::string>& clock_list,
                                const std::vector<int>& clock_group_start_pos);
 
+void set_false_path_internal(const std::vector<std::string>& from_list,
+                             const std::vector<std::string>& to_list);
+
 void set_input_delay_internal(bool max_delay_flag,
                               bool min_delay_flag,
                               const std::string& clock_name,
