@@ -67,6 +67,7 @@
  *                   | sdc_commands cmd_set_time_format EOL {$$ = add_sdc_set_time_format($1, $2); }
  *
  */
+#include <unordered_map>
 #include <vector>
 #include <string>
 #include <memory>
@@ -96,6 +97,42 @@ struct SetTimingDerate;
 
 struct StringGroup;
 
+class TimingObjectDatabase {
+  private:
+    std::unordered_map<std::string, std::string> port_object_name;
+    std::vector<std::string> port_objects;
+  public:
+    std::string create_port_object(std::string port_name) {
+        // TODO: We should make this a strong ID which happens to hold a string.
+        std::string port_object_id = "__vtr_obj_port_" + std::to_string(port_objects.size());
+        // TODO: Assert that the object id does not already exist anywhere else.
+        port_object_name[port_object_id] = port_name;
+        port_objects.push_back(port_object_id);
+        return port_object_id;
+    }
+
+    inline bool is_object_id(std::string object_id) const {
+        if (object_id.rfind("__vtr_obj_", 0) == 0) {
+            return true;
+        }
+
+        return false;
+    }
+
+    inline std::string get_object_name(std::string object_id) const {
+        // TODO: Assert that the object exists.
+        auto it = port_object_name.find(object_id);
+        return it->second;
+    }
+
+    const std::vector<std::string>& get_port_objects() const {
+        return port_objects;
+    }
+
+    const std::unordered_map<std::string, std::string>& get_port_object_name_map() const {
+        return port_object_name;
+    }
+};
 
 class Callback {
 
@@ -122,13 +159,14 @@ class Callback {
         virtual void set_disable_timing(const SetDisableTiming& cmd) = 0;
         virtual void set_timing_derate(const SetTimingDerate& cmd) = 0;
 
-        virtual std::vector<std::string> all_ports() = 0;
-
         //End of parsing
         virtual void finish_parse() = 0;
 
         //Error during parsing
         virtual void parse_error(const int curr_lineno, const std::string& near_text, const std::string& msg) = 0;
+
+    public:
+        TimingObjectDatabase obj_database;
 };
 
 /*

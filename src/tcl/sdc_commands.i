@@ -36,4 +36,8 @@ void set_output_delay_internal(bool max_delay_flag,
 // TODO: Investigate if this is too poor for performance
 std::vector<std::string> all_ports_internal();
 
+std::string get_name_internal(std::string object_id);
+
+bool is_object_id_internal(std::string object_id);
+
 // TODO: Add more commands.

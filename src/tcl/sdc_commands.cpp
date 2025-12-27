@@ -39,6 +39,7 @@ void create_clock_internal(double period,
     else
         create_clock_cmd.is_virtual = false;
 
+    // TODO: Assert that all targets are IDs
     create_clock_cmd.targets.strings = targets;
 
     create_clock_cmd.add = add;
@@ -100,5 +101,23 @@ std::vector<std::string> all_ports_internal() {
         throw new std::runtime_error("Callback not registered!.");
     }
 
-    return sdcparse::g_callback->all_ports();
+    return sdcparse::g_callback->obj_database.get_port_objects();
+}
+
+std::string get_name_internal(std::string object_id) {
+    if (sdcparse::g_callback == nullptr) {
+        // FIXME: Make this a proper error.
+        throw new std::runtime_error("Callback not registered!.");
+    }
+
+    return sdcparse::g_callback->obj_database.get_object_name(object_id);
+}
+
+bool is_object_id_internal(std::string object_id) {
+    if (sdcparse::g_callback == nullptr) {
+        // FIXME: Make this a proper error.
+        throw new std::runtime_error("Callback not registered!.");
+    }
+
+    return sdcparse::g_callback->obj_database.is_object_id(object_id);
 }

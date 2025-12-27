@@ -11,7 +11,15 @@ void print_from_to_group(const StringGroup& from, const StringGroup& to);
 class PrintCallback : public Callback {
 public:
     //Start of parsing
-    void start_parse() override { }
+    void start_parse() override {
+        obj_database.create_port_object("in1");
+        obj_database.create_port_object("in2");
+        obj_database.create_port_object("in3");
+        obj_database.create_port_object("clk1");
+        obj_database.create_port_object("clk3");
+        obj_database.create_port_object("clk4");
+        obj_database.create_port_object("clk5");
+    }
 
     //Sets current filename
     void filename(std::string fname) override { filename_ = fname; }
@@ -156,10 +164,6 @@ public:
         printf("%f ", cmd.value);
         print_string_group(cmd.cell_targets);
         printf("\n");
-    }
-
-    std::vector<std::string> all_ports() override {
-        return {"in1", "in2", "in3"};
     }
 
     //End of parsing

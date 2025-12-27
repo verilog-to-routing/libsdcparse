@@ -109,6 +109,36 @@ proc generic_sdc_parser {cmd_name spec raw_args} {
     return $results
 }
 
+# TODO: Maybe add an argument with a list of object types to try in order
+#           {ports pins ... }
+proc _convert_to_objects {cmd_name targets} {
+    set id_targets {}
+    foreach item $targets {
+        if {[is_object_id_internal $item]} {
+            # Already is an object.
+            lappend id_targets $item
+        } else {
+            # Convert to an object.
+            # First, try to see if this is a port.
+            set found 0
+            foreach id [all_ports_internal] {
+                set name [get_name_internal $id]
+                if {[string match $item $name]} {
+                    lappend id_targets $id
+                    set found 1
+                }
+            }
+            if {$found} {continue}
+            # TODO: Try to see if this is a pin.
+
+            # If nothing can be found, raise an error.
+            error "$cmd_name: Unknown target: '$item'."
+        }
+    }
+
+    return $id_targets
+}
+
 proc create_clock {args} {
     # Set the line number from the caller's frame
     # TODO: Can this be made more general?
@@ -131,9 +161,11 @@ proc create_clock {args} {
     # TODO: Verify in TCL land that waveform has length two and maybe that
     #       the first element is smaller than the second.
 
+    set id_targets [_convert_to_objects "create_clock" [dict get $params targets]]
+
     # TODO: Can we improve this function interface to wrap onto multiple lines
     #       without messing with the strings?
-    create_clock_internal [dict get $params -period] [dict get $params -name] [dict get $params -waveform] [dict get $params -add] [dict get $params targets]
+    create_clock_internal [dict get $params -period] [dict get $params -name] [dict get $params -waveform] [dict get $params -add] $id_targets
 }
 
 proc set_input_delay {args} {
@@ -152,7 +184,9 @@ proc set_input_delay {args} {
 
     set params [generic_sdc_parser "set_input_delay" $spec $args]
 
-    set_input_delay_internal [dict get $params -max] [dict get $params -min] [dict get $params -clock] [dict get $params delay] [dict get $params targets]
+    set id_targets [_convert_to_objects "set_input_delay" [dict get $params targets]]
+
+    set_input_delay_internal [dict get $params -max] [dict get $params -min] [dict get $params -clock] [dict get $params delay] $id_targets
 }
 
 proc set_output_delay {args} {
@@ -171,7 +205,18 @@ proc set_output_delay {args} {
 
     set params [generic_sdc_parser "set_output_delay" $spec $args]
 
-    set_output_delay_internal [dict get $params -max] [dict get $params -min] [dict get $params -clock] [dict get $params delay] [dict get $params targets]
+    set id_targets [_convert_to_objects "set_input_delay" [dict get $params targets]]
+
+    set_output_delay_internal [dict get $params -max] [dict get $params -min] [dict get $params -clock] [dict get $params delay] $id_targets
+}
+
+proc get_name {object_id} {
+    # Set the line number from the caller's frame
+    set frame_info [info frame -1]
+    set line_num [dict get $frame_info line]
+    lineno_internal $line_num
+
+    get_name_internal object_id
 }
 
 proc get_ports {args} {
@@ -191,37 +236,39 @@ proc get_ports {args} {
     set params [generic_sdc_parser "get_ports" $spec $args]
 
     # Create the options for the search.
-    set search_options {-all -inline}
-    if {[dict get $params -regexp]} {
-        lappend search_options -regexp
-    }
+    set search_options {}
     if {[dict get $params -nocase]} {
         lappend search_options -nocase
     }
 
-    # TODO: This may become very slow if we need to get all the ports everytime
-    #       we search. We may be able to create a global variable which gets loaded
-    #       once per circuit.
-    set matched_items {}
+    set matches [lmap id [all_ports_internal] {
+        set name [get_name_internal $id]
 
-    # Go through each pattern and collect all matches.
-    foreach pattern [dict get $params patterns] {
-        set matches [lsearch {*}$search_options [all_ports_internal] $pattern]
-        lappend matched_items {*}$matches
-    }
-    # De-dupe the matches
-    set unique_matches [lsort -unique $matched_items]
+        set match 0
+        foreach pattern [dict get $params patterns] {
+            if {[dict get $params -regexp]} {
+                if {[regexp {*}$search_options -- $pattern $name]} {
+                    set match 1
+                    break;
+                }
+            } else {
+                if {[string match {*}$search_options $pattern $name]} {
+                    set match 1
+                    break;
+                }
+            }
+        }
+        if {$match} {
+            set id
+        } else {
+            continue
+        }
+    }]
 
     # If unique matches is empty, raise error unless quiet is active.
-    if {[llength $unique_matches] == 0 && ![dict get $params -quiet]} {
+    if {[llength $matches] == 0 && ![dict get $params -quiet]} {
         puts "Warning: no matches found for get_ports $args"
     }
 
-    # TODO: I am not sure if this function should return strings or not.
-    #       From what I can tell, other tools use "pointers" to objects which
-    #       have a name that matches the pattern. This may be a more robust
-    #       way of doing things since we may need to know if something is a port
-    #       or a pin.
-    #       This can be fixed by creating an internal database here in TCL.
-    return $unique_matches
+    return $matches
 }
