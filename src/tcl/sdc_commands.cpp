@@ -53,6 +53,25 @@ void create_clock_internal(double period,
     sdcparse::g_callback->create_clock(create_clock_cmd);
 }
 
+void set_clock_groups_internal(const std::vector<std::string>& clock_list,
+                               const std::vector<int>& clock_group_start_pos) {
+    sdcparse::SetClockGroups set_clock_groups_cmd;
+    for (size_t i = 0; i < clock_group_start_pos.size() - 1; i++) {
+        sdcparse::StringGroup new_group;
+        new_group.type = sdcparse::StringGroupType::OBJECT;
+        for (size_t j = clock_group_start_pos[i]; j < (size_t)clock_group_start_pos[i + 1]; j++) {
+            new_group.strings.push_back(clock_list[j]);
+        }
+        set_clock_groups_cmd.clock_groups.push_back(std::move(new_group));
+    }
+
+    if (sdcparse::g_callback == nullptr) {
+        // FIXME: Make this a proper error.
+        throw new std::runtime_error("Callback not registered!.");
+    }
+    sdcparse::g_callback->set_clock_groups(set_clock_groups_cmd);
+}
+
 void set_input_delay_internal(bool max_delay_flag,
                               bool min_delay_flag,
                               const std::string& clock_name,

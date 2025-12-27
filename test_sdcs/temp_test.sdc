@@ -22,3 +22,6 @@ set_input_delay -clock Jeff 0 [get_ports -regexp -nocase {IN.*}]
 set_input_delay -clock Jerry 0 [get_ports *]
 set temp [get_ports out1]
 set temp2 [get_ports -quiet out2]
+
+set_clock_groups -exclusive -group {clk3 clk4} -group {clk1 clk5}
+set_clock_groups -exclusive -group [get_clocks Jeff] -group [get_clocks Test] -group clk1

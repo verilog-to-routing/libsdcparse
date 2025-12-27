@@ -26,11 +26,17 @@ proc generic_sdc_parser {cmd_name spec raw_args} {
         set arg_types [dict get $spec types]
     }
 
+    set list_flags {}
+    if {[dict exists $spec list_flags]} {
+        set list_flags [dict get $spec list_flags]
+    }
+
     # Result dictionary initialization
     set results [dict create]
     foreach b $bool_flags { dict set results $b 0 }
     foreach f $val_flags  { dict set results $f "" }
     foreach p $pos_names  { dict set results $p "" }
+    foreach l $list_flags { dict set results $l {} }
 
     set remaining $raw_args
     set positional_values {}
@@ -51,6 +57,14 @@ proc generic_sdc_parser {cmd_name spec raw_args} {
                 error "$cmd_name: Missing value for flag '$arg'"
             }
             dict set results $arg [lindex $remaining 1]
+            set remaining [lrange $remaining 2 end]
+        }  elseif {$arg in $list_flags} {
+            if {[llength $remaining] < 2} {
+                error "$cmd_name: Missing value for list flag '$arg'"
+            }
+            set curr_list [dict get $results $arg]
+            lappend curr_list [lindex $remaining 1]
+            dict set results $arg $curr_list
             set remaining [lrange $remaining 2 end]
         } elseif {$arg in $bool_flags} {
             dict set results $arg 1
@@ -75,6 +89,11 @@ proc generic_sdc_parser {cmd_name spec raw_args} {
     foreach req $required {
         if {[dict get $results $req] eq ""} {
             error "$cmd_name: The argument '$req' is required."
+        }
+        if {$req in $list_flags} {
+            if {[dict get $results $req] eq {}} {
+                error "$cmd_name: The argument '$req' is required."
+            }
         }
     }
 
@@ -111,7 +130,7 @@ proc generic_sdc_parser {cmd_name spec raw_args} {
 
 # TODO: Maybe add an argument with a list of object types to try in order
 #           {ports pins ... }
-proc _convert_to_objects {cmd_name targets} {
+proc _convert_to_objects {cmd_name targets object_type_list} {
     set id_targets {}
     foreach item $targets {
         if {[is_object_id_internal $item]} {
@@ -119,17 +138,31 @@ proc _convert_to_objects {cmd_name targets} {
             lappend id_targets $item
         } else {
             # Convert to an object.
-            # First, try to see if this is a port.
             set found 0
-            foreach id [all_ports_internal] {
-                set name [get_name_internal $id]
-                if {[string match $item $name]} {
-                    lappend id_targets $id
-                    set found 1
+            foreach object_type $object_type_list {
+                switch -- $object_type {
+                    "ports" {
+                        foreach id [all_ports_internal] {
+                            set name [get_name_internal $id]
+                            if {[string match $item $name]} {
+                                lappend id_targets $id
+                                set found 1
+                            }
+                        }
+                    }
+                    "clocks" {
+                        foreach id [all_clocks_internal] {
+                            set name [get_name_internal $id]
+                            if {[string match $item $name]} {
+                                lappend id_targets $id
+                                set found 1
+                            }
+                        }
+                    }
                 }
+                if {$found} {break}
             }
             if {$found} {continue}
-            # TODO: Try to see if this is a pin.
 
             # If nothing can be found, raise an error.
             error "$cmd_name: Unknown target: '$item'."
@@ -161,11 +194,45 @@ proc create_clock {args} {
     # TODO: Verify in TCL land that waveform has length two and maybe that
     #       the first element is smaller than the second.
 
-    set id_targets [_convert_to_objects "create_clock" [dict get $params targets]]
+    set id_targets [_convert_to_objects "create_clock" [dict get $params targets] {ports}]
 
     # TODO: Can we improve this function interface to wrap onto multiple lines
     #       without messing with the strings?
     create_clock_internal [dict get $params -period] [dict get $params -name] [dict get $params -waveform] [dict get $params -add] $id_targets
+}
+
+proc set_clock_groups {args} {
+    # Set the line number from the caller's frame
+    set frame_info [info frame -1]
+    set line_num [dict get $frame_info line]
+    lineno_internal $line_num
+
+    # TODO: Need to ensure the number of groups is more than 1 I think.
+    set spec {
+        flags        {}
+        list_flags   {-group}
+        bools        {-exclusive}
+        pos          {}
+        require      {-exclusive -group}
+        types        {}
+    }
+
+    set params [generic_sdc_parser "set_clock_groups" $spec $args]
+
+    # TODO: There has to be a cleaner way of doing this. Vector of vectors are
+    #       very tricky with SWIG. Decided to linearize the container instead.
+    set clock_list {}
+    set clock_group_start_pos { 0 }
+    set i 0
+    foreach group [dict get $params -group] {
+        foreach clk [_convert_to_objects "set_clock_groups" $group {clocks}] {
+            lappend clock_list $clk
+            incr i
+        }
+        lappend clock_group_start_pos $i
+    }
+
+    set_clock_groups_internal $clock_list $clock_group_start_pos
 }
 
 proc set_input_delay {args} {
@@ -184,7 +251,7 @@ proc set_input_delay {args} {
 
     set params [generic_sdc_parser "set_input_delay" $spec $args]
 
-    set id_targets [_convert_to_objects "set_input_delay" [dict get $params targets]]
+    set id_targets [_convert_to_objects "set_input_delay" [dict get $params targets] {ports}]
 
     set_input_delay_internal [dict get $params -max] [dict get $params -min] [dict get $params -clock] [dict get $params delay] $id_targets
 }
@@ -205,7 +272,7 @@ proc set_output_delay {args} {
 
     set params [generic_sdc_parser "set_output_delay" $spec $args]
 
-    set id_targets [_convert_to_objects "set_input_delay" [dict get $params targets]]
+    set id_targets [_convert_to_objects "set_input_delay" [dict get $params targets] {ports}]
 
     set_output_delay_internal [dict get $params -max] [dict get $params -min] [dict get $params -clock] [dict get $params delay] $id_targets
 }
