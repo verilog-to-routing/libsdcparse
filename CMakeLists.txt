@@ -121,3 +121,5 @@ if (USES_IPO)
 endif()
 
 install(TARGETS libsdcparse DESTINATION bin)
+
+add_subdirectory(test_sdcs/lit_tests)

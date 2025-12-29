@@ -9,3 +9,5 @@ src/sdc_parser.gen.h
 src/stack.hh
 
 .cache/
+
+.venv/
