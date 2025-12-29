@@ -561,3 +561,45 @@ proc all_clocks {} {
 
     return [all_clocks_internal]
 }
+
+proc _libsdcparse_create_port {args} {
+    # Set the line number from the caller's frame
+    set frame_info [info frame -1]
+    set line_num [dict get $frame_info line]
+    lineno_internal $line_num
+
+    set spec {
+        flags   {-type}
+        bools   {}
+        pos     {port_name}
+        require {-type}
+        types   {}
+    }
+
+    set params [generic_sdc_parser "create_port" $spec $args]
+
+    # NOTE: Right now we ignore the port type. Eventually we will need the port
+    #       types.
+    return [_libsdcparse_create_port_internal [dict get $params port_name]]
+}
+
+proc _libsdcparse_create_pin {args} {
+    # Set the line number from the caller's frame
+    set frame_info [info frame -1]
+    set line_num [dict get $frame_info line]
+    lineno_internal $line_num
+
+    set spec {
+        flags   {-type}
+        bools   {}
+        pos     {pin_name}
+        require {-type}
+        types   {}
+    }
+
+    set params [generic_sdc_parser "create_pin" $spec $args]
+
+    # NOTE: Right now we ignore the pin type. Eventually we will need the port
+    #       types.
+    return [_libsdcparse_create_pin_internal [dict get $params pin_name]]
+}

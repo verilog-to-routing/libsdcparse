@@ -12,17 +12,6 @@ class PrintCallback : public Callback {
 public:
     //Start of parsing
     void start_parse() override {
-        obj_database.create_port_object("in1");
-        obj_database.create_port_object("in2");
-        obj_database.create_port_object("in3");
-        obj_database.create_port_object("clk1");
-        obj_database.create_port_object("clk3");
-        obj_database.create_port_object("clk4");
-        obj_database.create_port_object("clk5");
-
-        obj_database.create_pin_object("my_inst.in1");
-        obj_database.create_pin_object("FFA.Q0");
-        obj_database.create_pin_object("to_FFD.in0");
     }
 
     //Sets current filename

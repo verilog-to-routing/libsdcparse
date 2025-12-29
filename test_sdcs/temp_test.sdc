@@ -1,4 +1,17 @@
 
+# Internal way of creating ports used for testing the parser.
+_libsdcparse_create_port "in1" -type INPUT
+_libsdcparse_create_port "in2" -type INPUT
+_libsdcparse_create_port "in3" -type INPUT
+_libsdcparse_create_port "clk1" -type INPUT
+_libsdcparse_create_port "clk3" -type INPUT
+_libsdcparse_create_port "clk4" -type INPUT
+_libsdcparse_create_port "clk5" -type INPUT
+
+_libsdcparse_create_pin "my_inst.in1" -type INPUT
+_libsdcparse_create_pin "to_FFD.in0" -type INPUT
+_libsdcparse_create_pin "FFA.Q0" -type OUTPUT
+
 create_clock -period 1.0 clk3
 
 create_clock -period 6.0 clk4 -add

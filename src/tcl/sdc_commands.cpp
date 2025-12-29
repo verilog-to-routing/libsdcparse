@@ -292,3 +292,21 @@ bool is_object_id_internal(std::string object_id) {
 
     return sdcparse::g_callback->obj_database.is_object_id(object_id);
 }
+
+std::string _libsdcparse_create_port_internal(std::string port_name) {
+    if (sdcparse::g_callback == nullptr) {
+        // FIXME: Make this a proper error.
+        throw new std::runtime_error("Callback not registered!.");
+    }
+
+    return sdcparse::g_callback->obj_database.create_port_object(port_name);
+}
+
+std::string _libsdcparse_create_pin_internal(std::string pin_name) {
+    if (sdcparse::g_callback == nullptr) {
+        // FIXME: Make this a proper error.
+        throw new std::runtime_error("Callback not registered!.");
+    }
+
+    return sdcparse::g_callback->obj_database.create_pin_object(pin_name);
+}
