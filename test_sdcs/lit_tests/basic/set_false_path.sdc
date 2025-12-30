@@ -8,8 +8,17 @@ create_clock -period 1 clk2
 create_clock -period 2 -name virtual
 create_clock -period 2 -name virtual2
 
-# CHECK: set_false_path -from {clk1} -to {virtual}
+# CHECK: [[clk1_ptr:__vtr_obj_clock_[0-9]+]]
+puts [get_clocks clk1]
+# CHECK: [[clk2_ptr:__vtr_obj_clock_[0-9]+]]
+puts [get_clocks clk2]
+# CHECK: [[virtual_ptr:__vtr_obj_clock_[0-9]+]]
+puts [get_clocks virtual]
+# CHECK: [[virtual2_ptr:__vtr_obj_clock_[0-9]+]]
+puts [get_clocks virtual2]
+
+# CHECK: set_false_path -from {[[clk1_ptr]]} -to {[[virtual_ptr]]}
 set_false_path -from clk1 -to virtual
 
-# CHECK: set_false_path -from {clk2} -to {virtual2}
+# CHECK: set_false_path -from {[[clk2_ptr]]} -to {[[virtual2_ptr]]}
 set_false_path -from [get_clocks clk2] -to [get_clocks virtual2]

@@ -5,8 +5,8 @@
 
 using namespace sdcparse;
 
-void print_string_group(const StringGroup& group, const TimingObjectDatabase& db);
-void print_from_to_group(const StringGroup& from, const StringGroup& to, const TimingObjectDatabase& db);
+void print_string_group(const StringGroup& group);
+void print_from_to_group(const StringGroup& from, const StringGroup& to);
 
 class PrintCallback : public Callback {
 public:
@@ -32,7 +32,7 @@ public:
         }
         if (!cmd.targets.strings.empty()) {
             printf(" ");
-            print_string_group(cmd.targets, obj_database);
+            print_string_group(cmd.targets);
         }
         if (cmd.add) {
             printf(" -add");
@@ -74,7 +74,7 @@ public:
             printf(" -min");
         }
         printf(" %f ", cmd.delay);
-        print_string_group(cmd.target_ports, obj_database);
+        print_string_group(cmd.target_ports);
         printf("\n");
 
     }
@@ -86,7 +86,7 @@ public:
         }
         for(const auto& clk_grp : cmd.clock_groups) {
             printf(" -group ");
-            print_string_group(clk_grp, obj_database);
+            print_string_group(clk_grp);
         }
         printf("\n");
 
@@ -95,7 +95,7 @@ public:
     void set_false_path(const SetFalsePath& cmd) override {
         printf("#%s:%d\n", filename_.c_str(), lineno_);
         printf("set_false_path ");
-        print_from_to_group(cmd.from, cmd.to, obj_database);
+        print_from_to_group(cmd.from, cmd.to);
         printf("\n");
     }
     void set_min_max_delay(const SetMinMaxDelay& cmd) override {
@@ -106,7 +106,7 @@ public:
             printf("set_min_delay");
         }
         printf(" %f ", cmd.value);
-        print_from_to_group(cmd.from, cmd.to, obj_database);
+        print_from_to_group(cmd.from, cmd.to);
         printf("\n");
     }
     void set_multicycle_path(const SetMulticyclePath& cmd) override {
@@ -118,7 +118,7 @@ public:
         if(cmd.is_hold) {
             printf("-hold ");
         }
-        print_from_to_group(cmd.from, cmd.to, obj_database);
+        print_from_to_group(cmd.from, cmd.to);
         printf("\n");
     }
     void set_clock_uncertainty(const SetClockUncertainty& cmd) override {
@@ -130,7 +130,7 @@ public:
         if(cmd.is_hold) {
             printf("-hold ");
         }
-        print_from_to_group(cmd.from, cmd.to, obj_database);
+        print_from_to_group(cmd.from, cmd.to);
         printf(" %f ", cmd.value);
         printf("\n");
     }
@@ -147,13 +147,13 @@ public:
             printf("-late ");
         }
         printf("%f ", cmd.value);
-        print_string_group(cmd.target_clocks, obj_database);
+        print_string_group(cmd.target_clocks);
         printf("\n");
     }
     void set_disable_timing(const SetDisableTiming& cmd) override {
         printf("#%s:%d\n", filename_.c_str(), lineno_);
         printf("set_disable_timing ");
-        print_from_to_group(cmd.from, cmd.to, obj_database);
+        print_from_to_group(cmd.from, cmd.to);
         printf("\n");
 
     }
@@ -174,7 +174,7 @@ public:
             printf("-cell_delay ");
         }
         printf("%f ", cmd.value);
-        print_string_group(cmd.cell_targets, obj_database);
+        print_string_group(cmd.cell_targets);
         printf("\n");
     }
 
@@ -227,12 +227,14 @@ int main(int argc, char **argv) {
     return 0;
 }
 
-void print_string_group(const StringGroup& group, const TimingObjectDatabase& db) {
+void print_string_group(const StringGroup& group) {
     const char *start_token, *end_token;
-    if(group.type == StringGroupType::STRING || group.type == StringGroupType::OBJECT) {
+    if(group.type == StringGroupType::STRING) {
         start_token = "{";
         end_token   = "}";
-
+    } else if (group.type == StringGroupType::OBJECT) {
+        start_token = "{";
+        end_token   = "}";
     } else if (group.type == StringGroupType::CLOCK) {
         start_token = "[get_clocks {";
         end_token   = "}]";
@@ -256,11 +258,7 @@ void print_string_group(const StringGroup& group, const TimingObjectDatabase& db
     if(!group.strings.empty()) {
         printf("%s", start_token);
         for(size_t i = 0; i < group.strings.size(); ++i) {
-            if (group.type == StringGroupType::OBJECT) {
-                printf("%s", db.get_object_name(group.strings[i]).c_str());
-            } else {
-                printf("%s", group.strings[i].c_str());
-            }
+            printf("%s", group.strings[i].c_str());
 
             if(i != group.strings.size() - 1) {
                 printf(" ");
@@ -270,15 +268,15 @@ void print_string_group(const StringGroup& group, const TimingObjectDatabase& db
     }
 }
 
-void print_from_to_group(const StringGroup& from, const StringGroup& to, const TimingObjectDatabase& db) {
+void print_from_to_group(const StringGroup& from, const StringGroup& to) {
     if(!from.strings.empty()) {
         printf("-from ");
-        print_string_group(from, db);
+        print_string_group(from);
     }
 
     if(!to.strings.empty()) {
         printf(" -to ");
-        print_string_group(to, db);
+        print_string_group(to);
     }
 }
 
