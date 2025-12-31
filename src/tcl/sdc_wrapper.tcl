@@ -562,6 +562,27 @@ proc get_pins {args} {
     return $matches
 }
 
+proc get_cells {args} {
+    # Set the line number from the caller's frame
+    set frame_info [info frame -1]
+    set line_num [dict get $frame_info line]
+    lineno_internal $line_num
+
+    set spec {
+        flags   {}
+        bools   {-regexp -nocase -quiet}
+        pos     {patterns}
+        require {patterns}
+        types   {}
+    }
+
+    set params [generic_sdc_parser "get_cells" $spec $args]
+
+    set matches [_query_get_impl "get_cells" all_cells_internal $params]
+
+    return $matches
+}
+
 proc all_clocks {} {
     # Set the line number from the caller's frame
     set frame_info [info frame -1]
