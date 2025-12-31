@@ -275,6 +275,15 @@ std::vector<std::string> all_pins_internal() {
     return sdcparse::g_callback->obj_database.get_pin_objects();
 }
 
+std::vector<std::string> all_cells_internal() {
+    if (sdcparse::g_callback == nullptr) {
+        // FIXME: Make this a proper error.
+        throw new std::runtime_error("Callback not registered!.");
+    }
+
+    return sdcparse::g_callback->obj_database.get_cell_objects();
+}
+
 std::string get_name_internal(std::string object_id) {
     if (sdcparse::g_callback == nullptr) {
         // FIXME: Make this a proper error.
@@ -309,4 +318,13 @@ std::string _libsdcparse_create_pin_internal(std::string pin_name) {
     }
 
     return sdcparse::g_callback->obj_database.create_pin_object(pin_name);
+}
+
+std::string _libsdcparse_create_cell_internal(std::string cell_name) {
+    if (sdcparse::g_callback == nullptr) {
+        // FIXME: Make this a proper error.
+        throw new std::runtime_error("Callback not registered!.");
+    }
+
+    return sdcparse::g_callback->obj_database.create_cell_object(cell_name);
 }

@@ -42,20 +42,26 @@ public:
         std::string clock_name = "";
         if (!cmd.name.empty()) {
             clock_name = cmd.name;
+            obj_database.create_clock_object(clock_name);
         } else if (cmd.targets.strings.size() == 1) {
             if (cmd.targets.type == StringGroupType::OBJECT) {
                 clock_name = obj_database.get_object_name(cmd.targets.strings[0]);
             } else {
                 clock_name = cmd.targets.strings[0];
             }
+            obj_database.create_clock_object(clock_name);
         } else {
-            // TODO: Figure out what to do in this case. Should we just not create
-            //       the clock object? Or maybe give it a random name?
-            // I wonder if each target would get its own clock?
-            printf("Cannot create a name for the clock.\n");
-            exit(1);
+            // If no name is given, create a clock for each target.
+            // FIXME: Verify that this is correct.
+            for (const auto& target: cmd.targets.strings) {
+                if (cmd.targets.type == StringGroupType::OBJECT) {
+                    clock_name = obj_database.get_object_name(target);
+                } else {
+                    clock_name = target;
+                }
+                obj_database.create_clock_object(clock_name);
+            }
         }
-        obj_database.create_clock_object(clock_name);
     }
 
     void set_io_delay(const SetIoDelay& cmd) override {

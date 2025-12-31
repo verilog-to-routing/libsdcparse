@@ -106,6 +106,7 @@ class TimingObjectDatabase {
     std::vector<std::string> port_objects;
     std::vector<std::string> clock_objects;
     std::vector<std::string> pin_objects;
+    std::vector<std::string> cell_objects;
   public:
     std::string create_port_object(std::string port_name) {
         // TODO: We should make this a strong ID which happens to hold a string.
@@ -134,6 +135,14 @@ class TimingObjectDatabase {
         return pin_object_id;
     }
 
+    std::string create_cell_object(std::string cell_name) {
+        // TODO: We should make this a strong ID which happens to hold a string.
+        std::string cell_object_id = "__vtr_obj_cell_" + std::to_string(cell_objects.size());
+        // TODO: Assert that the object id does not already exist anywhere else.
+        object_name[cell_object_id] = cell_name;
+        cell_objects.push_back(cell_object_id);
+        return cell_object_id;
+    }
 
     inline bool is_object_id(std::string object_id) const {
         if (object_id.rfind("__vtr_obj_", 0) == 0) {
@@ -159,6 +168,10 @@ class TimingObjectDatabase {
 
     const std::vector<std::string>& get_pin_objects() const {
         return pin_objects;
+    }
+
+    const std::vector<std::string>& get_cell_objects() const {
+        return cell_objects;
     }
 };
 

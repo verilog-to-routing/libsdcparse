@@ -168,6 +168,15 @@ proc _convert_to_objects {cmd_name targets object_type_list} {
                             }
                         }
                     }
+                    "cells" {
+                        foreach id [all_cells_internal] {
+                            set name [get_name_internal $id]
+                            if {[string match $item $name]} {
+                                lappend id_targets $id
+                                set found 1
+                            }
+                        }
+                    }
                 }
                 if {$found} {break}
             }
@@ -260,8 +269,8 @@ proc set_false_path {args} {
 
     set params [generic_sdc_parser "set_false_path" $spec $args]
 
-    set from_list [_convert_to_objects "set_false_path" [dict get $params -from] {clocks}]
-    set to_list [_convert_to_objects "set_false_path" [dict get $params -to] {clocks}]
+    set from_list [_convert_to_objects "set_false_path" [dict get $params -from] {clocks cells ports pins}]
+    set to_list [_convert_to_objects "set_false_path" [dict get $params -to] {clocks cells ports pins}]
 
     set_false_path_internal $from_list $to_list
 }
@@ -282,8 +291,8 @@ proc set_max_delay {args} {
 
     set params [generic_sdc_parser "set_max_delay" $spec $args]
 
-    set from_list [_convert_to_objects "set_max_delay" [dict get $params -from] {clocks}]
-    set to_list [_convert_to_objects "set_max_delay" [dict get $params -to] {clocks}]
+    set from_list [_convert_to_objects "set_max_delay" [dict get $params -from] {clocks cells ports pins}]
+    set to_list [_convert_to_objects "set_max_delay" [dict get $params -to] {clocks cells ports pins}]
 
     set_max_delay_internal [dict get $params delay] $from_list $to_list
 }
@@ -304,8 +313,8 @@ proc set_min_delay {args} {
 
     set params [generic_sdc_parser "set_min_delay" $spec $args]
 
-    set from_list [_convert_to_objects "set_min_delay" [dict get $params -from] {clocks}]
-    set to_list [_convert_to_objects "set_min_delay" [dict get $params -to] {clocks}]
+    set from_list [_convert_to_objects "set_min_delay" [dict get $params -from] {clocks cells ports pins}]
+    set to_list [_convert_to_objects "set_min_delay" [dict get $params -to] {clocks cells ports pins}]
 
     set_min_delay_internal [dict get $params delay] $from_list $to_list
 }
@@ -326,8 +335,8 @@ proc set_multicycle_path {args} {
 
     set params [generic_sdc_parser "set_multicycle_path" $spec $args]
 
-    set from_list [_convert_to_objects "set_multicycle_path" [dict get $params -from] {clocks}]
-    set to_list [_convert_to_objects "set_multicycle_path" [dict get $params -to] {clocks pins}]
+    set from_list [_convert_to_objects "set_multicycle_path" [dict get $params -from] {clocks cells ports pins}]
+    set to_list [_convert_to_objects "set_multicycle_path" [dict get $params -to] {clocks cells ports pins}]
 
     set_multicycle_path_internal [dict get $params -setup] [dict get $params -hold] $from_list $to_list [dict get $params path_multiplier]
 }
@@ -348,7 +357,7 @@ proc set_input_delay {args} {
 
     set params [generic_sdc_parser "set_input_delay" $spec $args]
 
-    set id_targets [_convert_to_objects "set_input_delay" [dict get $params targets] {ports}]
+    set id_targets [_convert_to_objects "set_input_delay" [dict get $params targets] {ports pins}]
 
     set_input_delay_internal [dict get $params -max] [dict get $params -min] [dict get $params -clock] [dict get $params delay] $id_targets
 }
@@ -369,7 +378,7 @@ proc set_output_delay {args} {
 
     set params [generic_sdc_parser "set_output_delay" $spec $args]
 
-    set id_targets [_convert_to_objects "set_input_delay" [dict get $params targets] {ports}]
+    set id_targets [_convert_to_objects "set_input_delay" [dict get $params targets] {ports pins}]
 
     set_output_delay_internal [dict get $params -max] [dict get $params -min] [dict get $params -clock] [dict get $params delay] $id_targets
 }
@@ -593,7 +602,7 @@ proc _libsdcparse_create_pin {args} {
         flags   {-type}
         bools   {}
         pos     {pin_name}
-        require {-type}
+        require {pin_name -type}
         types   {}
     }
 
@@ -602,4 +611,23 @@ proc _libsdcparse_create_pin {args} {
     # NOTE: Right now we ignore the pin type. Eventually we will need the port
     #       types.
     return [_libsdcparse_create_pin_internal [dict get $params pin_name]]
+}
+
+proc _libsdcparse_create_cell {args} {
+    # Set the line number from the caller's frame
+    set frame_info [info frame -1]
+    set line_num [dict get $frame_info line]
+    lineno_internal $line_num
+
+    set spec {
+        flags   {}
+        bools   {}
+        pos     {cell_name}
+        require {cell_name}
+        types   {}
+    }
+
+    set params [generic_sdc_parser "create_cell" $spec $args]
+
+    return [_libsdcparse_create_cell_internal [dict get $params cell_name]]
 }
