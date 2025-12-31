@@ -17,7 +17,6 @@ namespace std {
 
 void lineno_internal(int line_num);
 
-// TODO: Update the prototype of this.
 void create_clock_internal(double period,
                            const std::string& name,
                            const std::vector<double>& waveform,
@@ -78,7 +77,6 @@ void set_timing_derate_internal(bool is_early,
                                 double derate,
                                 const std::vector<std::string>& targets);
 
-// TODO: Investigate if this is too poor for performance
 std::vector<std::string> all_ports_internal();
 
 std::vector<std::string> all_clocks_internal();

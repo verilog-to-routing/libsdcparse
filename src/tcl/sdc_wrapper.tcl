@@ -501,14 +501,11 @@ proc get_name {args} {
         error "get_name: Not an object: '$object'"
     }
 
-    # TODO: This should really become [get_property object name]
+    # TODO: This should really become [get_property $object name]
     return [get_name_internal $object]
 }
 
 proc _query_get_impl {cmd_name all_func params} {
-    # TODO: Square brackets are not currently supported. Need to figure out
-    #       how those are parsed. This may move this query method into C++.
-
     # Create the options for the search.
     set search_options {}
     if {[dict get $params -nocase]} {
@@ -688,8 +685,6 @@ proc _libsdcparse_create_port {args} {
 
     set params [generic_sdc_parser "create_port" $spec $args]
 
-    # NOTE: Right now we ignore the port type. Eventually we will need the port
-    #       types.
     return [_libsdcparse_create_port_internal [dict get $params port_name] [dict get $params -type]]
 }
 

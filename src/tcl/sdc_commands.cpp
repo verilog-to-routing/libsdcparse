@@ -1,5 +1,5 @@
 
-#include <iostream>
+#include <cassert>
 #include <stdexcept>
 #include <string>
 
@@ -10,6 +10,7 @@
 sdcparse::Callback* sdcparse::g_callback = nullptr;
 
 void lineno_internal(int line_num) {
+    assert(sdcparse::g_callback != nullptr);
     sdcparse::g_callback->lineno(line_num);
 }
 
@@ -18,9 +19,6 @@ void create_clock_internal(double period,
                            const std::vector<double>& waveform,
                            bool add,
                            const std::vector<std::string>& targets) {
-    // TODO: Have this call the proper callback.
-    // std::cout << "create_clock with period " << period << " named: " << name << std::endl;
-
     sdcparse::CreateClock create_clock_cmd;
     create_clock_cmd.name = name;
     create_clock_cmd.period = period;
@@ -45,11 +43,7 @@ void create_clock_internal(double period,
 
     create_clock_cmd.add = add;
 
-    // TODO: This can probably be made into an assert.
-    if (sdcparse::g_callback == nullptr) {
-        // FIXME: Make this a proper error.
-        throw new std::runtime_error("Callback not registered!.");
-    }
+    assert(sdcparse::g_callback != nullptr);
     sdcparse::g_callback->create_clock(create_clock_cmd);
 }
 
@@ -65,10 +59,7 @@ void set_clock_groups_internal(const std::vector<std::string>& clock_list,
         set_clock_groups_cmd.clock_groups.push_back(std::move(new_group));
     }
 
-    if (sdcparse::g_callback == nullptr) {
-        // FIXME: Make this a proper error.
-        throw new std::runtime_error("Callback not registered!.");
-    }
+    assert(sdcparse::g_callback != nullptr);
     sdcparse::g_callback->set_clock_groups(set_clock_groups_cmd);
 }
 
@@ -80,10 +71,7 @@ void set_false_path_internal(const std::vector<std::string>& from_list,
     set_false_path_cmd.to.strings = to_list;
     set_false_path_cmd.to.type = sdcparse::StringGroupType::OBJECT;
 
-    if (sdcparse::g_callback == nullptr) {
-        // FIXME: Make this a proper error.
-        throw new std::runtime_error("Callback not registered!.");
-    }
+    assert(sdcparse::g_callback != nullptr);
     sdcparse::g_callback->set_false_path(set_false_path_cmd);
 }
 
@@ -98,10 +86,7 @@ void set_min_delay_internal(double delay,
     set_min_delay_cmd.to.strings = to_list;
     set_min_delay_cmd.to.type = sdcparse::StringGroupType::OBJECT;
 
-    if (sdcparse::g_callback == nullptr) {
-        // FIXME: Make this a proper error.
-        throw new std::runtime_error("Callback not registered!.");
-    }
+    assert(sdcparse::g_callback != nullptr);
     sdcparse::g_callback->set_min_max_delay(set_min_delay_cmd);
 }
 
@@ -116,10 +101,7 @@ void set_max_delay_internal(double delay,
     set_max_delay_cmd.to.strings = to_list;
     set_max_delay_cmd.to.type = sdcparse::StringGroupType::OBJECT;
 
-    if (sdcparse::g_callback == nullptr) {
-        // FIXME: Make this a proper error.
-        throw new std::runtime_error("Callback not registered!.");
-    }
+    assert(sdcparse::g_callback != nullptr);
     sdcparse::g_callback->set_min_max_delay(set_max_delay_cmd);
 }
 
@@ -137,10 +119,7 @@ void set_multicycle_path_internal(bool is_setup,
     set_multicycle_path_cmd.to.type = sdcparse::StringGroupType::OBJECT;
     set_multicycle_path_cmd.mcp_value = path_multiplier;
 
-    if (sdcparse::g_callback == nullptr) {
-        // FIXME: Make this a proper error.
-        throw new std::runtime_error("Callback not registered!.");
-    }
+    assert(sdcparse::g_callback != nullptr);
     sdcparse::g_callback->set_multicycle_path(set_multicycle_path_cmd);
 }
 
@@ -159,10 +138,7 @@ void set_input_delay_internal(bool max_delay_flag,
     set_input_delay_cmd.target_ports.type = sdcparse::StringGroupType::OBJECT;
     set_input_delay_cmd.type = sdcparse::IoDelayType::INPUT;
 
-    if (sdcparse::g_callback == nullptr) {
-        // FIXME: Make this a proper error.
-        throw new std::runtime_error("Callback not registered!.");
-    }
+    assert(sdcparse::g_callback != nullptr);
     sdcparse::g_callback->set_io_delay(set_input_delay_cmd);
 }
 
@@ -181,10 +157,7 @@ void set_output_delay_internal(bool max_delay_flag,
     set_output_delay_cmd.target_ports.type = sdcparse::StringGroupType::OBJECT;
     set_output_delay_cmd.type = sdcparse::IoDelayType::OUTPUT;
 
-    if (sdcparse::g_callback == nullptr) {
-        // FIXME: Make this a proper error.
-        throw new std::runtime_error("Callback not registered!.");
-    }
+    assert(sdcparse::g_callback != nullptr);
     sdcparse::g_callback->set_io_delay(set_output_delay_cmd);
 }
 
@@ -202,10 +175,7 @@ void set_clock_uncertainty_internal(bool is_setup,
     set_clock_uncertainty_cmd.to.type = sdcparse::StringGroupType::OBJECT;
     set_clock_uncertainty_cmd.value = uncertainty;
 
-    if (sdcparse::g_callback == nullptr) {
-        // FIXME: Make this a proper error.
-        throw new std::runtime_error("Callback not registered!.");
-    }
+    assert(sdcparse::g_callback != nullptr);
     sdcparse::g_callback->set_clock_uncertainty(set_clock_uncertainty_cmd);
 }
 
@@ -226,10 +196,7 @@ void set_clock_latency_internal(bool is_source,
     set_clock_latency_cmd.target_clocks.strings = targets;
     set_clock_latency_cmd.target_clocks.type = sdcparse::StringGroupType::OBJECT;
 
-    if (sdcparse::g_callback == nullptr) {
-        // FIXME: Make this a proper error.
-        throw new std::runtime_error("Callback not registered!.");
-    }
+    assert(sdcparse::g_callback != nullptr);
     sdcparse::g_callback->set_clock_latency(set_clock_latency_cmd);
 }
 
@@ -241,10 +208,7 @@ void set_disable_timing_internal(const std::vector<std::string>& from_list,
     set_disable_timing_cmd.to.strings = to_list;
     set_disable_timing_cmd.to.type = sdcparse::StringGroupType::OBJECT;
 
-    if (sdcparse::g_callback == nullptr) {
-        // FIXME: Make this a proper error.
-        throw new std::runtime_error("Callback not registered!.");
-    }
+    assert(sdcparse::g_callback != nullptr);
     sdcparse::g_callback->set_disable_timing(set_disable_timing_cmd);
 }
 
@@ -263,112 +227,65 @@ void set_timing_derate_internal(bool is_early,
     set_timing_derate_cmd.cell_targets.strings = targets;
     set_timing_derate_cmd.cell_targets.type = sdcparse::StringGroupType::OBJECT;
 
-    if (sdcparse::g_callback == nullptr) {
-        // FIXME: Make this a proper error.
-        throw new std::runtime_error("Callback not registered!.");
-    }
+    assert(sdcparse::g_callback != nullptr);
     sdcparse::g_callback->set_timing_derate(set_timing_derate_cmd);
 }
 
 std::vector<std::string> all_ports_internal() {
-    if (sdcparse::g_callback == nullptr) {
-        // FIXME: Make this a proper error.
-        throw new std::runtime_error("Callback not registered!.");
-    }
-
+    assert(sdcparse::g_callback != nullptr);
     return sdcparse::g_callback->obj_database.get_port_objects();
 }
 
 std::vector<std::string> all_clocks_internal() {
-    if (sdcparse::g_callback == nullptr) {
-        // FIXME: Make this a proper error.
-        throw new std::runtime_error("Callback not registered!.");
-    }
-
+    assert(sdcparse::g_callback != nullptr);
     return sdcparse::g_callback->obj_database.get_clock_objects();
 }
 
 std::vector<std::string> all_inputs_internal() {
-    if (sdcparse::g_callback == nullptr) {
-        // FIXME: Make this a proper error.
-        throw new std::runtime_error("Callback not registered!.");
-    }
-
+    assert(sdcparse::g_callback != nullptr);
     return sdcparse::g_callback->obj_database.get_input_port_objects();
 }
 
 std::vector<std::string> all_outputs_internal() {
-    if (sdcparse::g_callback == nullptr) {
-        // FIXME: Make this a proper error.
-        throw new std::runtime_error("Callback not registered!.");
-    }
-
+    assert(sdcparse::g_callback != nullptr);
     return sdcparse::g_callback->obj_database.get_output_port_objects();
 }
 
 std::vector<std::string> all_pins_internal() {
-    if (sdcparse::g_callback == nullptr) {
-        // FIXME: Make this a proper error.
-        throw new std::runtime_error("Callback not registered!.");
-    }
-
+    assert(sdcparse::g_callback != nullptr);
     return sdcparse::g_callback->obj_database.get_pin_objects();
 }
 
 std::vector<std::string> all_cells_internal() {
-    if (sdcparse::g_callback == nullptr) {
-        // FIXME: Make this a proper error.
-        throw new std::runtime_error("Callback not registered!.");
-    }
-
+    assert(sdcparse::g_callback != nullptr);
     return sdcparse::g_callback->obj_database.get_cell_objects();
 }
 
 std::string get_name_internal(std::string object_id) {
-    if (sdcparse::g_callback == nullptr) {
-        // FIXME: Make this a proper error.
-        throw new std::runtime_error("Callback not registered!.");
-    }
-
+    assert(sdcparse::g_callback != nullptr);
     return sdcparse::g_callback->obj_database.get_object_name(object_id);
 }
 
 bool is_object_id_internal(std::string object_id) {
-    if (sdcparse::g_callback == nullptr) {
-        // FIXME: Make this a proper error.
-        throw new std::runtime_error("Callback not registered!.");
-    }
-
+    assert(sdcparse::g_callback != nullptr);
     return sdcparse::g_callback->obj_database.is_object_id(object_id);
 }
 
 std::string _libsdcparse_create_port_internal(std::string port_name,
                                               std::string port_type_str) {
-    if (sdcparse::g_callback == nullptr) {
-        // FIXME: Make this a proper error.
-        throw new std::runtime_error("Callback not registered!.");
-    }
-
-    // TODO: Assert that the port type exists.
     sdcparse::PortType port_type = sdcparse::get_port_type(port_type_str);
+    assert(port_type != sdcparse::PortType::UNKNOWN);
 
+    assert(sdcparse::g_callback != nullptr);
     return sdcparse::g_callback->obj_database.create_port_object(port_name, port_type);
 }
 
 std::string _libsdcparse_create_pin_internal(std::string pin_name) {
-    if (sdcparse::g_callback == nullptr) {
-        // FIXME: Make this a proper error.
-        throw new std::runtime_error("Callback not registered!.");
-    }
-
+    assert(sdcparse::g_callback != nullptr);
     return sdcparse::g_callback->obj_database.create_pin_object(pin_name);
 }
 
 std::string _libsdcparse_create_cell_internal(std::string cell_name) {
-    if (sdcparse::g_callback == nullptr) {
-        // FIXME: Make this a proper error.
-        throw new std::runtime_error("Callback not registered!.");
-    }
-
+    assert(sdcparse::g_callback != nullptr);
     return sdcparse::g_callback->obj_database.create_cell_object(cell_name);
 }

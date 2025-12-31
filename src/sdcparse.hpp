@@ -67,13 +67,10 @@
  *                   | sdc_commands cmd_set_time_format EOL {$$ = add_sdc_set_time_format($1, $2); }
  *
  */
-#include <exception>
 #include <unordered_map>
 #include <vector>
 #include <string>
-#include <memory>
 #include <limits>
-#include <functional>
 
 namespace sdcparse {
 /*

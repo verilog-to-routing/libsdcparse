@@ -9,8 +9,6 @@ if __name__ == "__main__":
     output_file_path = sys.argv[2];
 
     with open(output_file_path, 'w') as output_file:
-        # TODO: There is some optimizations we can do to have this take up less
-        #       space.
         output_file.write("#include \"sdc_wrapper.h\"\n")
         output_file.write("const char* get_sdc_wrapper_script() {\n")
         output_file.write("\treturn\n")
