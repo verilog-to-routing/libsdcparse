@@ -1,3 +1,29 @@
+
+rename unknown _original_unknown
+
+# Check if the given string looks like a bus, i.e. [0], [*], [15:0], etc.
+proc _is_bus_str { str } {
+    if {[string is integer $str]} { return 1 }
+    if {[string equal $str "*"]} { return 1 }
+    if {[regexp {[0-9]+:[0-9]+} $str]} { return 1 }
+    return 0
+}
+
+# This is a massive hack that we need to do to make parsing busses actually work.
+# The issue is that some people like to write get_ports A[*], but this causes
+# problems because TCL tries to interpret the square brackets as a method. Here,
+# we override TCL's behaviour such that when it tries to execute the [*] command,
+# and fails, we check if it looks like a bus and instead return the string literal.
+# This appears to be the common way of dealing with this.
+proc unknown {args} {
+    set cmd [lindex $args 0]
+    if { [llength $args] == 1 && [_is_bus_str $cmd] } {
+        return "\[$cmd\]"
+    }
+
+    uplevel 1 _original_unknown $args
+}
+
 # =====================================================================
 # Generic SDC Argument Parser
 # =====================================================================
@@ -472,13 +498,25 @@ proc _query_get_impl {cmd_name all_func params} {
 
         set match 0
         foreach pattern [dict get $params patterns] {
+            # Since square brackets are used for ports, and are not used for
+            # any other pattern as far as I am aware, we can just always assume
+            # that the square brackets should be escaped. Any square brackets
+            # that are not escaped, make them escaped.
+            # TODO: Is there a cleaner way to do this?
+            # TODO: Ports should just be handled special. We could match for the
+            #       port pattern and make special patterns which get the correct
+            #       ports.
+            set tmp [string map {\\\[ "___ESC_BRACKET___"} $pattern]
+            set tmp [string map {[ "\\\["} $tmp]
+            set escaped_pattern [string map {"___ESC_BRACKET___" \\\[} $tmp]
+
             if {[dict get $params -regexp]} {
-                if {[regexp {*}$search_options -- $pattern $name]} {
+                if {[regexp {*}$search_options -- $escaped_pattern $name]} {
                     set match 1
                     break;
                 }
             } else {
-                if {[string match {*}$search_options $pattern $name]} {
+                if {[string match {*}$search_options $escaped_pattern $name]} {
                     set match 1
                     break;
                 }

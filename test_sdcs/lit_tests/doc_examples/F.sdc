@@ -15,11 +15,10 @@ puts [_libsdcparse_create_port "clk" -type INPUT]
 # CHECK-NEXT: [[clk2_port_ptr:__vtr_obj_port_[0-9]+]]
 puts [_libsdcparse_create_port "clk2" -type INPUT]
 
-# TODO: Need better support for square brackets.
 # CHECK-NEXT: [[FFAQ0_pin_ptr:__vtr_obj_pin_[0-9]+]]
-puts [_libsdcparse_create_pin "FFA.Q0" -type OUTPUT]
+puts [_libsdcparse_create_pin "FFA.Q\[0\]" -type OUTPUT]
 # CHECK-NEXT: [[FFDin0_pin_ptr:__vtr_obj_pin_[0-9]+]]
-puts [_libsdcparse_create_pin "to_FFD.in0" -type INPUT]
+puts [_libsdcparse_create_pin "to_FFD.in\[0\]" -type INPUT]
 
 # CHECK: create_clock -period {{3.0*}} -waveform {{{1.250*}} {{2.750*}}} {[[clk_port_ptr]]}
 create_clock -period 3 -waveform {1.25 2.75} clk
@@ -64,6 +63,5 @@ set_multicycle_path -setup -from [get_clocks {clk}] -to [get_clocks {clk2}] 3
 # CHECK: set_clock_uncertainty -from {__vtr_obj_clock_0} -to {__vtr_obj_clock_1} {{0.750*}}
 set_clock_uncertainty -from [get_clocks {clk}] -to [get_clocks {clk2}] 0.75
 
-# TODO: Need to handle square brackets better.
 # CHECK: set_disable_timing -from {[[FFAQ0_pin_ptr]]} -to {[[FFDin0_pin_ptr]]}
-set_disable_timing -from [get_pins {FFA.Q0}] -to [get_pins {to_FFD.in0}]
+set_disable_timing -from [get_pins {FFA.Q[0]}] -to [get_pins {to_FFD.in[0]}]

@@ -17,6 +17,10 @@ if __name__ == "__main__":
 
         with open(input_file_path, 'r') as input_file:
             for line in input_file:
-                output_file.write(f"\t\"{line.strip().replace('\"', '\\"')}\\n\"\n")
+                line = line.strip()
+                line = line.replace('\"', '\\"')
+                line = line.replace('\\[', '\\\\[')
+                line = line.replace("\\]", "\\\\]")
+                output_file.write(f"\t\"{line}\\n\"\n")
 
         output_file.write(";\n}")

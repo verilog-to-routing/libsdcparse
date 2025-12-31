@@ -1,8 +1,6 @@
 # RUN: %sdcparse-test %s 2>&1
 
 # COM: TODO: Add the filecheck.
-# COM: TODO: Need to handle the square brackets correctly.
-#            Right now they are just warning that they do not exist.
 
 puts [_libsdcparse_create_port "clk0" -type INPUT]
 puts [_libsdcparse_create_port "clk1" -type INPUT]
@@ -26,6 +24,9 @@ _libsdcparse_create_cell "xcw/32|ff2"
 _libsdcparse_create_cell "asdf/ff"
 _libsdcparse_create_cell "qwert/asd/ff"
 _libsdcparse_create_cell "asdf/ff2"
+
+puts [_libsdcparse_create_pin "my_inst/in\[0\]" -type INPUT]
+puts [_libsdcparse_create_pin "my_inst2/out\[0\]" -type OUTPUT]
 
 #Netlist Clocks
 create_clock -period 3 -waveform {1.25 2.75} clk0; #Integer period, float waveform
