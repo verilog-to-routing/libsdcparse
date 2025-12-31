@@ -18,6 +18,10 @@ if __name__ == "__main__":
         with open(input_file_path, 'r') as input_file:
             for line in input_file:
                 line = line.strip()
+                if line.startswith('#'):
+                    continue
+                if line == "":
+                    continue
                 line = line.replace('\"', '\\"')
                 line = line.replace('\\[', '\\\\[')
                 line = line.replace("\\]", "\\\\]")

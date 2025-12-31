@@ -154,8 +154,8 @@ proc generic_sdc_parser {cmd_name spec raw_args} {
     return $results
 }
 
-# TODO: Maybe add an argument with a list of object types to try in order
-#           {ports pins ... }
+# TODO: This may need to be merged with the query functions. We want to be
+#       able to reuse that functionality
 proc _convert_to_objects {cmd_name targets object_type_list} {
     set id_targets {}
     foreach item $targets {
