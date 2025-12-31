@@ -154,8 +154,6 @@ proc generic_sdc_parser {cmd_name spec raw_args} {
     return $results
 }
 
-# TODO: This may need to be merged with the query functions. We want to be
-#       able to reuse that functionality
 proc _convert_to_objects {cmd_name targets object_type_list} {
     set id_targets {}
     foreach item $targets {
@@ -163,54 +161,40 @@ proc _convert_to_objects {cmd_name targets object_type_list} {
             # Already is an object.
             lappend id_targets $item
         } else {
-            # Convert to an object.
-            set found 0
+            # Convert to object(s).
+            # NOTE: Here we are trying to find all matches in the object type list.
+            # TODO: Need to verify if this is the correct functionality.
+            set params [dict create]
+            dict set params -quiet 1
+            dict set params -nocase 0
+            dict set params -regexp 0
+            dict set params patterns $item
             foreach object_type $object_type_list {
                 switch -- $object_type {
                     "ports" {
-                        foreach id [all_ports_internal] {
-                            set name [get_name_internal $id]
-                            if {[string match $item $name]} {
-                                lappend id_targets $id
-                                set found 1
-                            }
-                        }
+                        set matches [_query_get_impl $cmd_name all_ports_internal $params]
+                        lappend id_targets {*}$matches
                     }
                     "clocks" {
-                        foreach id [all_clocks_internal] {
-                            set name [get_name_internal $id]
-                            if {[string match $item $name]} {
-                                lappend id_targets $id
-                                set found 1
-                            }
-                        }
+                        set matches [_query_get_impl $cmd_name all_clocks_internal $params]
+                        lappend id_targets {*}$matches
                     }
                     "pins" {
-                        foreach id [all_pins_internal] {
-                            set name [get_name_internal $id]
-                            if {[string match $item $name]} {
-                                lappend id_targets $id
-                                set found 1
-                            }
-                        }
+                        set matches [_query_get_impl $cmd_name all_pins_internal $params]
+                        lappend id_targets {*}$matches
                     }
                     "cells" {
-                        foreach id [all_cells_internal] {
-                            set name [get_name_internal $id]
-                            if {[string match $item $name]} {
-                                lappend id_targets $id
-                                set found 1
-                            }
-                        }
+                        set matches [_query_get_impl $cmd_name all_cells_internal $params]
+                        lappend id_targets {*}$matches
                     }
                 }
-                if {$found} {break}
             }
-            if {$found} {continue}
-
-            # If nothing can be found, raise an error.
-            error "$cmd_name: Unknown target: '$item'."
         }
+    }
+
+    # TODO: Should the error be raised here?
+    if {[llength $targets] != 0 && [llength $id_targets] == 0} {
+        error "$cmd_name: Unknown targets: $targets."
     }
 
     return $id_targets

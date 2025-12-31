@@ -17,7 +17,8 @@ puts [get_clocks virtual]
 # CHECK: [[virtual2_ptr:__vtr_obj_clock_[0-9]+]]
 puts [get_clocks virtual2]
 
-# CHECK: set_false_path -from {[[clk1_ptr]]} -to {[[virtual_ptr]]}
+# COM: TODO: Verify that this should return both the clock and the port.
+# CHECK: set_false_path -from {[[clk1_ptr]] __vtr_obj_port_0} -to {[[virtual_ptr]]}
 set_false_path -from clk1 -to virtual
 
 # CHECK: set_false_path -from {[[clk2_ptr]]} -to {[[virtual2_ptr]]}
