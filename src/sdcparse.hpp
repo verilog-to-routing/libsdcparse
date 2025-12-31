@@ -67,6 +67,7 @@
  *                   | sdc_commands cmd_set_time_format EOL {$$ = add_sdc_set_time_format($1, $2); }
  *
  */
+#include <exception>
 #include <unordered_map>
 #include <vector>
 #include <string>
@@ -97,22 +98,41 @@ struct SetTimingDerate;
 
 struct StringGroup;
 
+enum class PortType {
+    INPUT,
+    OUTPUT,
+    INOUT,
+    UNKNOWN
+};
+
+static inline PortType get_port_type(std::string port_type) {
+    if (port_type == "INPUT")
+        return PortType::INPUT;
+    if (port_type == "OUTPUT")
+        return PortType::OUTPUT;
+    if (port_type == "INOUT")
+        return PortType::INOUT;
+    return PortType::UNKNOWN;
+}
+
 class TimingObjectDatabase {
   private:
     // TODO: In the future, we may want to make this a more complex struct
     //       to hold more information. For example, a clock may have data that
     //       a port does not have.
     std::unordered_map<std::string, std::string> object_name;
+    std::unordered_map<std::string, PortType> port_type_;
     std::vector<std::string> port_objects;
     std::vector<std::string> clock_objects;
     std::vector<std::string> pin_objects;
     std::vector<std::string> cell_objects;
   public:
-    std::string create_port_object(std::string port_name) {
+    std::string create_port_object(std::string port_name, PortType port_type) {
         // TODO: We should make this a strong ID which happens to hold a string.
         std::string port_object_id = "__vtr_obj_port_" + std::to_string(port_objects.size());
         // TODO: Assert that the object id does not already exist anywhere else.
         object_name[port_object_id] = port_name;
+        port_type_[port_object_id] = port_type;
         port_objects.push_back(port_object_id);
         return port_object_id;
     }
@@ -160,6 +180,34 @@ class TimingObjectDatabase {
 
     const std::vector<std::string>& get_port_objects() const {
         return port_objects;
+    }
+
+    const std::vector<std::string> get_input_port_objects() const {
+        std::vector<std::string> all_inputs;
+        all_inputs.reserve(port_objects.size());
+        for (const auto& input: port_objects) {
+            auto it = port_type_.find(input);
+            // TODO: Assert that this exists.
+            if (it->second == PortType::INPUT || it->second == PortType::INOUT) {
+                all_inputs.push_back(input);
+            }
+        }
+
+        return all_inputs;
+    }
+
+    const std::vector<std::string> get_output_port_objects() const {
+        std::vector<std::string> all_outputs;
+        all_outputs.reserve(port_objects.size());
+        for (const auto& output: port_objects) {
+            auto it = port_type_.find(output);
+            // TODO: Assert that this exists.
+            if (it->second == PortType::OUTPUT || it->second == PortType::INOUT) {
+                all_outputs.push_back(output);
+            }
+        }
+
+        return all_outputs;
     }
 
     const std::vector<std::string>& get_clock_objects() const {

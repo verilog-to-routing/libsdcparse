@@ -76,6 +76,10 @@ std::vector<std::string> all_ports_internal();
 
 std::vector<std::string> all_clocks_internal();
 
+std::vector<std::string> all_inputs_internal();
+
+std::vector<std::string> all_outputs_internal();
+
 std::vector<std::string> all_pins_internal();
 
 std::vector<std::string> all_cells_internal();
@@ -84,7 +88,8 @@ std::string get_name_internal(std::string object_id);
 
 bool is_object_id_internal(std::string object_id);
 
-std::string _libsdcparse_create_port_internal(std::string port_name);
+std::string _libsdcparse_create_port_internal(std::string port_name,
+                                              std::string port_type_str);
 
 std::string _libsdcparse_create_pin_internal(std::string pin_name);
 

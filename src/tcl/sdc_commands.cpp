@@ -266,6 +266,24 @@ std::vector<std::string> all_clocks_internal() {
     return sdcparse::g_callback->obj_database.get_clock_objects();
 }
 
+std::vector<std::string> all_inputs_internal() {
+    if (sdcparse::g_callback == nullptr) {
+        // FIXME: Make this a proper error.
+        throw new std::runtime_error("Callback not registered!.");
+    }
+
+    return sdcparse::g_callback->obj_database.get_input_port_objects();
+}
+
+std::vector<std::string> all_outputs_internal() {
+    if (sdcparse::g_callback == nullptr) {
+        // FIXME: Make this a proper error.
+        throw new std::runtime_error("Callback not registered!.");
+    }
+
+    return sdcparse::g_callback->obj_database.get_output_port_objects();
+}
+
 std::vector<std::string> all_pins_internal() {
     if (sdcparse::g_callback == nullptr) {
         // FIXME: Make this a proper error.
@@ -302,13 +320,17 @@ bool is_object_id_internal(std::string object_id) {
     return sdcparse::g_callback->obj_database.is_object_id(object_id);
 }
 
-std::string _libsdcparse_create_port_internal(std::string port_name) {
+std::string _libsdcparse_create_port_internal(std::string port_name,
+                                              std::string port_type_str) {
     if (sdcparse::g_callback == nullptr) {
         // FIXME: Make this a proper error.
         throw new std::runtime_error("Callback not registered!.");
     }
 
-    return sdcparse::g_callback->obj_database.create_port_object(port_name);
+    // TODO: Assert that the port type exists.
+    sdcparse::PortType port_type = sdcparse::get_port_type(port_type_str);
+
+    return sdcparse::g_callback->obj_database.create_port_object(port_name, port_type);
 }
 
 std::string _libsdcparse_create_pin_internal(std::string pin_name) {

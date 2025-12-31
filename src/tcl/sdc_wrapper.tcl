@@ -583,6 +583,26 @@ proc get_cells {args} {
     return $matches
 }
 
+proc all_inputs {} {
+    # Set the line number from the caller's frame
+    set frame_info [info frame -1]
+    set line_num [dict get $frame_info line]
+    lineno_internal $line_num
+
+    # TODO: Handle -no_clocks bool
+
+    return [all_inputs_internal]
+}
+
+proc all_outputs {} {
+    # Set the line number from the caller's frame
+    set frame_info [info frame -1]
+    set line_num [dict get $frame_info line]
+    lineno_internal $line_num
+
+    return [all_outputs_internal]
+}
+
 proc all_clocks {} {
     # Set the line number from the caller's frame
     set frame_info [info frame -1]
@@ -610,7 +630,7 @@ proc _libsdcparse_create_port {args} {
 
     # NOTE: Right now we ignore the port type. Eventually we will need the port
     #       types.
-    return [_libsdcparse_create_port_internal [dict get $params port_name]]
+    return [_libsdcparse_create_port_internal [dict get $params port_name] [dict get $params -type]]
 }
 
 proc _libsdcparse_create_pin {args} {
