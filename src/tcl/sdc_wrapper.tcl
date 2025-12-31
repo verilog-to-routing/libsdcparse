@@ -479,13 +479,30 @@ proc set_timing_derate {args} {
     set_timing_derate_internal [dict get $params -early] [dict get $params -late] [dict get $params -net_delay] [dict get $params -cell_delay] [dict get $params derate] $targets
 }
 
-proc get_name {object_id} {
+proc get_name {args} {
     # Set the line number from the caller's frame
     set frame_info [info frame -1]
     set line_num [dict get $frame_info line]
     lineno_internal $line_num
 
-    get_name_internal object_id
+    set spec {
+        flags   {}
+        bools   {}
+        pos     {object}
+        require {object}
+        types   {}
+    }
+
+    set params [generic_sdc_parser "get_name" $spec $args]
+
+    set object [dict get $params object]
+
+    if {![is_object_id_internal $object]} {
+        error "get_name: Not an object: '$object'"
+    }
+
+    # TODO: This should really become [get_property object name]
+    return [get_name_internal $object]
 }
 
 proc _query_get_impl {cmd_name all_func params} {

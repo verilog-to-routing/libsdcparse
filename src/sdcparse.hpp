@@ -98,6 +98,7 @@ struct SetTimingDerate;
 
 struct StringGroup;
 
+// TODO: This should be Direction not type.
 enum class PortType {
     INPUT,
     OUTPUT,
