@@ -70,6 +70,13 @@ void set_clock_latency_internal(bool is_source,
 void set_disable_timing_internal(const std::vector<std::string>& from_list,
                                  const std::vector<std::string>& to_list);
 
+void set_timing_derate_internal(bool is_early,
+                                bool is_late,
+                                bool derate_nets,
+                                bool derate_cells,
+                                double derate,
+                                const std::vector<std::string>& targets);
+
 std::vector<std::string> all_ports_internal();
 
 std::vector<std::string> all_clocks_internal();

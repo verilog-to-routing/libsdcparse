@@ -248,6 +248,28 @@ void set_disable_timing_internal(const std::vector<std::string>& from_list,
     sdcparse::g_callback->set_disable_timing(set_disable_timing_cmd);
 }
 
+void set_timing_derate_internal(bool is_early,
+                                bool is_late,
+                                bool derate_nets,
+                                bool derate_cells,
+                                double derate,
+                                const std::vector<std::string>& targets) {
+    sdcparse::SetTimingDerate set_timing_derate_cmd;
+    set_timing_derate_cmd.is_early = is_early;
+    set_timing_derate_cmd.is_late = is_late;
+    set_timing_derate_cmd.derate_nets = derate_nets;
+    set_timing_derate_cmd.derate_cells = derate_cells;
+    set_timing_derate_cmd.value = derate;
+    set_timing_derate_cmd.cell_targets.strings = targets;
+    set_timing_derate_cmd.cell_targets.type = sdcparse::StringGroupType::OBJECT;
+
+    if (sdcparse::g_callback == nullptr) {
+        // FIXME: Make this a proper error.
+        throw new std::runtime_error("Callback not registered!.");
+    }
+    sdcparse::g_callback->set_timing_derate(set_timing_derate_cmd);
+}
+
 std::vector<std::string> all_ports_internal() {
     if (sdcparse::g_callback == nullptr) {
         // FIXME: Make this a proper error.

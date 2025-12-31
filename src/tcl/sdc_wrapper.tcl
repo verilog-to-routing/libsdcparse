@@ -458,6 +458,27 @@ proc set_disable_timing {args} {
     set_disable_timing_internal $from_list $to_list
 }
 
+proc set_timing_derate {args} {
+    # Set the line number from the caller's frame
+    set frame_info [info frame -1]
+    set line_num [dict get $frame_info line]
+    lineno_internal $line_num
+
+    set spec {
+        flags   {}
+        bools   {-early -late -net_delay -cell_delay}
+        pos     {derate targets}
+        require {derate}
+        types   {derate double}
+    }
+
+    set params [generic_sdc_parser "set_timing_derate" $spec $args]
+
+    set targets [_convert_to_objects "set_timing_derate" [dict get $params targets] {cells}]
+
+    set_timing_derate_internal [dict get $params -early] [dict get $params -late] [dict get $params -net_delay] [dict get $params -cell_delay] [dict get $params derate] $targets
+}
+
 proc get_name {object_id} {
     # Set the line number from the caller's frame
     set frame_info [info frame -1]
