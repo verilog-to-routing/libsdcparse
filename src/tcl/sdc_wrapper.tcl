@@ -219,14 +219,29 @@ proc create_clock {args} {
 
     set params [generic_sdc_parser "create_clock" $spec $args]
 
-    # TODO: Verify in TCL land that waveform has length two and maybe that
-    #       the first element is smaller than the second.
+    set period [dict get $params -period]
+
+    set name [dict get $params -name]
+
+    # Get the waveform. If the waveform is unset, it is defaulted to a 50% duty-cycle.
+    set waveform [dict get $params -waveform]
+    if {$waveform == {}} {
+        set waveform [list "0" [expr { $period / double(2) }]]
+    } elseif {[llength $waveform] != 2} {
+        # TODO: This check should be in the parser for better generality.
+        error "create_clock: Waveform must have two values."
+    }
 
     set id_targets [_convert_to_objects "create_clock" [dict get $params targets] {ports}]
 
+    # TODO: This should be added to the parser for better generality.
+    if {$name == "" && [llength $id_targets] == 0} {
+        error "create_clock: Either name or target must be provided."
+    }
+
     # TODO: Can we improve this function interface to wrap onto multiple lines
     #       without messing with the strings?
-    create_clock_internal [dict get $params -period] [dict get $params -name] [dict get $params -waveform] [dict get $params -add] $id_targets
+    create_clock_internal $period $name $waveform [dict get $params -add] $id_targets
 }
 
 proc set_clock_groups {args} {

@@ -1,7 +1,6 @@
 #include <stdio.h>
 
 #include "sdcparse.hpp"
-#include "sdc_common.hpp"
 
 #include "sdc_lexer.hpp"
 #include "sdc_error.hpp"
@@ -17,10 +16,8 @@ void sdc_parse_filename(std::string filename, Callback& callback) {
 
 void sdc_parse_filename(const char* filename, Callback& callback) {
     // FIXME: Make this more proper.
-    TclInterpreter interpreter;
-    interpreter.register_callback(&callback);
-    std::string result = interpreter.eval_file(filename);
-    std::cout << result << std::endl;
+    TclInterpreter interpreter(callback);
+    interpreter.eval_file(filename);
     return;
 
     FILE* infile = std::fopen(filename, "r");

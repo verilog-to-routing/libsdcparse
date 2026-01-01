@@ -1,6 +1,5 @@
 
 #include <cassert>
-#include <stdexcept>
 #include <string>
 
 #include "sdc_commands.h"
@@ -22,16 +21,9 @@ void create_clock_internal(double period,
     sdcparse::CreateClock create_clock_cmd;
     create_clock_cmd.name = name;
     create_clock_cmd.period = period;
-    if (waveform.size() == 0) {
-        create_clock_cmd.rise_edge = 0.0;
-        create_clock_cmd.fall_edge = period / 2.0;
-    } else {
-        if (waveform.size() != 2) {
-            throw new std::runtime_error("Waveform must be length 2.");
-        }
-        create_clock_cmd.rise_edge = waveform[0];
-        create_clock_cmd.fall_edge = waveform[1];
-    }
+    assert(waveform.size() == 2);
+    create_clock_cmd.rise_edge = waveform[0];
+    create_clock_cmd.fall_edge = waveform[1];
     if (targets.size() == 0 && !name.empty())
         create_clock_cmd.is_virtual = true;
     else

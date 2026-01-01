@@ -1,7 +1,7 @@
 
+#include <cassert>
 #include <iostream>
 #include <tcl/tcl.h>
-#include <stdexcept>
 #include <string>
 
 #include "sdc_commands.h"
@@ -17,9 +17,14 @@ namespace sdcparse {
 class TclInterpreter {
   private:
     Tcl_Interp *interp;
+
+    bool init_success_;
   public:
-    TclInterpreter(const char* argv0 = nullptr)
-        : interp(nullptr) {
+    TclInterpreter(Callback& callback, const char* argv0 = nullptr)
+        : interp(nullptr), init_success_(false) {
+
+        // Register the callback.
+        g_callback = &callback;
 
         static bool initLib = false;
         if (!initLib) {
@@ -28,30 +33,30 @@ class TclInterpreter {
         }
         interp = Tcl_CreateInterp();
         if (!interp) {
-            // TODO: Make this a proper error.
-            throw new std::runtime_error("failed to initialize Tcl library");
+            callback.parse_error(0, "", "Failed to initialize Tcl library");
+            return;
         }
         if (Tcl_Init(interp) != TCL_OK) {
-            // TODO: Make this a proper error.
-            throw new std::runtime_error("Failed to init tcl interpreter.");
+            callback.parse_error(0, "", "Failed to init Tcl interpreter");
+            return;
         }
 
         // Register the SWIG commands.
         if (Sdc_commands_Init(interp) != TCL_OK) {
-            // TODO: Make this a proper error.
-            throw new std::runtime_error("SWIG module Mycommands_Init failed.");
+            callback.parse_error(0, "", "SWIG module Mycommands_Init failed.");
+            return;
         }
 
         // Add the sdc wrapper file.
         // This is used to make the C++ interfaces simpler.
         const char* sdc_wrapper = get_sdc_wrapper_script();
         if (Tcl_Eval(interp, sdc_wrapper) != TCL_OK) {
-            std::cout << Tcl_GetStringResult(interp) << std::endl;
-            throw new std::runtime_error("Failed to evaluate SDC wrapper.");
+            print_error_log_();
+            callback.parse_error(0, "", "Failed to evaluate SDC wrapper.");
+            return;
         }
 
-        // Reset the callback if it was set.
-        g_callback = nullptr;
+        init_success_ = true;
     }
 
     ~TclInterpreter() {
@@ -59,14 +64,11 @@ class TclInterpreter {
             Tcl_DeleteInterp(interp);
     }
 
-    void register_callback(Callback* callback) {
-        g_callback = callback;
-    }
-
-    std::string eval_file(const std::string& filename) {
-        if (g_callback == nullptr) {
-            std::cout << "Callback has not been registered!\n";
-            throw new std::runtime_error("Callback not registered");
+    void eval_file(const std::string& filename) {
+        assert(g_callback != nullptr);
+        if (!init_success_) {
+            g_callback->parse_error(0, "", "Failed to parse due to interpreter initialization error.");
+            return;
         }
 
         g_callback->start_parse();
@@ -77,14 +79,41 @@ class TclInterpreter {
         int code = Tcl_EvalFile(interp, filename.c_str());
 
         if (code >= TCL_ERROR) {
-            // TODO: Make this a proper error.
-            std::cout << Tcl_GetStringResult(interp) << std::endl;
-            throw Tcl_GetStringResult(interp);
+            // NOTE: The stack trace here is very detailed, and may be too
+            //       detailed for a user.
+            // TODO: Make this optionally activated.
+            print_error_log_();
+
+            // Get the error line number.
+            // Get the return options dictionary
+            Tcl_Obj *options = Tcl_GetReturnOptions(interp, code);
+            Tcl_Obj *lineKey = Tcl_NewStringObj("-errorline", -1);
+            Tcl_Obj *lineVal;
+            // Extract the line number from the dictionary
+            Tcl_DictObjGet(NULL, options, lineKey, &lineVal);
+
+            int line_number;
+            Tcl_GetIntFromObj(interp, lineVal, &line_number);
+            // Clean up
+            Tcl_DecrRefCount(lineKey);
+
+            g_callback->parse_error(line_number, "", Tcl_GetStringResult(interp));
         }
 
         g_callback->finish_parse();
+    }
 
-        return std::string(Tcl_GetStringResult(interp));
+  private:
+    void print_error_log_() {
+        std::cerr << "--- SDC TCL Parse Error ---" << std::endl;
+        const char* msg = Tcl_GetStringResult(interp);
+        std::cerr << "Message: " << msg << std::endl;
+
+        const char* stack_trace = Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY);
+        if (stack_trace) {
+            std::cerr << "Stack Trace:\n" << stack_trace << std::endl;
+        }
+        std::cerr << "---------------------------" << std::endl;
     }
 };
 
