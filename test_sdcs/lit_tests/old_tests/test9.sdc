@@ -1,4 +1,8 @@
-# RUN: %sdcparse-test %s -legacy 2>&1
+# RUN: %sdcparse-test %s 2>&1
+
+# COM: TODO: Add the filecheck.
+
+puts [_libsdcparse_create_cell "werty/asdr/q"]
 
 set_timing_derate -early 0.9
 set_timing_derate -late 1.1

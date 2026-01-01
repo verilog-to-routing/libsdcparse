@@ -1,6 +1,19 @@
-# RUN: %sdcparse-test %s -legacy 2>&1
+# RUN: %sdcparse-test %s 2>&1
+
+# COM: TODO: Add the filecheck.
 
 #VPR compatible SDC file for benchmark 'bitcoin_miner'
+
+puts [_libsdcparse_create_port "OSC_CLK" -type INPUT]
+puts [_libsdcparse_create_port "pll:pll_inst|altpll:altpll_component|pll_altpll:auto_generated|wire_pll1_clk\[0\]" -type INPUT]
+
+# COM: TODO: We should use the actual bitcoin_miner port names!
+puts [_libsdcparse_create_port "in1" -type INPUT]
+puts [_libsdcparse_create_port "in2" -type INPUT]
+puts [_libsdcparse_create_port "in3" -type INPUT]
+puts [_libsdcparse_create_port "out1" -type OUTPUT]
+puts [_libsdcparse_create_port "out2" -type OUTPUT]
+puts [_libsdcparse_create_port "out3" -type OUTPUT]
 
 #*******************************
 # set_time_format 

@@ -216,16 +216,24 @@ private:
 };
 
 int main(int argc, char **argv) {
-    if(argc != 2) {
-        fprintf(stderr, "Usage: %s filename.sdc\n", argv[0]);
+    if(argc != 2 && argc != 3) {
+        fprintf(stderr, "Usage: %s filename.sdc [-legacy]\n", argv[0]);
         fprintf(stderr, "\n");
         fprintf(stderr, "Reads in an SDC file into internal data structures\n");
-        fprintf(stderr, "and then prints it out\n");
+        fprintf(stderr, "and then prints it out.\n");
+        fprintf(stderr, "Use -legacy to use the legacy (non-tcl) parser.\n");
         exit(1);
     }
 
+    // Basic flag parsing. This tool is only used for testing, so we can make
+    // the flag parsing a bit simple. Here we assume that the flag comes last.
+    bool use_tcl_interp = true;
+    if (argc == 3 && argv[2] == std::string("-legacy")) {
+        use_tcl_interp = false;
+    }
+
     PrintCallback callback;
-    sdc_parse_filename(argv[1], callback);
+    sdc_parse_filename(argv[1], callback, use_tcl_interp);
 
     if(callback.error()) {
         return 1;

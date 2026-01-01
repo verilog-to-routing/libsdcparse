@@ -1,15 +1,4 @@
-# RUN: %sdcparse-test %s 2>&1
-
-# COM: TODO: Add the filecheck.
-
-puts [_libsdcparse_create_port "clka" -type INPUT]
-puts [_libsdcparse_create_port "clkb" -type INPUT]
-puts [_libsdcparse_create_port "clkc" -type INPUT]
-puts [_libsdcparse_create_port "clkd" -type INPUT]
-create_clock -period 1.0 clka
-create_clock -period 1.0 clkb
-create_clock -period 1.0 clkc
-create_clock -period 1.0 clkd
+# RUN: %sdcparse-test %s -legacy 2>&1
 
 set_clock_uncertainty -setup -from clka -to clkb 0.3
 

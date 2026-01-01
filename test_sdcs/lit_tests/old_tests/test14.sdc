@@ -1,11 +1,21 @@
-# RUN: %sdcparse-test %s -legacy 2>&1
+# RUN: %sdcparse-test %s 2>&1
+
+# COM: TODO: Add the filecheck.
+
+puts [_libsdcparse_create_port "clk" -type INPUT]
+puts [_libsdcparse_create_port "in1" -type INPUT]
+puts [_libsdcparse_create_port "in2" -type INPUT]
+puts [_libsdcparse_create_port "in3" -type INPUT]
+puts [_libsdcparse_create_port "out1" -type OUTPUT]
+puts [_libsdcparse_create_port "out2" -type OUTPUT]
+puts [_libsdcparse_create_port "out3" -type OUTPUT]
 
 create_clock -period 0.5 -name VIRTUAL_INPUT_CLOCK
 create_clock -period 0.4 -name VIRTUAL_OUTPUT_CLOCK
 create_clock -period 0.7 clk
 
-set_input_delay -clock VIRTUAL_INPUT_CLOCK -max 0.1 [get_ports{*}]
-set_output_delay -clock VIRTUAL_OUTPUT_CLOCK -max 0.2 [get_ports{*}]
+set_input_delay -clock VIRTUAL_INPUT_CLOCK -max 0.1 [get_ports {*}]
+set_output_delay -clock VIRTUAL_OUTPUT_CLOCK -max 0.2 [get_ports {*}]
 
 set_clock_groups -exclusive -group [get_clocks {VIRTUAL_INPUT_CLOCK}] -group [get_clocks {VIRTUAL_OUTPUT_CLOCK}]
 
