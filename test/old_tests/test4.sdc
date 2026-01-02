@@ -4,16 +4,16 @@
 
 #VPR compatible SDC file for benchmark 'bitcoin_miner'
 
-puts [_libsdcparse_create_port "OSC_CLK" -type INPUT]
-puts [_libsdcparse_create_port "pll:pll_inst|altpll:altpll_component|pll_altpll:auto_generated|wire_pll1_clk\[0\]" -type INPUT]
+puts [_libsdcparse_create_port "OSC_CLK" -direction INPUT]
+puts [_libsdcparse_create_port "pll:pll_inst|altpll:altpll_component|pll_altpll:auto_generated|wire_pll1_clk\[0\]" -direction INPUT]
 
 # COM: TODO: We should use the actual bitcoin_miner port names!
-puts [_libsdcparse_create_port "in1" -type INPUT]
-puts [_libsdcparse_create_port "in2" -type INPUT]
-puts [_libsdcparse_create_port "in3" -type INPUT]
-puts [_libsdcparse_create_port "out1" -type OUTPUT]
-puts [_libsdcparse_create_port "out2" -type OUTPUT]
-puts [_libsdcparse_create_port "out3" -type OUTPUT]
+puts [_libsdcparse_create_port "in1" -direction INPUT]
+puts [_libsdcparse_create_port "in2" -direction INPUT]
+puts [_libsdcparse_create_port "in3" -direction INPUT]
+puts [_libsdcparse_create_port "out1" -direction OUTPUT]
+puts [_libsdcparse_create_port "out2" -direction OUTPUT]
+puts [_libsdcparse_create_port "out3" -direction OUTPUT]
 
 #*******************************
 # set_time_format 

@@ -1,7 +1,7 @@
 # RUN: %sdcparse-test %s 2>&1 | filecheck %s
 
-_libsdcparse_create_port "clk1" -type INPUT
-_libsdcparse_create_port "clk2" -type INPUT
+_libsdcparse_create_port "clk1" -direction INPUT
+_libsdcparse_create_port "clk2" -direction INPUT
 
 create_clock -period 1 clk1
 create_clock -period 1 clk2

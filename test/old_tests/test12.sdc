@@ -2,8 +2,8 @@
 
 # COM: TODO: Add the filecheck.
 
-puts [_libsdcparse_create_port "clk" -type INPUT]
-puts [_libsdcparse_create_port "output_clk" -type INPUT]
+puts [_libsdcparse_create_port "clk" -direction INPUT]
+puts [_libsdcparse_create_port "output_clk" -direction INPUT]
 puts [_libsdcparse_create_cell "asdf~/ff"]
 puts [_libsdcparse_create_cell "wer/234/ff3"]
 puts [_libsdcparse_create_cell "xcw/32|ff2"]

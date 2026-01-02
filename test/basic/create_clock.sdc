@@ -1,17 +1,17 @@
 # RUN: %sdcparse-test %s 2>&1 | filecheck %s
 
 # CHECK: [[clk1_port_ptr:__vtr_obj_port_[0-9]+]]
-puts [_libsdcparse_create_port "clk1" -type INPUT]
+puts [_libsdcparse_create_port "clk1" -direction INPUT]
 # CHECK: [[clk2_port_ptr:__vtr_obj_port_[0-9]+]]
-puts [_libsdcparse_create_port "clk2" -type INPUT]
+puts [_libsdcparse_create_port "clk2" -direction INPUT]
 # CHECK: [[clk3_port_ptr:__vtr_obj_port_[0-9]+]]
-puts [_libsdcparse_create_port "clk3" -type INPUT]
+puts [_libsdcparse_create_port "clk3" -direction INPUT]
 # CHECK: [[clk4_port_ptr:__vtr_obj_port_[0-9]+]]
-puts [_libsdcparse_create_port "clk4" -type INPUT]
+puts [_libsdcparse_create_port "clk4" -direction INPUT]
 # CHECK: [[clk5_port_ptr:__vtr_obj_port_[0-9]+]]
-puts [_libsdcparse_create_port "clk5" -type INPUT]
+puts [_libsdcparse_create_port "clk5" -direction INPUT]
 # CHECK: [[clk6_port_ptr:__vtr_obj_port_[0-9]+]]
-puts [_libsdcparse_create_port "clk6" -type INPUT]
+puts [_libsdcparse_create_port "clk6" -direction INPUT]
 
 # CHECK: create_clock -period {{1.0*}} -waveform {{{0.0*}} {{0.50*}}} {[[clk1_port_ptr]]}
 create_clock -period 1.0 clk1

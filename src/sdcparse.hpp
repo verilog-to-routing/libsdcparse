@@ -68,10 +68,58 @@
  *
  */
 #include <cassert>
+#include <functional>
 #include <unordered_map>
 #include <vector>
 #include <string>
 #include <limits>
+
+namespace sdcparse {
+struct ObjectId {
+    explicit ObjectId(const std::string& v) noexcept
+        : value(v) {};
+
+    bool operator==(const ObjectId& rhs) const {
+        return rhs.value == value;
+    }
+
+    std::string to_string() const {
+        return value;
+    }
+
+    friend std::hash<ObjectId>;
+  private:
+    // TODO: Consider changing this to be an integer and a type.
+    std::string value;
+};
+struct ClockObjectId : ObjectId {
+    using ObjectId::ObjectId;
+};
+struct CellObjectId : ObjectId {
+    using ObjectId::ObjectId;
+};
+struct PortObjectId : ObjectId {
+    using ObjectId::ObjectId;
+};
+struct PinObjectId : ObjectId {
+    using ObjectId::ObjectId;
+};
+}
+
+namespace std {
+    template<>
+    struct hash<sdcparse::ObjectId> {
+        std::size_t operator()(const sdcparse::ObjectId& obj) const noexcept {
+            return std::hash<std::string>{}(obj.to_string());
+        }
+    };
+    template<>
+    struct hash<sdcparse::PortObjectId> {
+        std::size_t operator()(const sdcparse::PortObjectId& obj) const noexcept {
+            return std::hash<std::string>{}(obj.to_string());
+        }
+    };
+}
 
 namespace sdcparse {
 /*
@@ -96,67 +144,59 @@ struct SetTimingDerate;
 
 struct StringGroup;
 
-// TODO: This should be Direction not type.
-enum class PortType {
+enum class PortDirection {
     INPUT,
     OUTPUT,
     INOUT,
     UNKNOWN
 };
 
-static inline PortType get_port_type(std::string port_type) {
+static inline PortDirection get_port_direction(std::string port_type) {
     if (port_type == "INPUT")
-        return PortType::INPUT;
+        return PortDirection::INPUT;
     if (port_type == "OUTPUT")
-        return PortType::OUTPUT;
+        return PortDirection::OUTPUT;
     if (port_type == "INOUT")
-        return PortType::INOUT;
-    return PortType::UNKNOWN;
+        return PortDirection::INOUT;
+    return PortDirection::UNKNOWN;
 }
 
 class TimingObjectDatabase {
   private:
-    // TODO: In the future, we may want to make this a more complex struct
-    //       to hold more information. For example, a clock may have data that
-    //       a port does not have.
-    std::unordered_map<std::string, std::string> object_name;
-    std::unordered_map<std::string, PortType> port_type_;
-    std::vector<std::string> port_objects;
-    std::vector<std::string> clock_objects;
-    std::vector<std::string> pin_objects;
-    std::vector<std::string> cell_objects;
+    std::unordered_map<ObjectId, std::string> object_name;
+    std::unordered_map<PortObjectId, PortDirection> port_direction_;
+    std::vector<PortObjectId> port_objects;
+    std::vector<ClockObjectId> clock_objects;
+    std::vector<PinObjectId> pin_objects;
+    std::vector<CellObjectId> cell_objects;
   public:
-    std::string create_port_object(std::string port_name, PortType port_type) {
-        // TODO: We should make this a strong ID which happens to hold a string.
-        std::string port_object_id = "__vtr_obj_port_" + std::to_string(port_objects.size());
+    PortObjectId create_port_object(std::string port_name, PortDirection port_direction) {
+        PortObjectId port_object_id = PortObjectId("__vtr_obj_port_" + std::to_string(port_objects.size()));
         assert(object_name.count(port_object_id) == 0);
         object_name[port_object_id] = port_name;
-        port_type_[port_object_id] = port_type;
+        port_direction_[port_object_id] = port_direction;
         port_objects.push_back(port_object_id);
         return port_object_id;
     }
 
-    std::string create_clock_object(std::string clock_name) {
-        // TODO: We should make this a strong ID which happens to hold a string.
-        std::string clock_object_id = "__vtr_obj_clock_" + std::to_string(clock_objects.size());
+    ClockObjectId create_clock_object(std::string clock_name) {
+        ClockObjectId clock_object_id = ClockObjectId("__vtr_obj_clock_" + std::to_string(clock_objects.size()));
         assert(object_name.count(clock_object_id) == 0);
         object_name[clock_object_id] = clock_name;
         clock_objects.push_back(clock_object_id);
         return clock_object_id;
     }
 
-    std::string create_pin_object(std::string pin_name) {
-        // TODO: We should make this a strong ID which happens to hold a string.
-        std::string pin_object_id = "__vtr_obj_pin_" + std::to_string(pin_objects.size());
+    PinObjectId create_pin_object(std::string pin_name) {
+        PinObjectId pin_object_id = PinObjectId("__vtr_obj_pin_" + std::to_string(pin_objects.size()));
         assert(object_name.count(pin_object_id) == 0);
         object_name[pin_object_id] = pin_name;
         pin_objects.push_back(pin_object_id);
         return pin_object_id;
     }
 
-    std::string create_cell_object(std::string cell_name) {
-        // TODO: We should make this a strong ID which happens to hold a string.
-        std::string cell_object_id = "__vtr_obj_cell_" + std::to_string(cell_objects.size());
+    CellObjectId create_cell_object(std::string cell_name) {
+        CellObjectId cell_object_id = CellObjectId("__vtr_obj_cell_" + std::to_string(cell_objects.size()));
         assert(object_name.count(cell_object_id) == 0);
         object_name[cell_object_id] = cell_name;
         cell_objects.push_back(cell_object_id);
@@ -171,24 +211,29 @@ class TimingObjectDatabase {
         return false;
     }
 
-    inline std::string get_object_name(std::string object_id) const {
+    inline std::string get_object_name(ObjectId object_id) const {
         auto it = object_name.find(object_id);
         assert(it != object_name.end());
         return it->second;
     }
 
-    const std::vector<std::string>& get_port_objects() const {
-        return port_objects;
+    const std::vector<std::string> get_port_objects() const {
+        std::vector<std::string> all_ports;
+        all_ports.reserve(port_objects.size());
+        for (const PortObjectId& port_id: port_objects) {
+            all_ports.push_back(port_id.to_string());
+        }
+        return all_ports;
     }
 
     const std::vector<std::string> get_input_port_objects() const {
         std::vector<std::string> all_inputs;
         all_inputs.reserve(port_objects.size());
-        for (const auto& input: port_objects) {
-            auto it = port_type_.find(input);
-            assert(it != port_type_.end());
-            if (it->second == PortType::INPUT || it->second == PortType::INOUT) {
-                all_inputs.push_back(input);
+        for (const PortObjectId& input: port_objects) {
+            auto it = port_direction_.find(input);
+            assert(it != port_direction_.end());
+            if (it->second == PortDirection::INPUT || it->second == PortDirection::INOUT) {
+                all_inputs.push_back(input.to_string());
             }
         }
 
@@ -198,27 +243,42 @@ class TimingObjectDatabase {
     const std::vector<std::string> get_output_port_objects() const {
         std::vector<std::string> all_outputs;
         all_outputs.reserve(port_objects.size());
-        for (const auto& output: port_objects) {
-            auto it = port_type_.find(output);
-            assert(it != port_type_.end());
-            if (it->second == PortType::OUTPUT || it->second == PortType::INOUT) {
-                all_outputs.push_back(output);
+        for (const PortObjectId& output: port_objects) {
+            auto it = port_direction_.find(output);
+            assert(it != port_direction_.end());
+            if (it->second == PortDirection::OUTPUT || it->second == PortDirection::INOUT) {
+                all_outputs.push_back(output.to_string());
             }
         }
 
         return all_outputs;
     }
 
-    const std::vector<std::string>& get_clock_objects() const {
-        return clock_objects;
+    const std::vector<std::string> get_clock_objects() const {
+        std::vector<std::string> all_clocks;
+        all_clocks.reserve(clock_objects.size());
+        for (const ClockObjectId& clock_id : clock_objects) {
+            all_clocks.push_back(clock_id.to_string());
+        }
+        return all_clocks;
     }
 
-    const std::vector<std::string>& get_pin_objects() const {
-        return pin_objects;
+    const std::vector<std::string> get_pin_objects() const {
+        std::vector<std::string> all_pins;
+        all_pins.reserve(pin_objects.size());
+        for (const PinObjectId& pin_id : pin_objects) {
+            all_pins.push_back(pin_id.to_string());
+        }
+        return all_pins;
     }
 
-    const std::vector<std::string>& get_cell_objects() const {
-        return cell_objects;
+    const std::vector<std::string> get_cell_objects() const {
+        std::vector<std::string> all_cells;
+        all_cells.reserve(cell_objects.size());
+        for (const CellObjectId& cell_id : cell_objects) {
+            all_cells.push_back(cell_id.to_string());
+        }
+        return all_cells;
     }
 };
 

@@ -255,7 +255,7 @@ std::vector<std::string> all_cells_internal() {
 
 std::string get_name_internal(std::string object_id) {
     assert(sdcparse::g_callback != nullptr);
-    return sdcparse::g_callback->obj_database.get_object_name(object_id);
+    return sdcparse::g_callback->obj_database.get_object_name(sdcparse::ObjectId(object_id));
 }
 
 bool is_object_id_internal(std::string object_id) {
@@ -264,20 +264,20 @@ bool is_object_id_internal(std::string object_id) {
 }
 
 std::string _libsdcparse_create_port_internal(std::string port_name,
-                                              std::string port_type_str) {
-    sdcparse::PortType port_type = sdcparse::get_port_type(port_type_str);
-    assert(port_type != sdcparse::PortType::UNKNOWN);
+                                              std::string port_dir_str) {
+    sdcparse::PortDirection port_dir = sdcparse::get_port_direction(port_dir_str);
+    assert(port_dir != sdcparse::PortDirection::UNKNOWN);
 
     assert(sdcparse::g_callback != nullptr);
-    return sdcparse::g_callback->obj_database.create_port_object(port_name, port_type);
+    return sdcparse::g_callback->obj_database.create_port_object(port_name, port_dir).to_string();
 }
 
 std::string _libsdcparse_create_pin_internal(std::string pin_name) {
     assert(sdcparse::g_callback != nullptr);
-    return sdcparse::g_callback->obj_database.create_pin_object(pin_name);
+    return sdcparse::g_callback->obj_database.create_pin_object(pin_name).to_string();
 }
 
 std::string _libsdcparse_create_cell_internal(std::string cell_name) {
     assert(sdcparse::g_callback != nullptr);
-    return sdcparse::g_callback->obj_database.create_cell_object(cell_name);
+    return sdcparse::g_callback->obj_database.create_cell_object(cell_name).to_string();
 }

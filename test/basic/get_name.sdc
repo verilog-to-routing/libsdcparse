@@ -1,7 +1,7 @@
 # RUN: %sdcparse-test %s 2>&1 | filecheck %s
 
-puts [_libsdcparse_create_port "clk1" -type INPUT]
-puts [_libsdcparse_create_pin "pin1" -type INPUT]
+puts [_libsdcparse_create_port "clk1" -direction INPUT]
+puts [_libsdcparse_create_pin "pin1" -direction INPUT]
 puts [_libsdcparse_create_cell "cell1"]
 
 # CHECK: clk1

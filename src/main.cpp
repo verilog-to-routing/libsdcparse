@@ -44,7 +44,7 @@ public:
             obj_database.create_clock_object(clock_name);
         } else if (cmd.targets.strings.size() == 1) {
             if (cmd.targets.type == StringGroupType::OBJECT) {
-                clock_name = obj_database.get_object_name(cmd.targets.strings[0]);
+                clock_name = obj_database.get_object_name(ObjectId(cmd.targets.strings[0]));
             } else {
                 clock_name = cmd.targets.strings[0];
             }
@@ -54,7 +54,7 @@ public:
             // FIXME: Verify that this is correct.
             for (const auto& target: cmd.targets.strings) {
                 if (cmd.targets.type == StringGroupType::OBJECT) {
-                    clock_name = obj_database.get_object_name(target);
+                    clock_name = obj_database.get_object_name(ObjectId(target));
                 } else {
                     clock_name = target;
                 }

@@ -1,4 +1,3 @@
-# TODO: Move this file to somewhere that makes more sense.
 import sys
 
 if __name__ == "__main__":

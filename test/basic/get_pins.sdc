@@ -1,11 +1,11 @@
 # RUN: %sdcparse-test %s 2>&1 | filecheck %s
 
 # CHECK: [[in1_ptr:__vtr_obj_pin_[0-9]+]]
-puts [_libsdcparse_create_pin "in1" -type INPUT]
+puts [_libsdcparse_create_pin "in1" -direction INPUT]
 # CHECK: [[in2_ptr:__vtr_obj_pin_[0-9]+]]
-puts [_libsdcparse_create_pin "in2" -type INPUT]
+puts [_libsdcparse_create_pin "in2" -direction INPUT]
 # CHECK: [[in3_ptr:__vtr_obj_pin_[0-9]+]]
-puts [_libsdcparse_create_pin "in3" -type INPUT]
+puts [_libsdcparse_create_pin "in3" -direction INPUT]
 
 # CHECK: [[in1_ptr]]
 puts [get_pins {in1}]

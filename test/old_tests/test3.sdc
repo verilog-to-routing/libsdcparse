@@ -4,23 +4,23 @@
 
 #VPR compatible SDC file for benchmark 'mes_noc'
 
-puts [_libsdcparse_create_port "clk" -type INPUT]
-puts [_libsdcparse_create_port "pll_noc_type0:\using_pll:separate_clk:noc_pll_0|altpll:altpll_component|pll_noc_type0_altpll:auto_generated|wire_pll1_clk\[0\]" -type INPUT]
-puts [_libsdcparse_create_port "pll_noc_type1:\using_pll:use_noc_pll_1:noc_pll_1|altpll:altpll_component|pll_noc_type1_altpll:auto_generated|wire_pll1_clk\[0\]" -type INPUT]
-puts [_libsdcparse_create_port "pll_noc_type2:\using_pll:use_noc_pll_2:noc_pll_2|altpll:altpll_component|pll_noc_type2_altpll:auto_generated|wire_pll1_clk\[0\]" -type INPUT]
-puts [_libsdcparse_create_port "pll_noc_type5:\using_pll:use_noc_pll_5:noc_pll_5|altpll:altpll_component|pll_noc_type5_altpll:auto_generated|wire_pll1_clk\[0\]" -type INPUT]
-puts [_libsdcparse_create_port "pll_noc_type4:\using_pll:use_noc_pll_4:noc_pll_4|altpll:altpll_component|pll_noc_type4_altpll:auto_generated|wire_pll1_clk\[0\]" -type INPUT]
-puts [_libsdcparse_create_port "pll_noc_type3:\using_pll:use_noc_pll_3:noc_pll_3|altpll:altpll_component|pll_noc_type3_altpll:auto_generated|wire_pll1_clk\[0\]" -type INPUT]
-puts [_libsdcparse_create_port "pll_noc_type6:\using_pll:use_noc_pll_6:noc_pll_6|altpll:altpll_component|pll_noc_type6_altpll:auto_generated|wire_pll1_clk\[0\]" -type INPUT]
-puts [_libsdcparse_create_port "pll_noc_type7:\using_pll:use_noc_pll_7:noc_pll_7|altpll:altpll_component|pll_noc_type7_altpll:auto_generated|wire_pll1_clk\[0\]" -type INPUT]
+puts [_libsdcparse_create_port "clk" -direction INPUT]
+puts [_libsdcparse_create_port "pll_noc_type0:\using_pll:separate_clk:noc_pll_0|altpll:altpll_component|pll_noc_type0_altpll:auto_generated|wire_pll1_clk\[0\]" -direction INPUT]
+puts [_libsdcparse_create_port "pll_noc_type1:\using_pll:use_noc_pll_1:noc_pll_1|altpll:altpll_component|pll_noc_type1_altpll:auto_generated|wire_pll1_clk\[0\]" -direction INPUT]
+puts [_libsdcparse_create_port "pll_noc_type2:\using_pll:use_noc_pll_2:noc_pll_2|altpll:altpll_component|pll_noc_type2_altpll:auto_generated|wire_pll1_clk\[0\]" -direction INPUT]
+puts [_libsdcparse_create_port "pll_noc_type5:\using_pll:use_noc_pll_5:noc_pll_5|altpll:altpll_component|pll_noc_type5_altpll:auto_generated|wire_pll1_clk\[0\]" -direction INPUT]
+puts [_libsdcparse_create_port "pll_noc_type4:\using_pll:use_noc_pll_4:noc_pll_4|altpll:altpll_component|pll_noc_type4_altpll:auto_generated|wire_pll1_clk\[0\]" -direction INPUT]
+puts [_libsdcparse_create_port "pll_noc_type3:\using_pll:use_noc_pll_3:noc_pll_3|altpll:altpll_component|pll_noc_type3_altpll:auto_generated|wire_pll1_clk\[0\]" -direction INPUT]
+puts [_libsdcparse_create_port "pll_noc_type6:\using_pll:use_noc_pll_6:noc_pll_6|altpll:altpll_component|pll_noc_type6_altpll:auto_generated|wire_pll1_clk\[0\]" -direction INPUT]
+puts [_libsdcparse_create_port "pll_noc_type7:\using_pll:use_noc_pll_7:noc_pll_7|altpll:altpll_component|pll_noc_type7_altpll:auto_generated|wire_pll1_clk\[0\]" -direction INPUT]
 
 # COM: TODO: We should use the actual mes_noc port names!
-puts [_libsdcparse_create_port "in1" -type INPUT]
-puts [_libsdcparse_create_port "in2" -type INPUT]
-puts [_libsdcparse_create_port "in3" -type INPUT]
-puts [_libsdcparse_create_port "out1" -type OUTPUT]
-puts [_libsdcparse_create_port "out2" -type OUTPUT]
-puts [_libsdcparse_create_port "out3" -type OUTPUT]
+puts [_libsdcparse_create_port "in1" -direction INPUT]
+puts [_libsdcparse_create_port "in2" -direction INPUT]
+puts [_libsdcparse_create_port "in3" -direction INPUT]
+puts [_libsdcparse_create_port "out1" -direction OUTPUT]
+puts [_libsdcparse_create_port "out2" -direction OUTPUT]
+puts [_libsdcparse_create_port "out3" -direction OUTPUT]
 
 #*******************************
 # set_time_format 

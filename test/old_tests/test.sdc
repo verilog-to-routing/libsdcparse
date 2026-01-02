@@ -2,21 +2,21 @@
 
 # COM: TODO: Add the filecheck.
 
-puts [_libsdcparse_create_port "clk0" -type INPUT]
-puts [_libsdcparse_create_port "clk1" -type INPUT]
-puts [_libsdcparse_create_port "clk2" -type INPUT]
-puts [_libsdcparse_create_port "clk3" -type INPUT]
-puts [_libsdcparse_create_port "clk4" -type INPUT]
-puts [_libsdcparse_create_port "top^clk" -type INPUT]
-puts [_libsdcparse_create_port "asdf" -type INPUT]
-puts [_libsdcparse_create_port "qwerty" -type INPUT]
-puts [_libsdcparse_create_port "in1" -type INPUT]
-puts [_libsdcparse_create_port "in2" -type INPUT]
-puts [_libsdcparse_create_port "in3" -type INPUT]
-puts [_libsdcparse_create_port "out1" -type INPUT]
-puts [_libsdcparse_create_port "out2" -type INPUT]
-puts [_libsdcparse_create_port "eof_test_port1" -type INPUT]
-puts [_libsdcparse_create_port "eof_test_port2" -type INPUT]
+puts [_libsdcparse_create_port "clk0" -direction INPUT]
+puts [_libsdcparse_create_port "clk1" -direction INPUT]
+puts [_libsdcparse_create_port "clk2" -direction INPUT]
+puts [_libsdcparse_create_port "clk3" -direction INPUT]
+puts [_libsdcparse_create_port "clk4" -direction INPUT]
+puts [_libsdcparse_create_port "top^clk" -direction INPUT]
+puts [_libsdcparse_create_port "asdf" -direction INPUT]
+puts [_libsdcparse_create_port "qwerty" -direction INPUT]
+puts [_libsdcparse_create_port "in1" -direction INPUT]
+puts [_libsdcparse_create_port "in2" -direction INPUT]
+puts [_libsdcparse_create_port "in3" -direction INPUT]
+puts [_libsdcparse_create_port "out1" -direction INPUT]
+puts [_libsdcparse_create_port "out2" -direction INPUT]
+puts [_libsdcparse_create_port "eof_test_port1" -direction INPUT]
+puts [_libsdcparse_create_port "eof_test_port2" -direction INPUT]
 
 _libsdcparse_create_cell "asdf~/ff"
 _libsdcparse_create_cell "wer/234/ff3"
@@ -25,8 +25,8 @@ _libsdcparse_create_cell "asdf/ff"
 _libsdcparse_create_cell "qwert/asd/ff"
 _libsdcparse_create_cell "asdf/ff2"
 
-puts [_libsdcparse_create_pin "my_inst/in\[0\]" -type INPUT]
-puts [_libsdcparse_create_pin "my_inst2/out\[0\]" -type OUTPUT]
+puts [_libsdcparse_create_pin "my_inst/in\[0\]" -direction INPUT]
+puts [_libsdcparse_create_pin "my_inst2/out\[0\]" -direction OUTPUT]
 
 #Netlist Clocks
 create_clock -period 3 -waveform {1.25 2.75} clk0; #Integer period, float waveform
