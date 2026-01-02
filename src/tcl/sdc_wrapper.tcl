@@ -200,12 +200,16 @@ proc _convert_to_objects {cmd_name targets object_type_list} {
     return $id_targets
 }
 
-proc create_clock {args} {
+proc _libsdcparse_set_lineno {} {
     # Set the line number from the caller's frame
     # TODO: Can this be made more general?
-    set frame_info [info frame -1]
+    set frame_info [info frame -2]
     set line_num [dict get $frame_info line]
     lineno_internal $line_num
+}
+
+proc create_clock {args} {
+    _libsdcparse_set_lineno
 
     # TODO: Either target or name is required. Need to improve the parser to handle
     #       this.
@@ -246,10 +250,7 @@ proc create_clock {args} {
 }
 
 proc set_clock_groups {args} {
-    # Set the line number from the caller's frame
-    set frame_info [info frame -1]
-    set line_num [dict get $frame_info line]
-    lineno_internal $line_num
+    _libsdcparse_set_lineno
 
     # TODO: Need to ensure the number of groups is more than 1 I think.
     set spec {
@@ -280,10 +281,7 @@ proc set_clock_groups {args} {
 }
 
 proc set_false_path {args} {
-    # Set the line number from the caller's frame
-    set frame_info [info frame -1]
-    set line_num [dict get $frame_info line]
-    lineno_internal $line_num
+    _libsdcparse_set_lineno
 
     set spec {
         flags   {-from -to}
@@ -302,10 +300,7 @@ proc set_false_path {args} {
 }
 
 proc set_max_delay {args} {
-    # Set the line number from the caller's frame
-    set frame_info [info frame -1]
-    set line_num [dict get $frame_info line]
-    lineno_internal $line_num
+    _libsdcparse_set_lineno
 
     set spec {
         flags   {-from -to}
@@ -324,10 +319,7 @@ proc set_max_delay {args} {
 }
 
 proc set_min_delay {args} {
-    # Set the line number from the caller's frame
-    set frame_info [info frame -1]
-    set line_num [dict get $frame_info line]
-    lineno_internal $line_num
+    _libsdcparse_set_lineno
 
     set spec {
         flags   {-from -to}
@@ -346,10 +338,7 @@ proc set_min_delay {args} {
 }
 
 proc set_multicycle_path {args} {
-    # Set the line number from the caller's frame
-    set frame_info [info frame -1]
-    set line_num [dict get $frame_info line]
-    lineno_internal $line_num
+    _libsdcparse_set_lineno
 
     set spec {
         flags   {-from -to}
@@ -368,10 +357,7 @@ proc set_multicycle_path {args} {
 }
 
 proc set_input_delay {args} {
-    # Set the line number from the caller's frame
-    set frame_info [info frame -1]
-    set line_num [dict get $frame_info line]
-    lineno_internal $line_num
+    _libsdcparse_set_lineno
 
     set spec {
         flags   {-clock}
@@ -389,10 +375,7 @@ proc set_input_delay {args} {
 }
 
 proc set_output_delay {args} {
-    # Set the line number from the caller's frame
-    set frame_info [info frame -1]
-    set line_num [dict get $frame_info line]
-    lineno_internal $line_num
+    _libsdcparse_set_lineno
 
     set spec {
         flags   {-clock}
@@ -410,10 +393,7 @@ proc set_output_delay {args} {
 }
 
 proc set_clock_uncertainty {args} {
-    # Set the line number from the caller's frame
-    set frame_info [info frame -1]
-    set line_num [dict get $frame_info line]
-    lineno_internal $line_num
+    _libsdcparse_set_lineno
 
     set spec {
         flags   {-from -to}
@@ -432,10 +412,7 @@ proc set_clock_uncertainty {args} {
 }
 
 proc set_clock_latency {args} {
-    # Set the line number from the caller's frame
-    set frame_info [info frame -1]
-    set line_num [dict get $frame_info line]
-    lineno_internal $line_num
+    _libsdcparse_set_lineno
 
     set spec {
         flags   {}
@@ -453,10 +430,7 @@ proc set_clock_latency {args} {
 }
 
 proc set_disable_timing {args} {
-    # Set the line number from the caller's frame
-    set frame_info [info frame -1]
-    set line_num [dict get $frame_info line]
-    lineno_internal $line_num
+    _libsdcparse_set_lineno
 
     set spec {
         flags   {-from -to}
@@ -475,10 +449,7 @@ proc set_disable_timing {args} {
 }
 
 proc set_timing_derate {args} {
-    # Set the line number from the caller's frame
-    set frame_info [info frame -1]
-    set line_num [dict get $frame_info line]
-    lineno_internal $line_num
+    _libsdcparse_set_lineno
 
     set spec {
         flags   {}
@@ -496,10 +467,7 @@ proc set_timing_derate {args} {
 }
 
 proc get_name {args} {
-    # Set the line number from the caller's frame
-    set frame_info [info frame -1]
-    set line_num [dict get $frame_info line]
-    lineno_internal $line_num
+    _libsdcparse_set_lineno
 
     set spec {
         flags   {}
@@ -573,10 +541,7 @@ proc _query_get_impl {cmd_name all_func params} {
 }
 
 proc get_ports {args} {
-    # Set the line number from the caller's frame
-    set frame_info [info frame -1]
-    set line_num [dict get $frame_info line]
-    lineno_internal $line_num
+    _libsdcparse_set_lineno
 
     set spec {
         flags   {}
@@ -594,10 +559,7 @@ proc get_ports {args} {
 }
 
 proc get_clocks {args} {
-    # Set the line number from the caller's frame
-    set frame_info [info frame -1]
-    set line_num [dict get $frame_info line]
-    lineno_internal $line_num
+    _libsdcparse_set_lineno
 
     set spec {
         flags   {}
@@ -615,10 +577,7 @@ proc get_clocks {args} {
 }
 
 proc get_pins {args} {
-    # Set the line number from the caller's frame
-    set frame_info [info frame -1]
-    set line_num [dict get $frame_info line]
-    lineno_internal $line_num
+    _libsdcparse_set_lineno
 
     set spec {
         flags   {}
@@ -636,10 +595,7 @@ proc get_pins {args} {
 }
 
 proc get_cells {args} {
-    # Set the line number from the caller's frame
-    set frame_info [info frame -1]
-    set line_num [dict get $frame_info line]
-    lineno_internal $line_num
+    _libsdcparse_set_lineno
 
     set spec {
         flags   {}
@@ -657,10 +613,7 @@ proc get_cells {args} {
 }
 
 proc all_inputs {} {
-    # Set the line number from the caller's frame
-    set frame_info [info frame -1]
-    set line_num [dict get $frame_info line]
-    lineno_internal $line_num
+    _libsdcparse_set_lineno
 
     # TODO: Handle -no_clocks bool
 
@@ -668,28 +621,19 @@ proc all_inputs {} {
 }
 
 proc all_outputs {} {
-    # Set the line number from the caller's frame
-    set frame_info [info frame -1]
-    set line_num [dict get $frame_info line]
-    lineno_internal $line_num
+    _libsdcparse_set_lineno
 
     return [all_outputs_internal]
 }
 
 proc all_clocks {} {
-    # Set the line number from the caller's frame
-    set frame_info [info frame -1]
-    set line_num [dict get $frame_info line]
-    lineno_internal $line_num
+    _libsdcparse_set_lineno
 
     return [all_clocks_internal]
 }
 
 proc _libsdcparse_create_port {args} {
-    # Set the line number from the caller's frame
-    set frame_info [info frame -1]
-    set line_num [dict get $frame_info line]
-    lineno_internal $line_num
+    _libsdcparse_set_lineno
 
     set spec {
         flags   {-type}
@@ -705,10 +649,7 @@ proc _libsdcparse_create_port {args} {
 }
 
 proc _libsdcparse_create_pin {args} {
-    # Set the line number from the caller's frame
-    set frame_info [info frame -1]
-    set line_num [dict get $frame_info line]
-    lineno_internal $line_num
+    _libsdcparse_set_lineno
 
     set spec {
         flags   {-type}
@@ -726,10 +667,7 @@ proc _libsdcparse_create_pin {args} {
 }
 
 proc _libsdcparse_create_cell {args} {
-    # Set the line number from the caller's frame
-    set frame_info [info frame -1]
-    set line_num [dict get $frame_info line]
-    lineno_internal $line_num
+    _libsdcparse_set_lineno
 
     set spec {
         flags   {}

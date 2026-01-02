@@ -11,8 +11,7 @@ void print_from_to_group(const StringGroup& from, const StringGroup& to);
 class PrintCallback : public Callback {
 public:
     //Start of parsing
-    void start_parse() override {
-    }
+    void start_parse() override { }
 
     //Sets current filename
     void filename(std::string fname) override { filename_ = fname; }
