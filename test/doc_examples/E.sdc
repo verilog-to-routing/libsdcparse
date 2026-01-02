@@ -27,8 +27,6 @@ create_clock -period 1 -name input_clk
 # CHECK: create_clock -period {{0.0*}} -waveform {{{0.0*}} {{0.0*}}} -name output_clk
 create_clock -period 0 -name output_clk
 
-# TODO: We should really make these functions return pointers. How do we know that
-#       the clk2 that is returned is the port or the clock?
 # CHECK: set_clock_groups -group {__vtr_obj_clock_2} -group {__vtr_obj_clock_1}
 set_clock_groups -exclusive -group input_clk -group clk2
 

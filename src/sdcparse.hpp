@@ -67,6 +67,7 @@
  *                   | sdc_commands cmd_set_time_format EOL {$$ = add_sdc_set_time_format($1, $2); }
  *
  */
+#include <cassert>
 #include <unordered_map>
 #include <vector>
 #include <string>
@@ -128,7 +129,7 @@ class TimingObjectDatabase {
     std::string create_port_object(std::string port_name, PortType port_type) {
         // TODO: We should make this a strong ID which happens to hold a string.
         std::string port_object_id = "__vtr_obj_port_" + std::to_string(port_objects.size());
-        // TODO: Assert that the object id does not already exist anywhere else.
+        assert(object_name.count(port_object_id) == 0);
         object_name[port_object_id] = port_name;
         port_type_[port_object_id] = port_type;
         port_objects.push_back(port_object_id);
@@ -138,7 +139,7 @@ class TimingObjectDatabase {
     std::string create_clock_object(std::string clock_name) {
         // TODO: We should make this a strong ID which happens to hold a string.
         std::string clock_object_id = "__vtr_obj_clock_" + std::to_string(clock_objects.size());
-        // TODO: Assert that the object id does not already exist anywhere else.
+        assert(object_name.count(clock_object_id) == 0);
         object_name[clock_object_id] = clock_name;
         clock_objects.push_back(clock_object_id);
         return clock_object_id;
@@ -147,7 +148,7 @@ class TimingObjectDatabase {
     std::string create_pin_object(std::string pin_name) {
         // TODO: We should make this a strong ID which happens to hold a string.
         std::string pin_object_id = "__vtr_obj_pin_" + std::to_string(pin_objects.size());
-        // TODO: Assert that the object id does not already exist anywhere else.
+        assert(object_name.count(pin_object_id) == 0);
         object_name[pin_object_id] = pin_name;
         pin_objects.push_back(pin_object_id);
         return pin_object_id;
@@ -156,7 +157,7 @@ class TimingObjectDatabase {
     std::string create_cell_object(std::string cell_name) {
         // TODO: We should make this a strong ID which happens to hold a string.
         std::string cell_object_id = "__vtr_obj_cell_" + std::to_string(cell_objects.size());
-        // TODO: Assert that the object id does not already exist anywhere else.
+        assert(object_name.count(cell_object_id) == 0);
         object_name[cell_object_id] = cell_name;
         cell_objects.push_back(cell_object_id);
         return cell_object_id;
@@ -171,8 +172,8 @@ class TimingObjectDatabase {
     }
 
     inline std::string get_object_name(std::string object_id) const {
-        // TODO: Assert that the object exists.
         auto it = object_name.find(object_id);
+        assert(it != object_name.end());
         return it->second;
     }
 
@@ -185,7 +186,7 @@ class TimingObjectDatabase {
         all_inputs.reserve(port_objects.size());
         for (const auto& input: port_objects) {
             auto it = port_type_.find(input);
-            // TODO: Assert that this exists.
+            assert(it != port_type_.end());
             if (it->second == PortType::INPUT || it->second == PortType::INOUT) {
                 all_inputs.push_back(input);
             }
@@ -199,7 +200,7 @@ class TimingObjectDatabase {
         all_outputs.reserve(port_objects.size());
         for (const auto& output: port_objects) {
             auto it = port_type_.find(output);
-            // TODO: Assert that this exists.
+            assert(it != port_type_.end());
             if (it->second == PortType::OUTPUT || it->second == PortType::INOUT) {
                 all_outputs.push_back(output);
             }
