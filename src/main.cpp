@@ -222,7 +222,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, "Reads in an SDC file into internal data structures\n");
         fprintf(stderr, "and then prints it out.\n");
         fprintf(stderr, "Use -legacy to use the legacy (non-tcl) parser.\n");
-        exit(1);
+        return 1;
     }
 
     // Basic flag parsing. This tool is only used for testing, so we can make

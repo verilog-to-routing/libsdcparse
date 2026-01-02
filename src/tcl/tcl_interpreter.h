@@ -62,6 +62,9 @@ class TclInterpreter {
     ~TclInterpreter() {
         if (interp)
             Tcl_DeleteInterp(interp);
+
+        // Shut down TCL subsystem entirely. This should prevent any leaks.
+        Tcl_Finalize();
     }
 
     void eval_file(const std::string& filename) {
@@ -88,6 +91,7 @@ class TclInterpreter {
             // Get the return options dictionary
             Tcl_Obj *options = Tcl_GetReturnOptions(interp, code);
             Tcl_Obj *lineKey = Tcl_NewStringObj("-errorline", -1);
+            Tcl_IncrRefCount(lineKey);
             Tcl_Obj *lineVal;
             // Extract the line number from the dictionary
             Tcl_DictObjGet(NULL, options, lineKey, &lineVal);
