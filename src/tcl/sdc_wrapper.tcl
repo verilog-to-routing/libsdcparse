@@ -229,7 +229,8 @@ proc create_clock {args} {
         set waveform [list "0" [expr { $period / double(2) }]]
     } elseif {[llength $waveform] != 2} {
         # TODO: This check should be in the parser for better generality.
-        error "create_clock: Waveform must have two values."
+        #       This check should include that this is a list of doubles.
+        error "create_clock: Waveform must have rise_time and fall_time."
     }
 
     set id_targets [_convert_to_objects "create_clock" [dict get $params targets] {ports}]
