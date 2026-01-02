@@ -1,0 +1,104 @@
+{
+   TclFinalizeReachable
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:Tcl_Finalize
+   ...
+}
+{
+   TclFindExecutableRechable
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:Tcl_FindExecutable
+   ...
+}
+{
+   TclCreateInterpReachable
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:Tcl_CreateInterp
+   ...
+}
+{
+   TclEvalReachable
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:Tcl_Eval
+   ...
+}
+{
+   TclFindExecutablePossible
+   Memcheck:Leak
+   match-leak-kinds: possible
+   ...
+   fun:Tcl_FindExecutable
+   ...
+}
+{
+   TclCreateInterpPosible
+   Memcheck:Leak
+   match-leak-kinds: possible
+   ...
+   fun:Tcl_CreateInterp
+   ...
+}
+{
+   TclEvalExPossible
+   Memcheck:Leak
+   match-leak-kinds: possible
+   ...
+   fun:Tcl_EvalEx
+   ...
+}
+{
+   TclGetEnvPossible
+   Memcheck:Leak
+   match-leak-kinds: possible
+   ...
+   fun:TclGetEnv
+   ...
+}
+{
+   TclSetByteCodeFromAnyPossible
+   Memcheck:Leak
+   match-leak-kinds: possible
+   ...
+   fun:TclSetByteCodeFromAny
+   ...
+}
+{
+   TclEvalFilePossible
+   Memcheck:Leak
+   match-leak-kinds: possible
+   ...
+   fun:Tcl_EvalFile
+   ...
+}
+{
+   TclNRRunCallbacksPossible
+   Memcheck:Leak
+   match-leak-kinds: possible
+   ...
+   fun:TclNRRunCallbacks
+   ...
+}
+{
+   DLOpenPossible
+   Memcheck:Leak
+   match-leak-kinds: possible
+   ...
+   fun:_dl_open
+   ...
+}
+{
+   TclReallocPossible
+   Memcheck:Leak
+   match-leak-kinds: possible
+   ...
+   fun:Tcl_Realloc
+   ...
+}
