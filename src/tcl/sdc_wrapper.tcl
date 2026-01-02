@@ -192,7 +192,6 @@ proc _convert_to_objects {cmd_name targets object_type_list} {
         }
     }
 
-    # TODO: Should the error be raised here?
     if {[llength $targets] != 0 && [llength $id_targets] == 0} {
         error "$cmd_name: Unknown targets: $targets."
     }
@@ -202,7 +201,6 @@ proc _convert_to_objects {cmd_name targets object_type_list} {
 
 proc _libsdcparse_set_lineno {} {
     # Set the line number from the caller's frame
-    # TODO: Can this be made more general?
     set frame_info [info frame -2]
     set line_num [dict get $frame_info line]
     lineno_internal $line_num
@@ -244,15 +242,12 @@ proc create_clock {args} {
         error "create_clock: Either name or target must be provided."
     }
 
-    # TODO: Can we improve this function interface to wrap onto multiple lines
-    #       without messing with the strings?
     create_clock_internal $period $name $waveform [dict get $params -add] $id_targets
 }
 
 proc set_clock_groups {args} {
     _libsdcparse_set_lineno
 
-    # TODO: Need to ensure the number of groups is more than 1 I think.
     set spec {
         flags        {}
         list_flags   {-group}
@@ -264,8 +259,8 @@ proc set_clock_groups {args} {
 
     set params [generic_sdc_parser "set_clock_groups" $spec $args]
 
-    # TODO: There has to be a cleaner way of doing this. Vector of vectors are
-    #       very tricky with SWIG. Decided to linearize the container instead.
+    # Vector of vectors are very tricky with SWIG. Decided to linearize the
+    # container instead.
     set clock_list {}
     set clock_group_start_pos { 0 }
     set i 0

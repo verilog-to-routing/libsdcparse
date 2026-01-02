@@ -1,3 +1,4 @@
+#pragma once
 
 #include <cassert>
 #include <iostream>
@@ -26,11 +27,14 @@ class TclInterpreter {
         // Register the callback.
         g_callback = &callback;
 
+        // Initialize the Tcl Library.
         static bool initLib = false;
         if (!initLib) {
             Tcl_FindExecutable(argv0);
             initLib = true;
         }
+
+        // Create and initialize the Tcl Interpreter.
         interp = Tcl_CreateInterp();
         if (!interp) {
             callback.parse_error(0, "", "Failed to initialize Tcl library");
@@ -43,7 +47,7 @@ class TclInterpreter {
 
         // Register the SWIG commands.
         if (Sdc_commands_Init(interp) != TCL_OK) {
-            callback.parse_error(0, "", "SWIG module Mycommands_Init failed.");
+            callback.parse_error(0, "", "SWIG module Sdc_commands_Init failed.");
             return;
         }
 
@@ -56,10 +60,12 @@ class TclInterpreter {
             return;
         }
 
+        // Mark this class as being fully initialized.
         init_success_ = true;
     }
 
     ~TclInterpreter() {
+        // Delete the interpreter.
         if (interp)
             Tcl_DeleteInterp(interp);
 
@@ -68,19 +74,23 @@ class TclInterpreter {
     }
 
     void eval_file(const std::string& filename) {
+        // Ensure that the class was initialized correctly.
         assert(g_callback != nullptr);
         if (!init_success_) {
             g_callback->parse_error(0, "", "Failed to parse due to interpreter initialization error.");
             return;
         }
 
+        // Signal the start of the parse.
         g_callback->start_parse();
 
         // Set the filename.
         g_callback->filename(filename);
 
+        // Use the interpreter to evaluate the file.
         int code = Tcl_EvalFile(interp, filename.c_str());
 
+        // Check for any errors.
         if (code >= TCL_ERROR) {
             // NOTE: The stack trace here is very detailed, and may be too
             //       detailed for a user.
@@ -91,7 +101,6 @@ class TclInterpreter {
             // Get the return options dictionary
             Tcl_Obj *options = Tcl_GetReturnOptions(interp, code);
             Tcl_Obj *lineKey = Tcl_NewStringObj("-errorline", -1);
-            Tcl_IncrRefCount(lineKey);
             Tcl_Obj *lineVal;
             // Extract the line number from the dictionary
             Tcl_DictObjGet(NULL, options, lineKey, &lineVal);
@@ -101,9 +110,11 @@ class TclInterpreter {
             // Clean up
             Tcl_DecrRefCount(lineKey);
 
+            // Signal that an error has occured.
             g_callback->parse_error(line_number, "", Tcl_GetStringResult(interp));
         }
 
+        // Signal the end of parsing.
         g_callback->finish_parse();
     }
 
