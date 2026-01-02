@@ -122,4 +122,4 @@ endif()
 
 install(TARGETS libsdcparse DESTINATION bin)
 
-add_subdirectory(test_sdcs/lit_tests)
+add_subdirectory(test)
