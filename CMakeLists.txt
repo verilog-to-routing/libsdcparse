@@ -56,8 +56,8 @@ swig_add_library(sdc_commands
 target_include_directories(sdc_commands
     PRIVATE
     ${TCL_INCLUDE_PATH}
-    ${CMAKE_SOURCE_DIR}/src
-    ${CMAKE_SOURCE_DIR}/src/tcl
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/tcl
 )
 # NOTE: This also suppresses the warnings for sdc_commands.cpp. May want to undo
 #       that if possible.
