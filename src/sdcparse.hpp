@@ -77,7 +77,7 @@
 namespace sdcparse {
 struct ObjectId {
     explicit ObjectId(const std::string& v) noexcept
-        : value(v) {};
+        : value(v) {}
 
     bool operator==(const ObjectId& rhs) const {
         return rhs.value == value;
