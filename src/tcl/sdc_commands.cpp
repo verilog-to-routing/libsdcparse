@@ -253,18 +253,18 @@ std::vector<std::string> _libsdcparse_all_cells_internal() {
     return sdcparse::g_callback->obj_database.get_cell_objects();
 }
 
-std::string _libsdcparse_get_name_internal(std::string object_id) {
+std::string _libsdcparse_get_name_internal(const std::string& object_id) {
     assert(sdcparse::g_callback != nullptr);
     return sdcparse::g_callback->obj_database.get_object_name(sdcparse::ObjectId(object_id));
 }
 
-bool _libsdcparse_is_object_id_internal(std::string object_id) {
+bool _libsdcparse_is_object_id_internal(const std::string& object_id) {
     assert(sdcparse::g_callback != nullptr);
     return sdcparse::g_callback->obj_database.is_object_id(object_id);
 }
 
-std::string _libsdcparse_create_port_internal(std::string port_name,
-                                              std::string port_dir_str) {
+std::string _libsdcparse_create_port_internal(const std::string& port_name,
+                                              const std::string& port_dir_str) {
     sdcparse::PortDirection port_dir = sdcparse::get_port_direction(port_dir_str);
     assert(port_dir != sdcparse::PortDirection::UNKNOWN);
 
@@ -272,13 +272,12 @@ std::string _libsdcparse_create_port_internal(std::string port_name,
     return sdcparse::g_callback->obj_database.create_port_object(port_name, port_dir).to_string();
 }
 
-std::string _libsdcparse_create_pin_internal(std::string pin_name) {
+std::string _libsdcparse_create_pin_internal(const std::string& pin_name) {
     assert(sdcparse::g_callback != nullptr);
     return sdcparse::g_callback->obj_database.create_pin_object(pin_name).to_string();
 }
 
-// FIXME: All string args should be passed by reference.
-std::string _libsdcparse_create_cell_internal(std::string cell_name) {
+std::string _libsdcparse_create_cell_internal(const std::string& cell_name) {
     assert(sdcparse::g_callback != nullptr);
     return sdcparse::g_callback->obj_database.create_cell_object(cell_name).to_string();
 }

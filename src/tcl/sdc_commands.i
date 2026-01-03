@@ -87,15 +87,15 @@ std::vector<std::string> _libsdcparse_all_pins_internal();
 
 std::vector<std::string> _libsdcparse_all_cells_internal();
 
-std::string _libsdcparse_get_name_internal(std::string object_id);
+std::string _libsdcparse_get_name_internal(const std::string& object_id);
 
-bool _libsdcparse_is_object_id_internal(std::string object_id);
+bool _libsdcparse_is_object_id_internal(const std::string& object_id);
 
-std::string _libsdcparse_create_port_internal(std::string port_name,
-                                              std::string port_type_str);
+std::string _libsdcparse_create_port_internal(const std::string& port_name,
+                                              const std::string& port_type_str);
 
-std::string _libsdcparse_create_pin_internal(std::string pin_name);
+std::string _libsdcparse_create_pin_internal(const std::string& pin_name);
 
-std::string _libsdcparse_create_cell_internal(std::string cell_name);
+std::string _libsdcparse_create_cell_internal(const std::string& cell_name);
 
 void _libsdcparse_raise_warning(const std::string& msg);
