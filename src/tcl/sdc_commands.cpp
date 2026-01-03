@@ -8,16 +8,16 @@
 
 sdcparse::Callback* sdcparse::g_callback = nullptr;
 
-void lineno_internal(int line_num) {
+void _libsdcparse_lineno_internal(int line_num) {
     assert(sdcparse::g_callback != nullptr);
     sdcparse::g_callback->lineno(line_num);
 }
 
-void create_clock_internal(double period,
-                           const std::string& name,
-                           const std::vector<double>& waveform,
-                           bool add,
-                           const std::vector<std::string>& targets) {
+void _libsdcparse_create_clock_internal(double period,
+                                        const std::string& name,
+                                        const std::vector<double>& waveform,
+                                        bool add,
+                                        const std::vector<std::string>& targets) {
     sdcparse::CreateClock create_clock_cmd;
     create_clock_cmd.name = name;
     create_clock_cmd.period = period;
@@ -39,8 +39,8 @@ void create_clock_internal(double period,
     sdcparse::g_callback->create_clock(create_clock_cmd);
 }
 
-void set_clock_groups_internal(const std::vector<std::string>& clock_list,
-                               const std::vector<int>& clock_group_start_pos) {
+void _libsdcparse_set_clock_groups_internal(const std::vector<std::string>& clock_list,
+                                            const std::vector<int>& clock_group_start_pos) {
     sdcparse::SetClockGroups set_clock_groups_cmd;
     for (size_t i = 0; i < clock_group_start_pos.size() - 1; i++) {
         sdcparse::StringGroup new_group;
@@ -55,8 +55,8 @@ void set_clock_groups_internal(const std::vector<std::string>& clock_list,
     sdcparse::g_callback->set_clock_groups(set_clock_groups_cmd);
 }
 
-void set_false_path_internal(const std::vector<std::string>& from_list,
-                             const std::vector<std::string>& to_list) {
+void _libsdcparse_set_false_path_internal(const std::vector<std::string>& from_list,
+                                          const std::vector<std::string>& to_list) {
     sdcparse::SetFalsePath set_false_path_cmd;
     set_false_path_cmd.from.strings = from_list;
     set_false_path_cmd.from.type = sdcparse::StringGroupType::OBJECT;
@@ -67,9 +67,9 @@ void set_false_path_internal(const std::vector<std::string>& from_list,
     sdcparse::g_callback->set_false_path(set_false_path_cmd);
 }
 
-void set_min_delay_internal(double delay,
-                            const std::vector<std::string>& from_list,
-                            const std::vector<std::string>& to_list) {
+void _libsdcparse_set_min_delay_internal(double delay,
+                                         const std::vector<std::string>& from_list,
+                                         const std::vector<std::string>& to_list) {
     sdcparse::SetMinMaxDelay set_min_delay_cmd;
     set_min_delay_cmd.type = sdcparse::MinMaxType::MIN;
     set_min_delay_cmd.value = delay;
@@ -82,9 +82,9 @@ void set_min_delay_internal(double delay,
     sdcparse::g_callback->set_min_max_delay(set_min_delay_cmd);
 }
 
-void set_max_delay_internal(double delay,
-                            const std::vector<std::string>& from_list,
-                            const std::vector<std::string>& to_list) {
+void _libsdcparse_set_max_delay_internal(double delay,
+                                         const std::vector<std::string>& from_list,
+                                         const std::vector<std::string>& to_list) {
     sdcparse::SetMinMaxDelay set_max_delay_cmd;
     set_max_delay_cmd.type = sdcparse::MinMaxType::MAX;
     set_max_delay_cmd.value = delay;
@@ -97,11 +97,11 @@ void set_max_delay_internal(double delay,
     sdcparse::g_callback->set_min_max_delay(set_max_delay_cmd);
 }
 
-void set_multicycle_path_internal(bool is_setup,
-                                  bool is_hold,
-                                  const std::vector<std::string>& from_list,
-                                  const std::vector<std::string>& to_list,
-                                  int path_multiplier) {
+void _libsdcparse_set_multicycle_path_internal(bool is_setup,
+                                               bool is_hold,
+                                               const std::vector<std::string>& from_list,
+                                               const std::vector<std::string>& to_list,
+                                               int path_multiplier) {
     sdcparse::SetMulticyclePath set_multicycle_path_cmd;
     set_multicycle_path_cmd.is_setup = is_setup;
     set_multicycle_path_cmd.is_hold = is_hold;
@@ -115,11 +115,11 @@ void set_multicycle_path_internal(bool is_setup,
     sdcparse::g_callback->set_multicycle_path(set_multicycle_path_cmd);
 }
 
-void set_input_delay_internal(bool max_delay_flag,
-                              bool min_delay_flag,
-                              const std::string& clock_name,
-                              double delay,
-                              const std::vector<std::string>& targets) {
+void _libsdcparse_set_input_delay_internal(bool max_delay_flag,
+                                           bool min_delay_flag,
+                                           const std::string& clock_name,
+                                           double delay,
+                                           const std::vector<std::string>& targets) {
 
     sdcparse::SetIoDelay set_input_delay_cmd;
     set_input_delay_cmd.is_max = max_delay_flag;
@@ -134,11 +134,11 @@ void set_input_delay_internal(bool max_delay_flag,
     sdcparse::g_callback->set_io_delay(set_input_delay_cmd);
 }
 
-void set_output_delay_internal(bool max_delay_flag,
-                               bool min_delay_flag,
-                               const std::string& clock_name,
-                               double delay,
-                               const std::vector<std::string>& targets) {
+void _libsdcparse_set_output_delay_internal(bool max_delay_flag,
+                                            bool min_delay_flag,
+                                            const std::string& clock_name,
+                                            double delay,
+                                            const std::vector<std::string>& targets) {
 
     sdcparse::SetIoDelay set_output_delay_cmd;
     set_output_delay_cmd.is_max = max_delay_flag;
@@ -153,11 +153,11 @@ void set_output_delay_internal(bool max_delay_flag,
     sdcparse::g_callback->set_io_delay(set_output_delay_cmd);
 }
 
-void set_clock_uncertainty_internal(bool is_setup,
-                                    bool is_hold,
-                                    const std::vector<std::string>& from_list,
-                                    const std::vector<std::string>& to_list,
-                                    double uncertainty) {
+void _libsdcparse_set_clock_uncertainty_internal(bool is_setup,
+                                                 bool is_hold,
+                                                 const std::vector<std::string>& from_list,
+                                                 const std::vector<std::string>& to_list,
+                                                 double uncertainty) {
     sdcparse::SetClockUncertainty set_clock_uncertainty_cmd;
     set_clock_uncertainty_cmd.is_setup = is_setup;
     set_clock_uncertainty_cmd.is_hold = is_hold;
@@ -171,11 +171,11 @@ void set_clock_uncertainty_internal(bool is_setup,
     sdcparse::g_callback->set_clock_uncertainty(set_clock_uncertainty_cmd);
 }
 
-void set_clock_latency_internal(bool is_source,
-                                bool is_early,
-                                bool is_late,
-                                double latency,
-                                const std::vector<std::string>& targets) {
+void _libsdcparse_set_clock_latency_internal(bool is_source,
+                                             bool is_early,
+                                             bool is_late,
+                                             double latency,
+                                             const std::vector<std::string>& targets) {
     sdcparse::SetClockLatency set_clock_latency_cmd;
     if (is_source) {
         set_clock_latency_cmd.type = sdcparse::ClockLatencyType::SOURCE;
@@ -192,8 +192,8 @@ void set_clock_latency_internal(bool is_source,
     sdcparse::g_callback->set_clock_latency(set_clock_latency_cmd);
 }
 
-void set_disable_timing_internal(const std::vector<std::string>& from_list,
-                                 const std::vector<std::string>& to_list) {
+void _libsdcparse_set_disable_timing_internal(const std::vector<std::string>& from_list,
+                                              const std::vector<std::string>& to_list) {
     sdcparse::SetDisableTiming set_disable_timing_cmd;
     set_disable_timing_cmd.from.strings = from_list;
     set_disable_timing_cmd.from.type = sdcparse::StringGroupType::OBJECT;
@@ -204,12 +204,12 @@ void set_disable_timing_internal(const std::vector<std::string>& from_list,
     sdcparse::g_callback->set_disable_timing(set_disable_timing_cmd);
 }
 
-void set_timing_derate_internal(bool is_early,
-                                bool is_late,
-                                bool derate_nets,
-                                bool derate_cells,
-                                double derate,
-                                const std::vector<std::string>& targets) {
+void _libsdcparse_set_timing_derate_internal(bool is_early,
+                                             bool is_late,
+                                             bool derate_nets,
+                                             bool derate_cells,
+                                             double derate,
+                                             const std::vector<std::string>& targets) {
     sdcparse::SetTimingDerate set_timing_derate_cmd;
     set_timing_derate_cmd.is_early = is_early;
     set_timing_derate_cmd.is_late = is_late;
@@ -223,42 +223,42 @@ void set_timing_derate_internal(bool is_early,
     sdcparse::g_callback->set_timing_derate(set_timing_derate_cmd);
 }
 
-std::vector<std::string> all_ports_internal() {
+std::vector<std::string> _libsdcparse_all_ports_internal() {
     assert(sdcparse::g_callback != nullptr);
     return sdcparse::g_callback->obj_database.get_port_objects();
 }
 
-std::vector<std::string> all_clocks_internal() {
+std::vector<std::string> _libsdcparse_all_clocks_internal() {
     assert(sdcparse::g_callback != nullptr);
     return sdcparse::g_callback->obj_database.get_clock_objects();
 }
 
-std::vector<std::string> all_inputs_internal() {
+std::vector<std::string> _libsdcparse_all_inputs_internal() {
     assert(sdcparse::g_callback != nullptr);
     return sdcparse::g_callback->obj_database.get_input_port_objects();
 }
 
-std::vector<std::string> all_outputs_internal() {
+std::vector<std::string> _libsdcparse_all_outputs_internal() {
     assert(sdcparse::g_callback != nullptr);
     return sdcparse::g_callback->obj_database.get_output_port_objects();
 }
 
-std::vector<std::string> all_pins_internal() {
+std::vector<std::string> _libsdcparse_all_pins_internal() {
     assert(sdcparse::g_callback != nullptr);
     return sdcparse::g_callback->obj_database.get_pin_objects();
 }
 
-std::vector<std::string> all_cells_internal() {
+std::vector<std::string> _libsdcparse_all_cells_internal() {
     assert(sdcparse::g_callback != nullptr);
     return sdcparse::g_callback->obj_database.get_cell_objects();
 }
 
-std::string get_name_internal(std::string object_id) {
+std::string _libsdcparse_get_name_internal(std::string object_id) {
     assert(sdcparse::g_callback != nullptr);
     return sdcparse::g_callback->obj_database.get_object_name(sdcparse::ObjectId(object_id));
 }
 
-bool is_object_id_internal(std::string object_id) {
+bool _libsdcparse_is_object_id_internal(std::string object_id) {
     assert(sdcparse::g_callback != nullptr);
     return sdcparse::g_callback->obj_database.is_object_id(object_id);
 }
