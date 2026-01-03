@@ -7,8 +7,6 @@
 extern int Sdc_commands_SafeInit(Tcl_Interp* interp);
 %}
 
-// TODO: Investigate "wrapper". It may be able to cleanly inject tcl procedures.
-
 namespace std {
     %template(StringVector) vector<std::string>;
     %template(DoubleVector) vector<double>;
@@ -99,3 +97,5 @@ std::string _libsdcparse_create_port_internal(std::string port_name,
 std::string _libsdcparse_create_pin_internal(std::string pin_name);
 
 std::string _libsdcparse_create_cell_internal(std::string cell_name);
+
+void _libsdcparse_raise_warning(const std::string& msg);

@@ -1,3 +1,4 @@
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -203,6 +204,11 @@ public:
         }
         fprintf(stderr, ": %s\n", msg.c_str());
         error_ = true;
+    }
+
+    // Warning during parsing
+    void parse_warning(const std::string& msg) override {
+        std::cout << "Warning: " << msg << std::endl;
     }
 
     bool error() { return error_; }

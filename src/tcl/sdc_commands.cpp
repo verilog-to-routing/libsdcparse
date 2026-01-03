@@ -277,7 +277,13 @@ std::string _libsdcparse_create_pin_internal(std::string pin_name) {
     return sdcparse::g_callback->obj_database.create_pin_object(pin_name).to_string();
 }
 
+// FIXME: All string args should be passed by reference.
 std::string _libsdcparse_create_cell_internal(std::string cell_name) {
     assert(sdcparse::g_callback != nullptr);
     return sdcparse::g_callback->obj_database.create_cell_object(cell_name).to_string();
+}
+
+void _libsdcparse_raise_warning(const std::string& msg) {
+    assert(sdcparse::g_callback != nullptr);
+    sdcparse::g_callback->parse_warning(msg);
 }

@@ -314,6 +314,8 @@ class Callback {
         //Error during parsing
         virtual void parse_error(const int curr_lineno, const std::string& near_text, const std::string& msg) = 0;
 
+        virtual void parse_warning(const std::string& msg) = 0;
+
     public:
         TimingObjectDatabase obj_database;
 };

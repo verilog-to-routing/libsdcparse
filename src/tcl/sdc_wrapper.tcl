@@ -588,7 +588,7 @@ proc _libsdcparse_query_get_impl {cmd_name all_func params} {
 
     # If unique matches is empty, raise error unless quiet is active.
     if {[llength $matches] == 0 && ![dict get $params -quiet]} {
-        puts "Warning: no matches found for $cmd_name [dict get $params patterns]"
+        _libsdcparse_raise_warning "no matches found for $cmd_name [dict get $params patterns]"
     }
 
     return $matches
