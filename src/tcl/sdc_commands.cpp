@@ -50,6 +50,8 @@ void _libsdcparse_set_clock_groups_internal(const std::vector<std::string>& cloc
         }
         set_clock_groups_cmd.clock_groups.push_back(std::move(new_group));
     }
+    // For now, we assume that this is always exclusive.
+    set_clock_groups_cmd.type = sdcparse::ClockGroupsType::EXCLUSIVE;
 
     assert(sdcparse::g_callback != nullptr);
     sdcparse::g_callback->set_clock_groups(set_clock_groups_cmd);

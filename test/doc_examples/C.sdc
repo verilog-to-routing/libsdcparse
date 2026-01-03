@@ -22,7 +22,7 @@ create_clock -period 3 clk2
 # CHECK: create_clock -period {{3.50*}} -waveform {{{0.0*}} {{1.750*}}} -name virtual_io_clock
 create_clock -period 3.5 -name virtual_io_clock
 
-# CHECK: set_clock_groups -group {__vtr_obj_clock_0} -group {__vtr_obj_clock_1}
+# CHECK: set_clock_groups -exclusive -group {__vtr_obj_clock_0} -group {__vtr_obj_clock_1}
 set_clock_groups -exclusive -group {clk} -group {clk2}
 
 # TODO: This is not technically correct. We need to produce warnings and only

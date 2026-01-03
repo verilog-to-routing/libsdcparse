@@ -22,12 +22,12 @@ puts [get_clocks virtual2]
 # CHECK: [[virtual3_ptr:__vtr_obj_clock_[0-9]+]]
 puts [get_clocks virtual3]
 
-# CHECK: set_clock_groups -group {[[clk1_ptr]]} -group {[[clk2_ptr]]}
+# CHECK: set_clock_groups -exclusive -group {[[clk1_ptr]]} -group {[[clk2_ptr]]}
 set_clock_groups -exclusive -group clk1 -group clk2
 
 # TODO: Order is not guarenteed. Need to make more robust.
-# CHECK: set_clock_groups -group {[[virtual1_ptr]] [[virtual2_ptr]] [[virtual3_ptr]]} -group {[[clk2_ptr]]}
+# CHECK: set_clock_groups -exclusive -group {[[virtual1_ptr]] [[virtual2_ptr]] [[virtual3_ptr]]} -group {[[clk2_ptr]]}
 set_clock_groups -exclusive -group [get_clocks virtual*] -group clk2
 
-# CHECK: set_clock_groups -group {[[clk1_ptr]]} -group {[[virtual1_ptr]]} -group {[[virtual2_ptr]]} -group {[[virtual3_ptr]]}
+# CHECK: set_clock_groups -exclusive -group {[[clk1_ptr]]} -group {[[virtual1_ptr]]} -group {[[virtual2_ptr]]} -group {[[virtual3_ptr]]}
 set_clock_groups -exclusive -group clk1 -group virtual1 -group virtual2 -group virtual3
