@@ -102,3 +102,11 @@
    fun:Tcl_Realloc
    ...
 }
+{
+   TclGetRegExpFromObjPossible
+   Memcheck:Leak
+   match-leak-kinds: possible
+   ...
+   fun:Tcl_GetRegExpFromObj
+   ...
+}

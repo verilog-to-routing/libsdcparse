@@ -1,4 +1,5 @@
-# RUN: %sdcparse-test %s 2>&1 | filecheck %s
+# RUN: %sdcparse-test %s &> %t
+# RUN: filecheck %s --input-file=%t
 
 # CHECK: [[cell1_ptr:__vtr_obj_cell_[0-9]+]]
 puts [_libsdcparse_create_cell "cell1"]
