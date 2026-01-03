@@ -119,6 +119,18 @@ namespace std {
             return std::hash<std::string>{}(obj.to_string());
         }
     };
+    template<>
+    struct hash<sdcparse::ClockObjectId> {
+        std::size_t operator()(const sdcparse::ClockObjectId& obj) const noexcept {
+            return std::hash<std::string>{}(obj.to_string());
+        }
+    };
+    template<>
+    struct hash<sdcparse::PinObjectId> {
+        std::size_t operator()(const sdcparse::PinObjectId& obj) const noexcept {
+            return std::hash<std::string>{}(obj.to_string());
+        }
+    };
 }
 
 namespace sdcparse {
