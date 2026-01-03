@@ -161,6 +161,7 @@ static inline PortDirection get_port_direction(std::string port_type) {
     return PortDirection::UNKNOWN;
 }
 
+// TODO: The TimingObjectDatabase should be moved to its own isolated file, maybe even dir.
 class TimingObjectDatabase {
   private:
     std::unordered_map<ObjectId, std::string> object_name;

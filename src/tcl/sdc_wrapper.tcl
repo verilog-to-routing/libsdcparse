@@ -474,14 +474,32 @@ proc get_name {args} {
 
     set params [generic_sdc_parser "get_name" $spec $args]
 
-    set object [dict get $params object]
+    return [get_property [dict get $params object] name]
+}
 
-    if {![is_object_id_internal $object]} {
-        error "get_name: Not an object: '$object'"
+proc get_property {args} {
+    _libsdcparse_set_lineno
+
+    set spec {
+        flags   {}
+        bools   {}
+        pos     {object property}
+        require {object property}
+        types   {}
     }
 
-    # TODO: This should really become [get_property $object name]
-    return [get_name_internal $object]
+    set params [generic_sdc_parser "get_property" $spec $args]
+
+    set object [_convert_to_objects "get_property" [dict get $params object] {cells clocks ports pins}]
+
+    set property [dict get $params property]
+
+    # TODO: Handle more properties.
+    if {$property == "name"} {
+        return [get_name_internal $object]
+    } else {
+        error "get_property: Unknown property: '$property'"
+    }
 }
 
 proc _query_get_impl {cmd_name all_func params} {
