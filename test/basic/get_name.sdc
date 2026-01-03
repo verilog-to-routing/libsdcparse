@@ -17,12 +17,3 @@ create_clock -period 1 [get_ports clk1] -name CLOCK
 
 # CHECK: CLOCK
 puts [get_name [get_clocks CLOCK]]
-
-# CHECK: clk1
-puts [get_name clk1]
-# CHECK: pin1
-puts [get_name pin1]
-# CHECK: cell1
-puts [get_name cell1]
-# CHECK: CLOCK
-puts [get_name CLOCK]

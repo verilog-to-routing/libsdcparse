@@ -474,14 +474,22 @@ proc get_name {args} {
 
     set params [generic_sdc_parser "get_name" $spec $args]
 
-    return [get_property [dict get $params object] name]
+    # Get the object and ensure that it is an ID.
+    set object [dict get $params object]
+    if {![is_object_id_internal $object]} {
+        error "get_name: Can only get name of an object."
+    }
+
+    # Get the name property of the object. This should always work, given that
+    # the object is a valid id.
+    return [get_property $object name]
 }
 
 proc get_property {args} {
     _libsdcparse_set_lineno
 
     set spec {
-        flags   {}
+        flags   {-object_type}
         bools   {}
         pos     {object property}
         require {object property}
@@ -490,13 +498,46 @@ proc get_property {args} {
 
     set params [generic_sdc_parser "get_property" $spec $args]
 
-    set object [_convert_to_objects "get_property" [dict get $params object] {cells clocks ports pins}]
+    # Get the object and ensure that only one object is provided.
+    set object [dict get $params object]
+    if {[llength $object] != 1} {
+        error "get_property: Can only get property for one object."
+    }
 
-    set property [dict get $params property]
+    set object_type [dict get $params -object_type]
+    if {[is_object_id_internal $object]} {
+        # TODO: Need to check that the ID matches the object type (if one is provided).
+        set object_id $object
+    } else {
+        # Convert the name into the given object type.
+        set object_type_list ""
+        switch -- $object_type {
+            "cell" {
+                set object_type_list cells
+            }
+            "pin" {
+                set object_type_list pins
+            }
+            "port" {
+                set object_type_list ports
+            }
+            "clock" {
+                set object_type_list clocks
+            }
+            "" {
+                error "get_property: -object_type is required if object is a name"
+            }
+            default {
+                error "get_property: Unknown object_type: '$object_type'"
+            }
+        }
+        set object_id [_convert_to_objects "get_property" $object $object_type_list]
+    }
 
     # TODO: Handle more properties.
+    set property [dict get $params property]
     if {$property == "name"} {
-        return [get_name_internal $object]
+        return [get_name_internal $object_id]
     } else {
         error "get_property: Unknown property: '$property'"
     }
