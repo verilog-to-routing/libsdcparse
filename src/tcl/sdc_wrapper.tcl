@@ -285,7 +285,9 @@ proc create_generated_clock {args} {
         set multiply_by -1
     }
 
-    # TODO: Should check if both divide and multiply are active.
+    if {$divide_by == -1 && $multiply_by == -1} {
+        error "create_generated_clock: Either -multiply_by or -divide-by is required."
+    }
 
     set add [dict get $params -add]
 
