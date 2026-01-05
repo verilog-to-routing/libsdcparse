@@ -252,6 +252,48 @@ proc create_clock {args} {
     _libsdcparse_create_clock_internal $period $name $waveform [dict get $params -add] $id_targets
 }
 
+proc create_generated_clock {args} {
+    _libsdcparse_set_lineno
+
+    set spec {
+        flags   {-name -source -divide_by -multiply_by}
+        bools   {-add}
+        pos     {targets}
+        require {-source targets}
+        types   {-divide_by integer -multiply_by integer}
+    }
+
+    set params [_libsdcparse_generic_sdc_parser "create_generated_clock" $spec $args]
+
+    set name [dict get $params -name]
+
+    set src [_libsdcparse_convert_to_objects "create_generated_clock" [dict get $params -source] {port pin}]
+    if {[llength $src] != 1} {
+        error "create_generated_clock: Only one source can be defined, found: '$src'"
+    }
+
+    set divide_by [dict get $params -divide_by]
+    if {$divide_by == ""} {
+        # TODO: This should be made non-magic.
+        #       This is UNINITIALIZED_INT
+        set divide_by -1
+    }
+
+    set multiply_by [dict get $params -multiply_by]
+    if {$multiply_by == ""} {
+        # TODO: This should be made non-magic.
+        set multiply_by -1
+    }
+
+    # TODO: Should check if both divide and multiply are active.
+
+    set add [dict get $params -add]
+
+    set id_targets [_libsdcparse_convert_to_objects "create_generated_clock" [dict get $params targets] {port}]
+
+    _libsdcparse_create_generated_clock_internal $name $src $divide_by $multiply_by $add $id_targets
+}
+
 proc set_clock_groups {args} {
     _libsdcparse_set_lineno
 

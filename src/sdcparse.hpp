@@ -144,6 +144,7 @@ enum class McpType;
 enum class StringGroupType;
 
 struct CreateClock;
+struct CreateGeneratedClock;
 struct SetIoDelay;
 struct SetClockGroups;
 struct SetFalsePath;
@@ -243,13 +244,13 @@ class TimingObjectDatabase {
     }
 
     inline ObjectType get_object_type(std::string object_id) const {
-        if (object_id.rfind("__vtr_obj_cell", 0) == 0)
+        if (object_id.rfind("__vtr_obj_cell_", 0) == 0)
             return ObjectType::Cell;
-        if (object_id.rfind("__vtr_obj_clock", 0) == 0)
+        if (object_id.rfind("__vtr_obj_clock_", 0) == 0)
             return ObjectType::Clock;
-        if (object_id.rfind("__vtr_obj_port", 0) == 0)
+        if (object_id.rfind("__vtr_obj_port_", 0) == 0)
             return ObjectType::Port;
-        if (object_id.rfind("__vtr_obj_pin", 0) == 0)
+        if (object_id.rfind("__vtr_obj_pin_", 0) == 0)
             return ObjectType::Pin;
 
         return ObjectType::Unknown;
@@ -341,6 +342,7 @@ class Callback {
         virtual void lineno(int line_num) = 0;
 
         virtual void create_clock(const CreateClock& cmd) = 0;
+        virtual void create_generated_clock(const CreateGeneratedClock& cmd) = 0;
         virtual void set_io_delay(const SetIoDelay& cmd) = 0;
         virtual void set_clock_groups(const SetClockGroups& cmd) = 0;
         virtual void set_false_path(const SetFalsePath& cmd) = 0;
@@ -444,6 +446,16 @@ struct CreateClock {
                                                 // May be explicit strings or regexs.
     bool is_virtual = false;                    //Identifies this as a virtual (non-netlist) clock
     bool add = false;
+};
+
+struct CreateGeneratedClock {
+    std::string name = "";
+    std::string source = "";
+    StringGroupType source_string_type = StringGroupType::STRING;
+    int divide_by = UNINITIALIZED_INT;
+    int multiply_by = UNINITIALIZED_INT;
+    bool add = false;
+    StringGroup targets;
 };
 
 struct SetIoDelay {

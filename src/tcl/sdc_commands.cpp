@@ -39,6 +39,26 @@ void _libsdcparse_create_clock_internal(double period,
     sdcparse::g_callback->create_clock(create_clock_cmd);
 }
 
+void _libsdcparse_create_generated_clock_internal(const std::string& name,
+                                                  const std::string& source,
+                                                  int divide_by,
+                                                  int multiply_by,
+                                                  bool add,
+                                                  const std::vector<std::string>& targets) {
+    sdcparse::CreateGeneratedClock create_gen_clock_cmd;
+    create_gen_clock_cmd.name = name;
+    create_gen_clock_cmd.source = source;
+    create_gen_clock_cmd.source_string_type = sdcparse::StringGroupType::OBJECT;
+    create_gen_clock_cmd.divide_by = divide_by;
+    create_gen_clock_cmd.multiply_by = multiply_by;
+    create_gen_clock_cmd.add = add;
+    create_gen_clock_cmd.targets.strings = targets;
+    create_gen_clock_cmd.targets.type = sdcparse::StringGroupType::OBJECT;
+
+    assert(sdcparse::g_callback != nullptr);
+    sdcparse::g_callback->create_generated_clock(create_gen_clock_cmd);
+}
+
 void _libsdcparse_set_clock_groups_internal(const std::vector<std::string>& clock_list,
                                             const std::vector<int>& clock_group_start_pos) {
     sdcparse::SetClockGroups set_clock_groups_cmd;

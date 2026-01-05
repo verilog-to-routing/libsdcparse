@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stdexcept>
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -21,6 +22,7 @@ public:
     void lineno(int line_num) override { lineno_ = line_num; }
 
     void create_clock(const CreateClock& cmd) override {
+        fflush(stdout);
         printf("#%s:%d\n", filename_.c_str(), lineno_);
         printf("create_clock -period %f -waveform {%f %f}",
                 cmd.period,
@@ -62,9 +64,67 @@ public:
                 obj_database.create_clock_object(clock_name);
             }
         }
+        fflush(stdout);
+    }
+
+    void create_generated_clock(const CreateGeneratedClock& cmd) override {
+        fflush(stdout);
+        printf("#%s:%d\n", filename_.c_str(), lineno_);
+        printf("create_generated_clock");
+        if (!cmd.name.empty()) {
+            printf(" -name %s",
+                   cmd.name.c_str());
+        }
+        std::string source_name;
+        if (cmd.source_string_type == StringGroupType::OBJECT) {
+            source_name = obj_database.get_object_name(ObjectId(cmd.source));
+        } else if (cmd.source_string_type == StringGroupType::STRING) {
+            source_name = cmd.source;
+        } else {
+            throw std::runtime_error("Unsupported string type group");
+        }
+        printf(" -source %s", source_name.c_str());
+        if (cmd.divide_by != sdcparse::UNINITIALIZED_INT)
+            printf(" -divide_by %d", cmd.divide_by);
+        if (cmd.multiply_by != sdcparse::UNINITIALIZED_INT)
+            printf(" -multiply_by %d", cmd.multiply_by);
+        if (cmd.add) {
+            printf(" -add");
+        }
+        if (!cmd.targets.strings.empty()) {
+            printf(" ");
+            print_string_group(cmd.targets);
+        }
+        printf("\n");
+
+        std::string clock_name = "";
+        if (!cmd.name.empty()) {
+            clock_name = cmd.name;
+            obj_database.create_clock_object(clock_name);
+        } else if (cmd.targets.strings.size() == 1) {
+            if (cmd.targets.type == StringGroupType::OBJECT) {
+                clock_name = obj_database.get_object_name(ObjectId(cmd.targets.strings[0]));
+            } else {
+                clock_name = cmd.targets.strings[0];
+            }
+            obj_database.create_clock_object(clock_name);
+        } else {
+            // If no name is given, create a clock for each target.
+            // FIXME: Verify that this is correct.
+            for (const auto& target: cmd.targets.strings) {
+                if (cmd.targets.type == StringGroupType::OBJECT) {
+                    clock_name = obj_database.get_object_name(ObjectId(target));
+                } else {
+                    clock_name = target;
+                }
+                obj_database.create_clock_object(clock_name);
+            }
+        }
+        fflush(stdout);
     }
 
     void set_io_delay(const SetIoDelay& cmd) override {
+        fflush(stdout);
         printf("#%s:%d\n", filename_.c_str(), lineno_);
         if(cmd.type == IoDelayType::INPUT) {
             printf("set_input_delay");
@@ -83,8 +143,10 @@ public:
         print_string_group(cmd.target_ports);
         printf("\n");
 
+        fflush(stdout);
     }
     void set_clock_groups(const SetClockGroups& cmd) override {
+        fflush(stdout);
         printf("#%s:%d\n", filename_.c_str(), lineno_);
         printf("set_clock_groups");
         if(cmd.type == ClockGroupsType::EXCLUSIVE) {
@@ -96,15 +158,19 @@ public:
         }
         printf("\n");
 
+        fflush(stdout);
     }
 
     void set_false_path(const SetFalsePath& cmd) override {
+        fflush(stdout);
         printf("#%s:%d\n", filename_.c_str(), lineno_);
         printf("set_false_path ");
         print_from_to_group(cmd.from, cmd.to);
         printf("\n");
+        fflush(stdout);
     }
     void set_min_max_delay(const SetMinMaxDelay& cmd) override {
+        fflush(stdout);
         printf("#%s:%d\n", filename_.c_str(), lineno_);
         if(cmd.type == MinMaxType::MAX) {
             printf("set_max_delay");
@@ -114,8 +180,10 @@ public:
         printf(" %f ", cmd.value);
         print_from_to_group(cmd.from, cmd.to);
         printf("\n");
+        fflush(stdout);
     }
     void set_multicycle_path(const SetMulticyclePath& cmd) override {
+        fflush(stdout);
         printf("#%s:%d\n", filename_.c_str(), lineno_);
         printf("set_multicycle_path %d ", cmd.mcp_value);
         if(cmd.is_setup) {
@@ -126,8 +194,10 @@ public:
         }
         print_from_to_group(cmd.from, cmd.to);
         printf("\n");
+        fflush(stdout);
     }
     void set_clock_uncertainty(const SetClockUncertainty& cmd) override {
+        fflush(stdout);
         printf("#%s:%d\n", filename_.c_str(), lineno_);
         printf("set_clock_uncertainty ");
         if(cmd.is_setup) {
@@ -139,8 +209,10 @@ public:
         print_from_to_group(cmd.from, cmd.to);
         printf(" %f ", cmd.value);
         printf("\n");
+        fflush(stdout);
     }
     void set_clock_latency(const SetClockLatency& cmd) override {
+        fflush(stdout);
         printf("#%s:%d\n", filename_.c_str(), lineno_);
         printf("set_clock_latency ");
         if(cmd.type == ClockLatencyType::SOURCE) {
@@ -155,15 +227,19 @@ public:
         printf("%f ", cmd.value);
         print_string_group(cmd.target_clocks);
         printf("\n");
+        fflush(stdout);
     }
     void set_disable_timing(const SetDisableTiming& cmd) override {
+        fflush(stdout);
         printf("#%s:%d\n", filename_.c_str(), lineno_);
         printf("set_disable_timing ");
         print_from_to_group(cmd.from, cmd.to);
         printf("\n");
 
+        fflush(stdout);
     }
     void set_timing_derate(const SetTimingDerate& cmd) override {
+        fflush(stdout);
         printf("#%s:%d\n", filename_.c_str(), lineno_);
         printf("set_timing_derate ");
         if(cmd.is_early) {
@@ -182,6 +258,7 @@ public:
         printf("%f ", cmd.value);
         print_string_group(cmd.cell_targets);
         printf("\n");
+        fflush(stdout);
     }
 
     //End of parsing
@@ -189,6 +266,7 @@ public:
 
     //Error during parsing
     void parse_error(const int curr_lineno, const std::string& near_text, const std::string& msg) override {
+        fflush(stdout);
         fprintf(stderr, "Custom Error");
         if(curr_lineno > 0) {
             fprintf(stderr, " at line %d", curr_lineno);
@@ -204,11 +282,14 @@ public:
         }
         fprintf(stderr, ": %s\n", msg.c_str());
         error_ = true;
+        fflush(stdout);
     }
 
     // Warning during parsing
     void parse_warning(const std::string& msg) override {
+        fflush(stdout);
         std::cout << "Warning: " << msg << std::endl;
+        fflush(stdout);
     }
 
     bool error() { return error_; }
