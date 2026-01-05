@@ -156,6 +156,24 @@ struct SetTimingDerate;
 
 struct StringGroup;
 
+enum class ObjectType {
+    Cell,
+    Clock,
+    Port,
+    Pin,
+    Unknown
+};
+
+inline std::string to_string(ObjectType object_type) {
+    switch (object_type) {
+        case ObjectType::Cell: return "cell";
+        case ObjectType::Clock: return "clock";
+        case ObjectType::Port: return "port";
+        case ObjectType::Pin: return "pin";
+        default: return "unknown";
+    }
+}
+
 enum class PortDirection {
     INPUT,
     OUTPUT,
@@ -222,6 +240,19 @@ class TimingObjectDatabase {
         }
 
         return false;
+    }
+
+    inline ObjectType get_object_type(std::string object_id) const {
+        if (object_id.rfind("__vtr_obj_cell", 0) == 0)
+            return ObjectType::Cell;
+        if (object_id.rfind("__vtr_obj_clock", 0) == 0)
+            return ObjectType::Clock;
+        if (object_id.rfind("__vtr_obj_port", 0) == 0)
+            return ObjectType::Port;
+        if (object_id.rfind("__vtr_obj_pin", 0) == 0)
+            return ObjectType::Pin;
+
+        return ObjectType::Unknown;
     }
 
     inline std::string get_object_name(ObjectId object_id) const {

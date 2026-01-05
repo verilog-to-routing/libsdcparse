@@ -159,10 +159,17 @@ proc _libsdcparse_convert_to_objects {cmd_name targets object_type_list} {
     foreach item $targets {
         if {[_libsdcparse_is_object_id_internal $item]} {
             # Already is an object.
+            # Check that the object is the correct type.
+            set object_type [_libsdcparse_get_object_type_internal $item]
+            if {$object_type ni $object_type_list} {
+                error "$cmd_name: Target is not the correct type: $targets. Expected one of $object_type_list, got $object_type."
+            }
+            # Add to the list of targets.
             lappend id_targets $item
         } else {
             # Convert to object(s).
-            # NOTE: Here we are trying to find all matches in the object type list.
+            # NOTE: Here we are trying to find all matches in the object type list
+            #       using a default pattern matching using glob.
             # TODO: Need to verify if this is the correct functionality.
             set params [dict create]
             dict set params -quiet 1
@@ -171,19 +178,19 @@ proc _libsdcparse_convert_to_objects {cmd_name targets object_type_list} {
             dict set params patterns $item
             foreach object_type $object_type_list {
                 switch -- $object_type {
-                    "ports" {
+                    "port" {
                         set matches [_libsdcparse_query_get_impl $cmd_name _libsdcparse_all_ports_internal $params]
                         lappend id_targets {*}$matches
                     }
-                    "clocks" {
+                    "clock" {
                         set matches [_libsdcparse_query_get_impl $cmd_name _libsdcparse_all_clocks_internal $params]
                         lappend id_targets {*}$matches
                     }
-                    "pins" {
+                    "pin" {
                         set matches [_libsdcparse_query_get_impl $cmd_name _libsdcparse_all_pins_internal $params]
                         lappend id_targets {*}$matches
                     }
-                    "cells" {
+                    "cell" {
                         set matches [_libsdcparse_query_get_impl $cmd_name _libsdcparse_all_cells_internal $params]
                         lappend id_targets {*}$matches
                     }
@@ -193,7 +200,7 @@ proc _libsdcparse_convert_to_objects {cmd_name targets object_type_list} {
     }
 
     if {[llength $targets] != 0 && [llength $id_targets] == 0} {
-        error "$cmd_name: Unknown targets: $targets."
+        error "$cmd_name: Unknown target(s): $targets. Expected target(s) of type $object_type_list."
     }
 
     return $id_targets
@@ -235,7 +242,7 @@ proc create_clock {args} {
         error "create_clock: Waveform must have rise_time and fall_time."
     }
 
-    set id_targets [_libsdcparse_convert_to_objects "create_clock" [dict get $params targets] {ports}]
+    set id_targets [_libsdcparse_convert_to_objects "create_clock" [dict get $params targets] {port}]
 
     # TODO: This should be added to the parser for better generality.
     if {$name == "" && [llength $id_targets] == 0} {
@@ -265,7 +272,7 @@ proc set_clock_groups {args} {
     set clock_group_start_pos { 0 }
     set i 0
     foreach group [dict get $params -group] {
-        foreach clk [_libsdcparse_convert_to_objects "set_clock_groups" $group {clocks}] {
+        foreach clk [_libsdcparse_convert_to_objects "set_clock_groups" $group {clock}] {
             lappend clock_list $clk
             incr i
         }
@@ -288,8 +295,8 @@ proc set_false_path {args} {
 
     set params [_libsdcparse_generic_sdc_parser "set_false_path" $spec $args]
 
-    set from_list [_libsdcparse_convert_to_objects "set_false_path" [dict get $params -from] {clocks cells ports pins}]
-    set to_list [_libsdcparse_convert_to_objects "set_false_path" [dict get $params -to] {clocks cells ports pins}]
+    set from_list [_libsdcparse_convert_to_objects "set_false_path" [dict get $params -from] {clock cell port pin}]
+    set to_list [_libsdcparse_convert_to_objects "set_false_path" [dict get $params -to] {clock cell port pin}]
 
     _libsdcparse_set_false_path_internal $from_list $to_list
 }
@@ -307,8 +314,8 @@ proc set_max_delay {args} {
 
     set params [_libsdcparse_generic_sdc_parser "set_max_delay" $spec $args]
 
-    set from_list [_libsdcparse_convert_to_objects "set_max_delay" [dict get $params -from] {clocks cells ports pins}]
-    set to_list [_libsdcparse_convert_to_objects "set_max_delay" [dict get $params -to] {clocks cells ports pins}]
+    set from_list [_libsdcparse_convert_to_objects "set_max_delay" [dict get $params -from] {clock cell port pin}]
+    set to_list [_libsdcparse_convert_to_objects "set_max_delay" [dict get $params -to] {clock cell port pin}]
 
     _libsdcparse_set_max_delay_internal [dict get $params delay] $from_list $to_list
 }
@@ -326,8 +333,8 @@ proc set_min_delay {args} {
 
     set params [_libsdcparse_generic_sdc_parser "set_min_delay" $spec $args]
 
-    set from_list [_libsdcparse_convert_to_objects "set_min_delay" [dict get $params -from] {clocks cells ports pins}]
-    set to_list [_libsdcparse_convert_to_objects "set_min_delay" [dict get $params -to] {clocks cells ports pins}]
+    set from_list [_libsdcparse_convert_to_objects "set_min_delay" [dict get $params -from] {clock cell port pin}]
+    set to_list [_libsdcparse_convert_to_objects "set_min_delay" [dict get $params -to] {clock cell port pin}]
 
     _libsdcparse_set_min_delay_internal [dict get $params delay] $from_list $to_list
 }
@@ -345,8 +352,8 @@ proc set_multicycle_path {args} {
 
     set params [_libsdcparse_generic_sdc_parser "set_multicycle_path" $spec $args]
 
-    set from_list [_libsdcparse_convert_to_objects "set_multicycle_path" [dict get $params -from] {clocks cells ports pins}]
-    set to_list [_libsdcparse_convert_to_objects "set_multicycle_path" [dict get $params -to] {clocks cells ports pins}]
+    set from_list [_libsdcparse_convert_to_objects "set_multicycle_path" [dict get $params -from] {clock cell port pin}]
+    set to_list [_libsdcparse_convert_to_objects "set_multicycle_path" [dict get $params -to] {clock cell port pin}]
 
     _libsdcparse_set_multicycle_path_internal [dict get $params -setup] [dict get $params -hold] $from_list $to_list [dict get $params path_multiplier]
 }
@@ -364,7 +371,7 @@ proc set_input_delay {args} {
 
     set params [_libsdcparse_generic_sdc_parser "set_input_delay" $spec $args]
 
-    set id_targets [_libsdcparse_convert_to_objects "set_input_delay" [dict get $params targets] {ports pins}]
+    set id_targets [_libsdcparse_convert_to_objects "set_input_delay" [dict get $params targets] {port pin}]
 
     _libsdcparse_set_input_delay_internal [dict get $params -max] [dict get $params -min] [dict get $params -clock] [dict get $params delay] $id_targets
 }
@@ -382,7 +389,7 @@ proc set_output_delay {args} {
 
     set params [_libsdcparse_generic_sdc_parser "set_output_delay" $spec $args]
 
-    set id_targets [_libsdcparse_convert_to_objects "set_input_delay" [dict get $params targets] {ports pins}]
+    set id_targets [_libsdcparse_convert_to_objects "set_input_delay" [dict get $params targets] {port pin}]
 
     _libsdcparse_set_output_delay_internal [dict get $params -max] [dict get $params -min] [dict get $params -clock] [dict get $params delay] $id_targets
 }
@@ -400,8 +407,8 @@ proc set_clock_uncertainty {args} {
 
     set params [_libsdcparse_generic_sdc_parser "set_clock_uncertainty" $spec $args]
 
-    set from_list [_libsdcparse_convert_to_objects "set_clock_uncertainty" [dict get $params -from] {clocks}]
-    set to_list [_libsdcparse_convert_to_objects "set_clock_uncertainty" [dict get $params -to] {clocks}]
+    set from_list [_libsdcparse_convert_to_objects "set_clock_uncertainty" [dict get $params -from] {clock}]
+    set to_list [_libsdcparse_convert_to_objects "set_clock_uncertainty" [dict get $params -to] {clock}]
 
     _libsdcparse_set_clock_uncertainty_internal [dict get $params -setup] [dict get $params -hold] $from_list $to_list [dict get $params uncertainty]
 }
@@ -419,7 +426,7 @@ proc set_clock_latency {args} {
 
     set params [_libsdcparse_generic_sdc_parser "set_clock_latency" $spec $args]
 
-    set target_list [_libsdcparse_convert_to_objects "set_clock_latency" [dict get $params targets] {clocks}]
+    set target_list [_libsdcparse_convert_to_objects "set_clock_latency" [dict get $params targets] {clock}]
 
     _libsdcparse_set_clock_latency_internal [dict get $params -source] [dict get $params -early] [dict get $params -late] [dict get $params latency] $target_list
 }
@@ -437,8 +444,8 @@ proc set_disable_timing {args} {
 
     set params [_libsdcparse_generic_sdc_parser "set_disable_timing" $spec $args]
 
-    set from_list [_libsdcparse_convert_to_objects "set_disable_timing" [dict get $params -from] {pins}]
-    set to_list [_libsdcparse_convert_to_objects "set_disable_timing" [dict get $params -to] {pins}]
+    set from_list [_libsdcparse_convert_to_objects "set_disable_timing" [dict get $params -from] {pin}]
+    set to_list [_libsdcparse_convert_to_objects "set_disable_timing" [dict get $params -to] {pin}]
 
     _libsdcparse_set_disable_timing_internal $from_list $to_list
 }
@@ -456,7 +463,7 @@ proc set_timing_derate {args} {
 
     set params [_libsdcparse_generic_sdc_parser "set_timing_derate" $spec $args]
 
-    set targets [_libsdcparse_convert_to_objects "set_timing_derate" [dict get $params targets] {cells}]
+    set targets [_libsdcparse_convert_to_objects "set_timing_derate" [dict get $params targets] {cell}]
 
     _libsdcparse_set_timing_derate_internal [dict get $params -early] [dict get $params -late] [dict get $params -net_delay] [dict get $params -cell_delay] [dict get $params derate] $targets
 }
@@ -513,16 +520,16 @@ proc get_property {args} {
         set object_type_list ""
         switch -- $object_type {
             "cell" {
-                set object_type_list cells
+                set object_type_list cell
             }
             "pin" {
-                set object_type_list pins
+                set object_type_list pin
             }
             "port" {
-                set object_type_list ports
+                set object_type_list port
             }
             "clock" {
-                set object_type_list clocks
+                set object_type_list clock
             }
             "" {
                 error "get_property: -object_type is required if object is a name"

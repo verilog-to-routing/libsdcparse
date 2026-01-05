@@ -102,6 +102,8 @@ std::string _libsdcparse_get_name_internal(const std::string& object_id);
 
 bool _libsdcparse_is_object_id_internal(const std::string& object_id);
 
+std::string _libsdcparse_get_object_type_internal(const std::string& object_id);
+
 std::string _libsdcparse_create_port_internal(const std::string& port_name,
                                               const std::string& port_type_str);
 

@@ -265,6 +265,12 @@ bool _libsdcparse_is_object_id_internal(const std::string& object_id) {
     return sdcparse::g_callback->obj_database.is_object_id(object_id);
 }
 
+std::string _libsdcparse_get_object_type_internal(const std::string& object_id) {
+    assert(sdcparse::g_callback != nullptr);
+    sdcparse::ObjectType object_type = sdcparse::g_callback->obj_database.get_object_type(object_id);
+    return sdcparse::to_string(object_type);
+}
+
 std::string _libsdcparse_create_port_internal(const std::string& port_name,
                                               const std::string& port_dir_str) {
     sdcparse::PortDirection port_dir = sdcparse::get_port_direction(port_dir_str);
