@@ -1,5 +1,6 @@
-
-rename unknown _libsdcparse_original_unknown
+# Wrapper file used to pre-process the SDC commands before calling the SWIG
+# interface. This allows the SWIG interface to be simpler and allows for more
+# pre-processing to occur within TCL, which is a easier to work with for parsing.
 
 # Check if the given string looks like a bus, i.e. [0], [*], [15:0], etc.
 proc _libsdcparse_is_bus_str { str } {
@@ -15,6 +16,7 @@ proc _libsdcparse_is_bus_str { str } {
 # we override TCL's behaviour such that when it tries to execute the [*] command,
 # and fails, we check if it looks like a bus and instead return the string literal.
 # This appears to be the common way of dealing with this.
+rename unknown _libsdcparse_original_unknown
 proc unknown {args} {
     set cmd [lindex $args 0]
     if { [llength $args] == 1 && [_libsdcparse_is_bus_str $cmd] } {
@@ -154,6 +156,19 @@ proc _libsdcparse_generic_sdc_parser {cmd_name spec raw_args} {
     return $results
 }
 
+# =====================================================================
+# Convert to Objects
+# =====================================================================
+# This procedure converts the given targets into a list of object IDs
+# of the given types. This will convert any object names into the
+# appropriate types, and it will also verify that all IDs are the correct
+# types (if the targets are already IDs).
+#
+# Parameters:
+#   cmd_name         - Name of the command (for error reporting)
+#   targets          - A list of targets (either names or IDs)
+#   object_type_list - A list of types (cell, clock, port, pin)
+# =====================================================================
 proc _libsdcparse_convert_to_objects {cmd_name targets object_type_list} {
     set id_targets {}
     foreach item $targets {
@@ -208,6 +223,8 @@ proc _libsdcparse_convert_to_objects {cmd_name targets object_type_list} {
 
 proc _libsdcparse_set_lineno {} {
     # Set the line number from the caller's frame
+    # Here, we are assuming that the top-level file is two calls above this
+    # procedure.
     set frame_info [info frame -2]
     set line_num [dict get $frame_info line]
     _libsdcparse_lineno_internal $line_num
@@ -611,6 +628,19 @@ proc get_property {args} {
     }
 }
 
+# =====================================================================
+# Query "get" Implementation
+# =====================================================================
+# This procedure performs the query necessary for the get commands
+# provided by SDC (such as get_ports, get_clocks, etc.).
+#
+# This performs the necessary searches for a compliant SDC interface.
+#
+# Parameters:
+#   cmd_name  - Name of the command (for error reporting)
+#   all_func  - A function that is used to get all IDs for the query type.
+#   params    - The params that are passed into the search.
+# =====================================================================
 proc _libsdcparse_query_get_impl {cmd_name all_func params} {
     # Create the options for the search.
     set search_options {}
@@ -619,8 +649,10 @@ proc _libsdcparse_query_get_impl {cmd_name all_func params} {
     }
 
     set matches [lmap id [$all_func] {
+        # Get the name from the ID.
         set name [_libsdcparse_get_name_internal $id]
 
+        # Go through each pattern and see if the name matches the pattern.
         set match 0
         foreach pattern [dict get $params patterns] {
             # Since square brackets are used for ports, and are not used for
@@ -647,6 +679,8 @@ proc _libsdcparse_query_get_impl {cmd_name all_func params} {
                 }
             }
         }
+
+        # If a match is found, add the ID to the resulting list.
         if {$match} {
             set id
         } else {
