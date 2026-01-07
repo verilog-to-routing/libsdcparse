@@ -108,14 +108,20 @@ struct hash<sdcparse::ObjectId> {
     }
 };
 template<>
-struct hash<sdcparse::PortObjectId> {
-    std::size_t operator()(const sdcparse::PortObjectId& obj) const noexcept {
+struct hash<sdcparse::CellObjectId> {
+    std::size_t operator()(const sdcparse::CellObjectId& obj) const noexcept {
         return std::hash<std::string>{}(obj.to_string());
     }
 };
 template<>
 struct hash<sdcparse::ClockObjectId> {
     std::size_t operator()(const sdcparse::ClockObjectId& obj) const noexcept {
+        return std::hash<std::string>{}(obj.to_string());
+    }
+};
+template<>
+struct hash<sdcparse::PortObjectId> {
+    std::size_t operator()(const sdcparse::PortObjectId& obj) const noexcept {
         return std::hash<std::string>{}(obj.to_string());
     }
 };
