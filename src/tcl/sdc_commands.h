@@ -1,19 +1,7 @@
 #pragma once
 
-// TODO: Move the interface declarations to another header file. That way we
-//       can just include that header file in the .i file.
-
 #include <string>
-#include "sdcparse.hpp"
-
-// TODO: Create a global variable to hold the callback.
-//       It will be a pointer to the base callback class.
-
-namespace sdcparse {
-
-extern Callback* g_callback;
-
-} // namespace sdcparse
+#include <vector>
 
 void _libsdcparse_lineno_internal(int line_num);
 

@@ -1,10 +1,11 @@
-
 #include <cassert>
 #include <string>
 
 #include "sdc_commands.h"
 
 #include "sdcparse.hpp"
+
+#include "tcl/tcl_interpreter.h"
 
 sdcparse::Callback* sdcparse::g_callback = nullptr;
 

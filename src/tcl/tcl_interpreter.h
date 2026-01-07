@@ -5,7 +5,6 @@
 #include <tcl/tcl.h>
 #include <string>
 
-#include "sdc_commands.h"
 #include "sdc_wrapper.h"
 #include "sdcparse.hpp"
 
@@ -14,6 +13,8 @@ extern "C" {
 }
 
 namespace sdcparse {
+
+extern Callback* g_callback;
 
 class TclInterpreter {
   private:

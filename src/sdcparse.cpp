@@ -5,8 +5,7 @@
 #include "sdc_lexer.hpp"
 #include "sdc_error.hpp"
 
-// FIXME: Better handle the header files.
-#include "tcl/tcl_interpreter.h"
+#include "tcl_interpreter.h"
 
 namespace sdcparse {
 
