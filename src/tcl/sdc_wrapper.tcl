@@ -48,7 +48,7 @@ proc _libsdcparse_generic_sdc_parser {cmd_name spec raw_args} {
     set bool_flags [dict get $spec bools]
     set pos_names [dict get $spec pos]
     set required [dict get $spec require]
-    
+
     set arg_types {}
     if {[dict exists $spec types]} {
         set arg_types [dict get $spec types]
@@ -72,7 +72,7 @@ proc _libsdcparse_generic_sdc_parser {cmd_name spec raw_args} {
     # --- 1. Parse Flags ---
     while {[llength $remaining] > 0} {
         set arg [lindex $remaining 0]
-        
+
         if {[string index $arg 0] ne "-"} {
             # Not a flag, move to positional processing
             lappend positional_values $arg
@@ -112,7 +112,7 @@ proc _libsdcparse_generic_sdc_parser {cmd_name spec raw_args} {
     }
 
     # --- 3. Validation ---
-    
+
     # Check Required arguments
     foreach req $required {
         if {[dict get $results $req] eq ""} {
@@ -129,7 +129,7 @@ proc _libsdcparse_generic_sdc_parser {cmd_name spec raw_args} {
     dict for {arg_name type} $arg_types {
         if {[dict exists $results $arg_name]} {
             set val [dict get $results $arg_name]
-            
+
             # Skip check if the value is empty and not required (already handled above)
             if {$val eq ""} continue
 

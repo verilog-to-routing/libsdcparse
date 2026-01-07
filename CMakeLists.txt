@@ -40,9 +40,6 @@ if(FLEX_BISON_WARN_SUPPRESS_FLAGS)
                                 PROPERTIES COMPILE_FLAGS ${FLEX_BISON_WARN_SUPPRESS_FLAGS})
 endif()
 
-# TCL Interpreter stuff =======
-
-# FIXME: Should TCL be required?
 find_package(TCL)
 find_package(SWIG REQUIRED)
 include(UseSWIG)
@@ -68,9 +65,9 @@ target_compile_options(sdc_commands
     -Wno-shadow
 )
 
-# Some goofy stuff to turn the sdc_wrapper tcl file into a C string which can
-# be parsed by the TCL interpreter directly.
-# TODO: Turn this into a cmake module to clean it up.
+# Convert the SDC Wrapper TCL file into a C-string which is directly loaded
+# into the TCL interpreter. This improves the portability of this application
+# by putting this script in the .data segment of the executable.
 set(TCL_SCRIPT_IN ${CMAKE_CURRENT_SOURCE_DIR}/src/tcl/sdc_wrapper.tcl)
 set(TCL_SCRIPT_OUT ${CMAKE_CURRENT_BINARY_DIR}/sdc_wrapper.cpp)
 add_custom_command(

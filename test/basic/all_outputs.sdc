@@ -1,4 +1,5 @@
-# RUN: %sdcparse-test %s 2>&1 | filecheck %s
+# RUN: %sdcparse-test %s &> %t
+# RUN: filecheck %s --input-file=%t
 
 # CHECK: START
 # CHECK-EMPTY:
