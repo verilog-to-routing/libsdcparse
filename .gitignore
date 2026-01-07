@@ -7,3 +7,9 @@ src/sdc_lexer.gen.h
 src/sdc_parser.gen.c
 src/sdc_parser.gen.h
 src/stack.hh
+
+.cache/
+
+.venv/
+
+__pycache__/

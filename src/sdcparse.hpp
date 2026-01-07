@@ -1,5 +1,4 @@
-#ifndef SDC_H
-#define SDC_H
+#pragma once
 /*
  * libsdcparse - Kevin E. Murray 2014
  *
@@ -67,11 +66,12 @@
  *                   | sdc_commands cmd_set_time_format EOL {$$ = add_sdc_set_time_format($1, $2); }
  *
  */
+#include <cassert>
 #include <vector>
 #include <string>
-#include <memory>
 #include <limits>
-#include <functional>
+
+#include "sdc_timing_object_database.h"
 
 namespace sdcparse {
 /*
@@ -84,6 +84,7 @@ enum class McpType;
 enum class StringGroupType;
 
 struct CreateClock;
+struct CreateGeneratedClock;
 struct SetIoDelay;
 struct SetClockGroups;
 struct SetFalsePath;
@@ -95,7 +96,6 @@ struct SetDisableTiming;
 struct SetTimingDerate;
 
 struct StringGroup;
-
 
 class Callback {
 
@@ -112,6 +112,7 @@ class Callback {
         virtual void lineno(int line_num) = 0;
 
         virtual void create_clock(const CreateClock& cmd) = 0;
+        virtual void create_generated_clock(const CreateGeneratedClock& cmd) = 0;
         virtual void set_io_delay(const SetIoDelay& cmd) = 0;
         virtual void set_clock_groups(const SetClockGroups& cmd) = 0;
         virtual void set_false_path(const SetFalsePath& cmd) = 0;
@@ -127,13 +128,18 @@ class Callback {
 
         //Error during parsing
         virtual void parse_error(const int curr_lineno, const std::string& near_text, const std::string& msg) = 0;
+
+        virtual void parse_warning(const std::string& msg) = 0;
+
+    public:
+        TimingObjectDatabase obj_database;
 };
 
 /*
  * External functions for loading an SDC file
  */
-void sdc_parse_filename(std::string filename, Callback& callback);
-void sdc_parse_filename(const char* filename, Callback& callback);
+void sdc_parse_filename(std::string filename, Callback& callback, bool use_tcl_interp = true);
+void sdc_parse_filename(const char* filename, Callback& callback, bool use_tcl_interp = true);
 
 //Loads from 'sdc'. 'filename' only used to pass a filename to callback and can be left unspecified
 void sdc_parse_file(FILE* sdc, Callback& callback, const char* filename=""); 
@@ -160,7 +166,11 @@ enum class MinMaxType {
 
 enum class ClockGroupsType {
     NONE,
-    EXCLUSIVE
+    LOGICALLY_EXCLUSIVE,
+    PHYSICALLY_EXCLUSIVE,
+    ASYNCHRONOUS,
+    // NOTE: This is deprecated and will be removed.
+    EXCLUSIVE,
 };
 
 enum class FromToType {
@@ -178,7 +188,8 @@ enum class StringGroupType {
     PORT, 
     CLOCK,
     CELL,
-    PIN
+    PIN,
+    OBJECT
 };
 
 /*
@@ -208,6 +219,17 @@ struct CreateClock {
     StringGroup targets;                        //The set of strings indicating clock sources.
                                                 // May be explicit strings or regexs.
     bool is_virtual = false;                    //Identifies this as a virtual (non-netlist) clock
+    bool add = false;
+};
+
+struct CreateGeneratedClock {
+    std::string name = "";
+    std::string source = "";
+    StringGroupType source_string_type = StringGroupType::STRING;
+    int divide_by = UNINITIALIZED_INT;
+    int multiply_by = UNINITIALIZED_INT;
+    bool add = false;
+    StringGroup targets;
 };
 
 struct SetIoDelay {
@@ -310,5 +332,3 @@ struct SetTimingDerate {
 };
 
 } //namespace
-
-#endif

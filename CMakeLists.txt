@@ -40,14 +40,65 @@ if(FLEX_BISON_WARN_SUPPRESS_FLAGS)
                                 PROPERTIES COMPILE_FLAGS ${FLEX_BISON_WARN_SUPPRESS_FLAGS})
 endif()
 
+find_package(TCL)
+find_package(SWIG REQUIRED)
+include(UseSWIG)
+
+set_property(SOURCE src/tcl/sdc_commands.i PROPERTY CPLUSPLUS ON)
+swig_add_library(sdc_commands
+    TYPE STATIC
+    LANGUAGE tcl
+    SOURCES src/tcl/sdc_commands.i src/tcl/sdc_commands.cpp
+)
+target_include_directories(sdc_commands
+    PRIVATE
+    ${TCL_INCLUDE_PATH}
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/tcl
+)
+# NOTE: This also suppresses the warnings for sdc_commands.cpp. May want to undo
+#       that if possible.
+set(SWIG_SUPPRESS_FLAGS "-Wno-cast-qual")
+target_compile_options(sdc_commands
+    PRIVATE
+    -Wno-cast-qual
+    -Wno-shadow
+)
+
+# Convert the SDC Wrapper TCL file into a C-string which is directly loaded
+# into the TCL interpreter. This improves the portability of this application
+# by putting this script in the .data segment of the executable.
+set(TCL_SCRIPT_IN ${CMAKE_CURRENT_SOURCE_DIR}/src/tcl/sdc_wrapper.tcl)
+set(TCL_SCRIPT_OUT ${CMAKE_CURRENT_BINARY_DIR}/sdc_wrapper.cpp)
+add_custom_command(
+    OUTPUT ${TCL_SCRIPT_OUT}
+    COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/src/tcl/script_converter.py ${TCL_SCRIPT_IN} ${TCL_SCRIPT_OUT}
+    DEPENDS ${TCL_SCRIPT_IN} ${CMAKE_CURRENT_SOURCE_DIR}/src/tcl/script_converter.py
+    COMMENT "Generating C source file from Tcl script..."
+)
+
 #Create the library
 add_library(libsdcparse STATIC
+             ${TCL_SCRIPT_OUT}
              ${LIB_HEADERS}
              ${LIB_SOURCES}
              ${FLEX_SdcLexer_OUTPUTS} 
              ${BISON_SdcParser_OUTPUT_SOURCE})
 target_include_directories(libsdcparse PUBLIC ${LIB_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 set_target_properties(libsdcparse PROPERTIES PREFIX "") #Avoid extra 'lib' prefix
+
+target_link_libraries(libsdcparse
+    PRIVATE
+    ${TCL_LIBRARY}
+    sdc_commands
+)
+
+target_include_directories(libsdcparse
+    PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/tcl
+    ${SWIG_INCLUDE_DIRS}
+    ${TCL_INCLUDE_PATH}
+)
 
 #Create the test executable
 add_executable(sdcparse_test src/main.cpp)
@@ -67,3 +118,5 @@ if (USES_IPO)
 endif()
 
 install(TARGETS libsdcparse DESTINATION bin)
+
+add_subdirectory(test)

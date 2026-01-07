@@ -1,5 +1,6 @@
 #include <cstdarg>
 #include <cassert>
+#include <memory>
 #include "sdc_error.hpp"
 #include "sdcparse.hpp"
 
