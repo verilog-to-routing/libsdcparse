@@ -54,6 +54,14 @@ struct ObjectId {
         return rhs.value == value;
     }
 
+    bool operator!=(const ObjectId& rhs) const {
+        return rhs.value != value;
+    }
+
+    bool operator<(const ObjectId& rhs) const {
+        return value < rhs.value;
+    }
+
     std::string to_string() const {
         return value;
     }
@@ -70,28 +78,28 @@ struct ObjectId {
 /**
  * @brief A strong identifier to a cell object.
  */
-struct CellObjectId : ObjectId {
+struct CellObjectId final : ObjectId {
     using ObjectId::ObjectId;
 };
 
 /**
  * @brief A strong identifier to a clock object.
  */
-struct ClockObjectId : ObjectId {
+struct ClockObjectId final : ObjectId {
     using ObjectId::ObjectId;
 };
 
 /**
  * @brief A strong identifier to a port object.
  */
-struct PortObjectId : ObjectId {
+struct PortObjectId final : ObjectId {
     using ObjectId::ObjectId;
 };
 
 /**
  * @brief A strong identifier to a pin object.
  */
-struct PinObjectId : ObjectId {
+struct PinObjectId final : ObjectId {
     using ObjectId::ObjectId;
 };
 

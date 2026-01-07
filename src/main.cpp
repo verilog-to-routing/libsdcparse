@@ -54,7 +54,7 @@ public:
             obj_database.create_clock_object(clock_name);
         } else {
             // If no name is given, create a clock for each target.
-            // FIXME: Verify that this is correct.
+            // TODO: Verify that this is correct.
             for (const auto& target: cmd.targets.strings) {
                 if (cmd.targets.type == StringGroupType::OBJECT) {
                     clock_name = obj_database.get_object_name(ObjectId(target));
@@ -110,7 +110,7 @@ public:
             obj_database.create_clock_object(clock_name);
         } else {
             // If no name is given, create a clock for each target.
-            // FIXME: Verify that this is correct.
+            // TODO: Verify that this is correct.
             for (const auto& target: cmd.targets.strings) {
                 if (cmd.targets.type == StringGroupType::OBJECT) {
                     clock_name = obj_database.get_object_name(ObjectId(target));
@@ -317,11 +317,14 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    // Basic flag parsing. This tool is only used for testing, so we can make
-    // the flag parsing a bit simple. Here we assume that the flag comes last.
     bool use_tcl_interp = true;
-    if (argc == 3 && argv[2] == std::string("-legacy")) {
-        use_tcl_interp = false;
+    for (int i = 2; i < argc; i++) {
+        if (std::string(argv[i]) == "-legacy") {
+            use_tcl_interp = false;
+        } else {
+            fprintf(stderr, "Unknown option: %s\n", argv[i]);
+            return 1;
+        }
     }
 
     PrintCallback callback;

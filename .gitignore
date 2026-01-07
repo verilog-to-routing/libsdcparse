@@ -11,3 +11,5 @@ src/stack.hh
 .cache/
 
 .venv/
+
+__pycache__/

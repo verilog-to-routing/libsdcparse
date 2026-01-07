@@ -24,7 +24,7 @@ void _libsdcparse_lineno_internal(int line_num);
 void _libsdcparse_raise_warning(const std::string& msg);
 
 // The following are internal wrapper calls to the underlying callback data
-// structures. The line-up basically one-to-one with the SDC commands that are
+// structures. The line up basically one-to-one with the SDC commands that are
 // supported.
 
 void _libsdcparse_create_clock_internal(double period,
