@@ -40,7 +40,10 @@ void _libsdcparse_create_generated_clock_internal(const std::string& name,
                                                   const std::vector<std::string>& targets);
 
 void _libsdcparse_set_clock_groups_internal(const std::vector<std::string>& clock_list,
-                                            const std::vector<int>& clock_group_start_pos);
+                                            const std::vector<int>& clock_group_start_pos,
+                                            bool is_logically_exlusive,
+                                            bool is_physically_exclusive,
+                                            bool is_asynchronous);
 
 void _libsdcparse_set_false_path_internal(const std::vector<std::string>& from_list,
                                           const std::vector<std::string>& to_list);

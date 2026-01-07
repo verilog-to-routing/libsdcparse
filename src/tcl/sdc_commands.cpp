@@ -60,7 +60,10 @@ void _libsdcparse_create_generated_clock_internal(const std::string& name,
 }
 
 void _libsdcparse_set_clock_groups_internal(const std::vector<std::string>& clock_list,
-                                            const std::vector<int>& clock_group_start_pos) {
+                                            const std::vector<int>& clock_group_start_pos,
+                                            bool is_logically_exlusive,
+                                            bool is_physically_exclusive,
+                                            bool is_asynchronous) {
     sdcparse::SetClockGroups set_clock_groups_cmd;
     for (size_t i = 0; i < clock_group_start_pos.size() - 1; i++) {
         sdcparse::StringGroup new_group;
@@ -70,8 +73,15 @@ void _libsdcparse_set_clock_groups_internal(const std::vector<std::string>& cloc
         }
         set_clock_groups_cmd.clock_groups.push_back(std::move(new_group));
     }
-    // For now, we assume that this is always exclusive.
-    set_clock_groups_cmd.type = sdcparse::ClockGroupsType::EXCLUSIVE;
+
+    // Can only be one type.
+    assert((int)is_logically_exlusive + (int)is_physically_exclusive + (int)is_asynchronous == 1);
+    if (is_logically_exlusive)
+        set_clock_groups_cmd.type = sdcparse::ClockGroupsType::LOGICALLY_EXCLUSIVE;
+    else if (is_physically_exclusive)
+        set_clock_groups_cmd.type = sdcparse::ClockGroupsType::PHYSICALLY_EXCLUSIVE;
+    else if (is_asynchronous)
+        set_clock_groups_cmd.type = sdcparse::ClockGroupsType::ASYNCHRONOUS;
 
     assert(sdcparse::g_callback != nullptr);
     sdcparse::g_callback->set_clock_groups(set_clock_groups_cmd);

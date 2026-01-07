@@ -27,8 +27,8 @@ create_clock -period 1 -name input_clk
 # CHECK: create_clock -period {{0.0*}} -waveform {{{0.0*}} {{0.0*}}} -name output_clk
 create_clock -period 0 -name output_clk
 
-# CHECK: set_clock_groups -exclusive -group {__vtr_obj_clock_2} -group {__vtr_obj_clock_1}
-set_clock_groups -exclusive -group input_clk -group clk2
+# CHECK: set_clock_groups -asynchronous -group {__vtr_obj_clock_2} -group {__vtr_obj_clock_1}
+set_clock_groups -asynchronous -group input_clk -group clk2
 
 # CHECK: set_false_path -from {__vtr_obj_clock_0} -to {__vtr_obj_clock_3}
 set_false_path -from [get_clocks {clk}] -to [get_clocks {output_clk}]

@@ -396,7 +396,11 @@ enum class MinMaxType {
 
 enum class ClockGroupsType {
     NONE,
-    EXCLUSIVE
+    LOGICALLY_EXCLUSIVE,
+    PHYSICALLY_EXCLUSIVE,
+    ASYNCHRONOUS,
+    // NOTE: This is deprecated and will be removed.
+    EXCLUSIVE,
 };
 
 enum class FromToType {

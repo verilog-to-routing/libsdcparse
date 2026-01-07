@@ -37,8 +37,8 @@ create_clock -period 0 -name output_clk
 # CHECK: set_clock_latency -source {{1.0*}} {__vtr_obj_clock_0}
 set_clock_latency -source 1.0 [get_clocks {clk}]
 
-# CHECK: set_clock_groups -exclusive -group {__vtr_obj_clock_2} -group {__vtr_obj_clock_1}
-set_clock_groups -exclusive -group input_clk -group clk2
+# CHECK: set_clock_groups -asynchronous -group {__vtr_obj_clock_2} -group {__vtr_obj_clock_1}
+set_clock_groups -asynchronous -group input_clk -group clk2
 
 # CHECK: set_false_path -from {__vtr_obj_clock_0} -to {__vtr_obj_clock_3}
 set_false_path -from [get_clocks {clk}] -to [get_clocks {output_clk}]

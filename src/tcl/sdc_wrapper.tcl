@@ -302,13 +302,30 @@ proc set_clock_groups {args} {
     set spec {
         flags        {}
         list_flags   {-group}
-        bools        {-exclusive}
+        bools        {-logically_exclusive -physically_exclusive -asynchronous -exclusive}
         pos          {}
-        require      {-exclusive -group}
+        require      {-group}
         types        {}
     }
 
     set params [_libsdcparse_generic_sdc_parser "set_clock_groups" $spec $args]
+
+    set logically_exclusive [dict get $params -logically_exclusive]
+
+    set physically_exclusive [dict get $params -physically_exclusive]
+
+    # -exlusive is an argument that used to be supported by LibSDCParse, but is
+    # synonymous with -asynchronous. We will accept it, but produce a warning
+    # that it is deprecated.
+    set asynchronous [dict get $params -asynchronous]
+    if {[dict get $params -exclusive]} {
+        _libsdcparse_raise_warning "set_clock_groups: '-exclusive' argument is deprecated. Use '-asynchronous' instead."
+        set asynchronous 1
+    }
+
+    if {[expr {$logically_exclusive + $physically_exclusive + $asynchronous}] != 1} {
+        error "set_clock_groups: Exactly one of the arguments {'-logically_exclusive', '-physically_exclusive', and '-asynchronous'} is required."
+    }
 
     # Vector of vectors are very tricky with SWIG. Decided to linearize the
     # container instead.
@@ -323,7 +340,7 @@ proc set_clock_groups {args} {
         lappend clock_group_start_pos $i
     }
 
-    _libsdcparse_set_clock_groups_internal $clock_list $clock_group_start_pos
+    _libsdcparse_set_clock_groups_internal $clock_list $clock_group_start_pos $logically_exclusive $physically_exclusive $asynchronous
 }
 
 proc set_false_path {args} {

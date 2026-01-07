@@ -149,9 +149,15 @@ public:
         fflush(stdout);
         printf("#%s:%d\n", filename_.c_str(), lineno_);
         printf("set_clock_groups");
-        if(cmd.type == ClockGroupsType::EXCLUSIVE) {
+        if (cmd.type == ClockGroupsType::LOGICALLY_EXCLUSIVE)
+            printf(" -logically_exclusive");
+        if (cmd.type == ClockGroupsType::PHYSICALLY_EXCLUSIVE)
+            printf(" -physically_exclusive");
+        if (cmd.type == ClockGroupsType::ASYNCHRONOUS)
+            printf(" -asynchronous");
+        // NOTE: This is deprecated and will be removed.
+        if (cmd.type == ClockGroupsType::EXCLUSIVE)
             printf(" -exclusive");
-        }
         for(const auto& clk_grp : cmd.clock_groups) {
             printf(" -group ");
             print_string_group(clk_grp);
@@ -288,7 +294,7 @@ public:
     // Warning during parsing
     void parse_warning(const std::string& msg) override {
         fflush(stdout);
-        std::cout << "Warning: " << msg << std::endl;
+        std::cout << "Warning at line " << lineno_ << ": " << msg << std::endl;
         fflush(stdout);
     }
 
