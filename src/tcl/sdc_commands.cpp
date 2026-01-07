@@ -1,11 +1,16 @@
+/**
+ * @file
+ * @author  Alex Singer
+ * @date    January 2026
+ * @brief   Implementation of the TCL callback functions.
+ */
+
 #include <cassert>
 #include <string>
 
-#include "sdc_commands.h"
-
 #include "sdcparse.hpp"
-
-#include "tcl/tcl_interpreter.h"
+#include "sdc_commands.h"
+#include "tcl_interpreter.h"
 
 sdcparse::Callback* sdcparse::g_callback = nullptr;
 

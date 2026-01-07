@@ -1,9 +1,31 @@
 #pragma once
+/**
+ * @file
+ * @author  Alex Singer
+ * @date    January 2026
+ * @brief   Declaration of all interface callback functions which will be
+ *          callable from TCL.
+ *
+ * This file is included within the SWIG interface file, so anything declared
+ * in here will be setup as a callable function within TCL.
+ */
 
 #include <string>
 #include <vector>
 
+/**
+ * @brief Set the internal line number in the callback function.
+ */
 void _libsdcparse_lineno_internal(int line_num);
+
+/**
+ * @brief Raise a warning message from the TCL side.
+ */
+void _libsdcparse_raise_warning(const std::string& msg);
+
+// The following are internal wrapper calls to the underlying callback data
+// structures. The line-up basically one-to-one with the SDC commands that are
+// supported.
 
 void _libsdcparse_create_clock_internal(double period,
                                         const std::string& name,
@@ -100,4 +122,3 @@ std::string _libsdcparse_create_pin_internal(const std::string& pin_name);
 
 std::string _libsdcparse_create_cell_internal(const std::string& cell_name);
 
-void _libsdcparse_raise_warning(const std::string& msg);
