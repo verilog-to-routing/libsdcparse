@@ -109,9 +109,6 @@ class TclInterpreter {
         // Delete the interpreter.
         if (interp)
             Tcl_DeleteInterp(interp);
-
-        // Shut down TCL subsystem entirely. This should prevent any leaks.
-        Tcl_Finalize();
     }
 
     /**
