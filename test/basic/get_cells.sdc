@@ -27,6 +27,7 @@ puts "DONE"
 # CHECK-DAG: [[cell1_ptr]]
 # CHECK-DAG: [[cell2_ptr]]
 # CHECK-DAG: [[cell3_ptr]]
+# CHECK-NEXT: DONE
 puts [get_cells -regexp {cell.*}]
 puts "DONE"
 
@@ -36,6 +37,7 @@ puts [get_cells -nocase {CELL1}]
 # CHECK-DAG: [[cell1_ptr]]
 # CHECK-DAG: [[cell2_ptr]]
 # CHECK-DAG: [[cell3_ptr]]
+# CHECK-NEXT: DONE
 puts [get_cells -regexp -nocase {CELL.*}]
 puts "DONE"
 

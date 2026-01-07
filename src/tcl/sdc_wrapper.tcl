@@ -467,7 +467,7 @@ proc set_output_delay {args} {
 
     set params [_libsdcparse_generic_sdc_parser "set_output_delay" $spec $args]
 
-    set id_targets [_libsdcparse_convert_to_objects "set_input_delay" [dict get $params targets] {port pin}]
+    set id_targets [_libsdcparse_convert_to_objects "set_output_delay" [dict get $params targets] {port pin}]
 
     _libsdcparse_set_output_delay_internal [dict get $params -max] [dict get $params -min] [dict get $params -clock] [dict get $params delay] $id_targets
 }

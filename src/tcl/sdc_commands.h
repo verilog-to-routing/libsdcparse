@@ -42,7 +42,7 @@ void _libsdcparse_create_generated_clock_internal(const std::string& name,
 
 void _libsdcparse_set_clock_groups_internal(const std::vector<std::string>& clock_list,
                                             const std::vector<int>& clock_group_start_pos,
-                                            bool is_logically_exlusive,
+                                            bool is_logically_exclusive,
                                             bool is_physically_exclusive,
                                             bool is_asynchronous);
 

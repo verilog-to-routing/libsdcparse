@@ -26,6 +26,7 @@ puts "DONE"
 # CHECK-DAG: [[in1_ptr]]
 # CHECK-DAG: [[in2_ptr]]
 # CHECK-DAG: [[in3_ptr]]
+# CHECK-NEXT: DONE
 puts [get_pins -regexp {in.*}]
 puts "DONE"
 
@@ -35,6 +36,7 @@ puts [get_pins -nocase {IN1}]
 # CHECK-DAG: [[in1_ptr]]
 # CHECK-DAG: [[in2_ptr]]
 # CHECK-DAG: [[in3_ptr]]
+# CHECK-NEXT: DONE
 puts [get_pins -regexp -nocase {IN.*}]
 puts "DONE"
 

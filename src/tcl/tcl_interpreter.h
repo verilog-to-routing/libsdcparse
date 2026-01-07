@@ -135,7 +135,7 @@ class TclInterpreter {
         int code = Tcl_EvalFile(interp, filename.c_str());
 
         // Check for any errors.
-        if (code >= TCL_ERROR) {
+        if (code == TCL_ERROR) {
             // NOTE: The stack trace here is very detailed, and may be too
             //       detailed for a user.
             // TODO: Make this optionally activated.

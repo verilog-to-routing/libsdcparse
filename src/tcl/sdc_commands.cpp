@@ -67,7 +67,7 @@ void _libsdcparse_create_generated_clock_internal(const std::string& name,
 
 void _libsdcparse_set_clock_groups_internal(const std::vector<std::string>& clock_list,
                                             const std::vector<int>& clock_group_start_pos,
-                                            bool is_logically_exlusive,
+                                            bool is_logically_exclusive,
                                             bool is_physically_exclusive,
                                             bool is_asynchronous) {
     sdcparse::SetClockGroups set_clock_groups_cmd;
@@ -81,8 +81,8 @@ void _libsdcparse_set_clock_groups_internal(const std::vector<std::string>& cloc
     }
 
     // Can only be one type.
-    assert((int)is_logically_exlusive + (int)is_physically_exclusive + (int)is_asynchronous == 1);
-    if (is_logically_exlusive)
+    assert((int)is_logically_exclusive + (int)is_physically_exclusive + (int)is_asynchronous == 1);
+    if (is_logically_exclusive)
         set_clock_groups_cmd.type = sdcparse::ClockGroupsType::LOGICALLY_EXCLUSIVE;
     else if (is_physically_exclusive)
         set_clock_groups_cmd.type = sdcparse::ClockGroupsType::PHYSICALLY_EXCLUSIVE;

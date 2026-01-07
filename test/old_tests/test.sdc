@@ -96,7 +96,7 @@ puts "output_clk: [get_clocks output_clk]"
 #Clock Groups
 # CHECK: set_clock_groups -asynchronous -group {[[input_clk_clock_ptr]]} -group {[[clk2_clock_ptr]]} -group {[[clk3_clock_ptr]]}
 set_clock_groups -asynchronous -group input_clk -group {clk2} -group [get_clocks {clk3}]; #Single element
-# TODO: Order is not gaurenteed.
+# TODO: Order is not guaranteed.
 # CHECK: set_clock_groups -asynchronous -group {[[input_clk_clock_ptr]] [[input_clock2_clock_ptr]]} -group {[[clk2_clock_ptr]]} -group {[[asdf_clock_ptr]] [[qwerty_clock_ptr]]}
 set_clock_groups -asynchronous -group {input_clk input_clock2} -group {clk2} -group [get_clocks {asdf qwerty}]; #Multiple string elements
 

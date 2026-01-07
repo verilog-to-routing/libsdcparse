@@ -17,8 +17,8 @@ if __name__ == "__main__":
         print("Invalid number of arguments")
         sys.exit(1)
 
-    input_file_path = sys.argv[1];
-    output_file_path = sys.argv[2];
+    input_file_path = sys.argv[1]
+    output_file_path = sys.argv[2]
 
     with open(output_file_path, 'w') as output_file:
         # Write the include headers.

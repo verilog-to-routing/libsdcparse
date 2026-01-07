@@ -7,7 +7,7 @@
    ...
 }
 {
-   TclFindExecutableRechable
+   TclFindExecutableReachable
    Memcheck:Leak
    match-leak-kinds: reachable
    ...
@@ -39,7 +39,7 @@
    ...
 }
 {
-   TclCreateInterpPosible
+   TclCreateInterpPossible
    Memcheck:Leak
    match-leak-kinds: possible
    ...

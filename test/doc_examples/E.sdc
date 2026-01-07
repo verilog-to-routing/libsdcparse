@@ -39,10 +39,10 @@ set_max_delay 17 -from [get_clocks {input_clk}] -to [get_clocks {output_clk}]
 # CHECK: set_multicycle_path 3 -setup -from {__vtr_obj_clock_0} -to {__vtr_obj_clock_1}
 set_multicycle_path -setup -from [get_clocks {clk}] -to [get_clocks {clk2}] 3
 
-# TODO: The order here is not guarenteed.
+# TODO: The order here is not guaranteed.
 # CHECK: set_input_delay -clock input_clk -max {{0.50*}} {[[in1_port_ptr]] [[in2_port_ptr]] [[in3_port_ptr]]}
 set_input_delay -clock input_clk -max 0.5 [get_ports {in1 in2 in3}]
 
-# TODO: The order here is not guarenteed.
+# TODO: The order here is not guaranteed.
 # CHECK: set_output_delay -clock output_clk -max {{1.0*}} {[[out1_port_ptr]] [[out2_port_ptr]]}
 set_output_delay -clock output_clk -max 1 [get_ports {out*}]
