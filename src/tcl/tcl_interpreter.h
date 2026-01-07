@@ -150,7 +150,11 @@ class TclInterpreter {
             Tcl_DictObjGet(NULL, options, lineKey, &lineVal);
 
             int line_number;
-            Tcl_GetIntFromObj(interp, lineVal, &line_number);
+            if (lineVal != nullptr) {
+                Tcl_GetIntFromObj(interp, lineVal, &line_number);
+            } else {
+                line_number = 0;
+            }
             // Clean up
             Tcl_DecrRefCount(lineKey);
 
