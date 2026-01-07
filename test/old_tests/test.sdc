@@ -1,4 +1,5 @@
-# RUN: %sdcparse-test %s 2>&1
+# RUN: %sdcparse-test %s &> %t
+# RUN: filecheck %s --input-file=%t
 
 # CHECK: [[clk0_port_ptr:__vtr_obj_port_[0-9]+]]
 puts [_libsdcparse_create_port "clk0" -direction INPUT]
@@ -32,17 +33,17 @@ puts [_libsdcparse_create_port "eof_test_port1" -direction INPUT]
 puts [_libsdcparse_create_port "eof_test_port2" -direction INPUT]
 
 # CHECK: [[asdf_tff_cell_ptr:__vtr_obj_cell_[0-9]+]]
-_libsdcparse_create_cell "asdf~/ff"
+puts [_libsdcparse_create_cell "asdf~/ff"]
 # CHECK: [[wer_cell_ptr:__vtr_obj_cell_[0-9]+]]
-_libsdcparse_create_cell "wer/234/ff3"
+puts [_libsdcparse_create_cell "wer/234/ff3"]
 # CHECK: [[xcw_cell_ptr:__vtr_obj_cell_[0-9]+]]
-_libsdcparse_create_cell "xcw/32|ff2"
+puts [_libsdcparse_create_cell "xcw/32|ff2"]
 # CHECK: [[asdf_ff_cell_ptr:__vtr_obj_cell_[0-9]+]]
-_libsdcparse_create_cell "asdf/ff"
+puts [_libsdcparse_create_cell "asdf/ff"]
 # CHECK: [[qwert_cell_ptr:__vtr_obj_cell_[0-9]+]]
-_libsdcparse_create_cell "qwert/asd/ff"
+puts [_libsdcparse_create_cell "qwert/asd/ff"]
 # CHECK: [[asdf_ff2_cell_ptr:__vtr_obj_cell_[0-9]+]]
-_libsdcparse_create_cell "asdf/ff2"
+puts [_libsdcparse_create_cell "asdf/ff2"]
 
 # CHECK: [[my_inst_in0_pin_ptr:__vtr_obj_pin_[0-9]+]]
 puts [_libsdcparse_create_pin "my_inst/in\[0\]" -direction INPUT]
@@ -50,20 +51,20 @@ puts [_libsdcparse_create_pin "my_inst/in\[0\]" -direction INPUT]
 puts [_libsdcparse_create_pin "my_inst2/out\[0\]" -direction OUTPUT]
 
 #Netlist Clocks
-# CHECK: create_clock -period {{3.0*}} -waveform {{{1.250* 2.750*}} {[[clk0_port_ptr]]}
+# CHECK: create_clock -period {{3.0*}} -waveform {{{1.250*}} {{2.750*}}} {[[clk0_port_ptr]]}
 create_clock -period 3 -waveform {1.25 2.75} clk0; #Integer period, float waveform
-# CHECK: create_clock -period {{3.0*}} -waveform {{{1.0* 2.0*}} {[[clk1_port_ptr]]}
+# CHECK: create_clock -period {{3.0*}} -waveform {{{1.0*}} {{2.0*}}} {[[clk1_port_ptr]]}
 create_clock -period 3 -waveform {1 2} clk1; #Integer period, integer waveform
-# CHECK: create_clock -period {{2.30*}} -waveform {{{1.0* 1.150*}} {[[clk2_port_ptr]]}
+# CHECK: create_clock -period {{2.30*}} -waveform {{{0.0*}} {{1.150*}}} {[[clk2_port_ptr]]}
 create_clock -period 2.3 clk2; #Float period
 # TODO: The order is not guaranteed.
-# CHECK: create_clock -period {{2.0*}} -waveform {{{0.0* 1.0*}} {[[clk3_port_ptr]] [[clk4_port_ptr]]}
+# CHECK: create_clock -period {{2.0*}} -waveform {{{0.0*}} {{1.0*}}} {[[clk3_port_ptr]] [[clk4_port_ptr]]}
 create_clock -period 2 {clk3 clk4}; #Multiple targets
-# CHECK: create_clock -period {{0.0*}} -waveform {{{0.0* 0.0*}} {[[top_clk_port_ptr]]}
+# CHECK: create_clock -period {{0.0*}} -waveform {{{0.0*}} {{0.0*}}} {[[top_clk_port_ptr]]}
 create_clock -period 0 {top^clk}
-# CHECK: create_clock -period {{0.0*}} -waveform {{{0.0* 0.0*}} {[[asdf_port_ptr]]}
+# CHECK: create_clock -period {{0.0*}} -waveform {{{0.0*}} {{0.0*}}} {[[asdf_port_ptr]]}
 create_clock -period 0 {asdf}
-# CHECK: create_clock -period {{0.0*}} -waveform {{{0.0* 0.0*}} {[[qwerty_port_ptr]]}
+# CHECK: create_clock -period {{0.0*}} -waveform {{{0.0*}} {{0.0*}}} {[[qwerty_port_ptr]]}
 create_clock -period 0 {qwerty}
 
 
@@ -93,11 +94,11 @@ puts "qwerty: [get_clocks qwerty]"
 puts "output_clk: [get_clocks output_clk]"
 
 #Clock Groups
-# CHECK: set_clock_groups -exclusive -group {[[clk2_clock_ptr]]} -group {[[clk3_clock_ptr]]}
-set_clock_groups -exclusive -group input_clk -group {clk2} -group [get_clocks {clk3}]; #Single element
+# CHECK: set_clock_groups -asynchronous -group {[[input_clk_clock_ptr]]} -group {[[clk2_clock_ptr]]} -group {[[clk3_clock_ptr]]}
+set_clock_groups -asynchronous -group input_clk -group {clk2} -group [get_clocks {clk3}]; #Single element
 # TODO: Order is not gaurenteed.
-# CHECK: set_clock_groups -exclusive -group {[[input_clk_clock_ptr]] [[input_clock2_clock_ptr]]} -group {[[clk2_clock_ptr]]} -group {[[asdf_clock_ptr]] [[qwerty_clock_ptr]]}
-set_clock_groups -exclusive -group {input_clk input_clock2} -group {clk2} -group [get_clocks {asdf qwerty}]; #Multiple string elements
+# CHECK: set_clock_groups -asynchronous -group {[[input_clk_clock_ptr]] [[input_clock2_clock_ptr]]} -group {[[clk2_clock_ptr]]} -group {[[asdf_clock_ptr]] [[qwerty_clock_ptr]]}
+set_clock_groups -asynchronous -group {input_clk input_clock2} -group {clk2} -group [get_clocks {asdf qwerty}]; #Multiple string elements
 
 #False Path
 # CHECK: set_false_path -from {[[clk0_clock_ptr]]} -to {[[output_clk_clock_ptr]]}
@@ -106,7 +107,7 @@ set_false_path -from [get_clocks {clk0}]          -to [get_clocks {output_clk}];
 set_false_path -from {asdf~/ff}                 -to {wer/234/ff3 xcw/32|ff2}; #Objects
 # CHECK: set_false_path -from {[[asdf_ff_cell_ptr]] [[qwert_cell_ptr]]} -to {[[output_clk_clock_ptr]]}
 set_false_path -from {asdf/ff qwert/asd/ff}     -to [get_clocks {output_clk}]; #Mixed Clocks/Objects
-# CHECK: set_false_path -from {[[output_clk_clock_ptr]]} -to {[[asdf_cell_ptr]]}
+# CHECK: set_false_path -from {[[output_clk_clock_ptr]]} -to {[[asdf_ff2_cell_ptr]]}
 set_false_path -from [get_clocks {output_clk}]   -to {asdf/ff2}; #Mixed Clocks/Objects
 
 # COM: TODO: Add more checks to the rest of this file.
