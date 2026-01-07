@@ -1,5 +1,4 @@
-#ifndef SDC_H
-#define SDC_H
+#pragma once
 /*
  * libsdcparse - Kevin E. Murray 2014
  *
@@ -68,70 +67,11 @@
  *
  */
 #include <cassert>
-#include <functional>
-#include <unordered_map>
 #include <vector>
 #include <string>
 #include <limits>
 
-namespace sdcparse {
-struct ObjectId {
-    explicit ObjectId(const std::string& v) noexcept
-        : value(v) {}
-
-    bool operator==(const ObjectId& rhs) const {
-        return rhs.value == value;
-    }
-
-    std::string to_string() const {
-        return value;
-    }
-
-    friend std::hash<ObjectId>;
-  private:
-    // TODO: Consider changing this to be an integer and a type.
-    std::string value;
-};
-struct ClockObjectId : ObjectId {
-    using ObjectId::ObjectId;
-};
-struct CellObjectId : ObjectId {
-    using ObjectId::ObjectId;
-};
-struct PortObjectId : ObjectId {
-    using ObjectId::ObjectId;
-};
-struct PinObjectId : ObjectId {
-    using ObjectId::ObjectId;
-};
-}
-
-namespace std {
-    template<>
-    struct hash<sdcparse::ObjectId> {
-        std::size_t operator()(const sdcparse::ObjectId& obj) const noexcept {
-            return std::hash<std::string>{}(obj.to_string());
-        }
-    };
-    template<>
-    struct hash<sdcparse::PortObjectId> {
-        std::size_t operator()(const sdcparse::PortObjectId& obj) const noexcept {
-            return std::hash<std::string>{}(obj.to_string());
-        }
-    };
-    template<>
-    struct hash<sdcparse::ClockObjectId> {
-        std::size_t operator()(const sdcparse::ClockObjectId& obj) const noexcept {
-            return std::hash<std::string>{}(obj.to_string());
-        }
-    };
-    template<>
-    struct hash<sdcparse::PinObjectId> {
-        std::size_t operator()(const sdcparse::PinObjectId& obj) const noexcept {
-            return std::hash<std::string>{}(obj.to_string());
-        }
-    };
-}
+#include "sdc_timing_object_database.h"
 
 namespace sdcparse {
 /*
@@ -156,176 +96,6 @@ struct SetDisableTiming;
 struct SetTimingDerate;
 
 struct StringGroup;
-
-enum class ObjectType {
-    Cell,
-    Clock,
-    Port,
-    Pin,
-    Unknown
-};
-
-inline std::string to_string(ObjectType object_type) {
-    switch (object_type) {
-        case ObjectType::Cell: return "cell";
-        case ObjectType::Clock: return "clock";
-        case ObjectType::Port: return "port";
-        case ObjectType::Pin: return "pin";
-        default: return "unknown";
-    }
-}
-
-enum class PortDirection {
-    INPUT,
-    OUTPUT,
-    INOUT,
-    UNKNOWN
-};
-
-static inline PortDirection get_port_direction(std::string port_type) {
-    if (port_type == "INPUT")
-        return PortDirection::INPUT;
-    if (port_type == "OUTPUT")
-        return PortDirection::OUTPUT;
-    if (port_type == "INOUT")
-        return PortDirection::INOUT;
-    return PortDirection::UNKNOWN;
-}
-
-// TODO: The TimingObjectDatabase should be moved to its own isolated file, maybe even dir.
-class TimingObjectDatabase {
-  private:
-    std::unordered_map<ObjectId, std::string> object_name;
-    std::unordered_map<PortObjectId, PortDirection> port_direction_;
-    std::vector<PortObjectId> port_objects;
-    std::vector<ClockObjectId> clock_objects;
-    std::vector<PinObjectId> pin_objects;
-    std::vector<CellObjectId> cell_objects;
-  public:
-    PortObjectId create_port_object(std::string port_name, PortDirection port_direction) {
-        PortObjectId port_object_id = PortObjectId("__vtr_obj_port_" + std::to_string(port_objects.size()));
-        assert(object_name.count(port_object_id) == 0);
-        object_name[port_object_id] = port_name;
-        port_direction_[port_object_id] = port_direction;
-        port_objects.push_back(port_object_id);
-        return port_object_id;
-    }
-
-    ClockObjectId create_clock_object(std::string clock_name) {
-        ClockObjectId clock_object_id = ClockObjectId("__vtr_obj_clock_" + std::to_string(clock_objects.size()));
-        assert(object_name.count(clock_object_id) == 0);
-        object_name[clock_object_id] = clock_name;
-        clock_objects.push_back(clock_object_id);
-        return clock_object_id;
-    }
-
-    PinObjectId create_pin_object(std::string pin_name) {
-        PinObjectId pin_object_id = PinObjectId("__vtr_obj_pin_" + std::to_string(pin_objects.size()));
-        assert(object_name.count(pin_object_id) == 0);
-        object_name[pin_object_id] = pin_name;
-        pin_objects.push_back(pin_object_id);
-        return pin_object_id;
-    }
-
-    CellObjectId create_cell_object(std::string cell_name) {
-        CellObjectId cell_object_id = CellObjectId("__vtr_obj_cell_" + std::to_string(cell_objects.size()));
-        assert(object_name.count(cell_object_id) == 0);
-        object_name[cell_object_id] = cell_name;
-        cell_objects.push_back(cell_object_id);
-        return cell_object_id;
-    }
-
-    inline bool is_object_id(std::string object_id) const {
-        if (object_id.rfind("__vtr_obj_", 0) == 0) {
-            return true;
-        }
-
-        return false;
-    }
-
-    inline ObjectType get_object_type(std::string object_id) const {
-        if (object_id.rfind("__vtr_obj_cell_", 0) == 0)
-            return ObjectType::Cell;
-        if (object_id.rfind("__vtr_obj_clock_", 0) == 0)
-            return ObjectType::Clock;
-        if (object_id.rfind("__vtr_obj_port_", 0) == 0)
-            return ObjectType::Port;
-        if (object_id.rfind("__vtr_obj_pin_", 0) == 0)
-            return ObjectType::Pin;
-
-        return ObjectType::Unknown;
-    }
-
-    inline std::string get_object_name(ObjectId object_id) const {
-        auto it = object_name.find(object_id);
-        assert(it != object_name.end());
-        return it->second;
-    }
-
-    const std::vector<std::string> get_port_objects() const {
-        std::vector<std::string> all_ports;
-        all_ports.reserve(port_objects.size());
-        for (const PortObjectId& port_id: port_objects) {
-            all_ports.push_back(port_id.to_string());
-        }
-        return all_ports;
-    }
-
-    const std::vector<std::string> get_input_port_objects() const {
-        std::vector<std::string> all_inputs;
-        all_inputs.reserve(port_objects.size());
-        for (const PortObjectId& input: port_objects) {
-            auto it = port_direction_.find(input);
-            assert(it != port_direction_.end());
-            if (it->second == PortDirection::INPUT || it->second == PortDirection::INOUT) {
-                all_inputs.push_back(input.to_string());
-            }
-        }
-
-        return all_inputs;
-    }
-
-    const std::vector<std::string> get_output_port_objects() const {
-        std::vector<std::string> all_outputs;
-        all_outputs.reserve(port_objects.size());
-        for (const PortObjectId& output: port_objects) {
-            auto it = port_direction_.find(output);
-            assert(it != port_direction_.end());
-            if (it->second == PortDirection::OUTPUT || it->second == PortDirection::INOUT) {
-                all_outputs.push_back(output.to_string());
-            }
-        }
-
-        return all_outputs;
-    }
-
-    const std::vector<std::string> get_clock_objects() const {
-        std::vector<std::string> all_clocks;
-        all_clocks.reserve(clock_objects.size());
-        for (const ClockObjectId& clock_id : clock_objects) {
-            all_clocks.push_back(clock_id.to_string());
-        }
-        return all_clocks;
-    }
-
-    const std::vector<std::string> get_pin_objects() const {
-        std::vector<std::string> all_pins;
-        all_pins.reserve(pin_objects.size());
-        for (const PinObjectId& pin_id : pin_objects) {
-            all_pins.push_back(pin_id.to_string());
-        }
-        return all_pins;
-    }
-
-    const std::vector<std::string> get_cell_objects() const {
-        std::vector<std::string> all_cells;
-        all_cells.reserve(cell_objects.size());
-        for (const CellObjectId& cell_id : cell_objects) {
-            all_cells.push_back(cell_id.to_string());
-        }
-        return all_cells;
-    }
-};
 
 class Callback {
 
@@ -562,5 +332,3 @@ struct SetTimingDerate {
 };
 
 } //namespace
-
-#endif

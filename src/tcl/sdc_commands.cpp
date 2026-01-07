@@ -303,7 +303,7 @@ std::string _libsdcparse_get_object_type_internal(const std::string& object_id) 
 
 std::string _libsdcparse_create_port_internal(const std::string& port_name,
                                               const std::string& port_dir_str) {
-    sdcparse::PortDirection port_dir = sdcparse::get_port_direction(port_dir_str);
+    sdcparse::PortDirection port_dir = sdcparse::from_string_to_port_dir(port_dir_str);
     assert(port_dir != sdcparse::PortDirection::UNKNOWN);
 
     assert(sdcparse::g_callback != nullptr);
