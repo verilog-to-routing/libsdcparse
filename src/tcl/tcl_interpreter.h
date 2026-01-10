@@ -109,6 +109,10 @@ class TclInterpreter {
         // Delete the interpreter.
         if (interp)
             Tcl_DeleteInterp(interp);
+
+        // Un-register the callback.
+        // NOTE: This is not necessary, but it is just good to do.
+        g_callback = nullptr;
     }
 
     /**

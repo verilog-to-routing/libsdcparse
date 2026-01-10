@@ -13,3 +13,5 @@ src/stack.hh
 .venv/
 
 __pycache__/
+
+*.swp
