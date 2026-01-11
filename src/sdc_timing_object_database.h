@@ -29,7 +29,7 @@ enum class PortDirection {
 /**
  * @brief Convert a string into a port direction.
  */
-static inline PortDirection from_string_to_port_dir(std::string port_type) {
+inline PortDirection from_string_to_port_dir(std::string port_type) {
     if (port_type == "INPUT")
         return PortDirection::INPUT;
     if (port_type == "OUTPUT")
@@ -71,7 +71,7 @@ class TimingObjectDatabase {
      *
      *  @return The ID of the created object.
      */
-    CellObjectId create_cell_object(const std::string& cell_name) {
+    inline CellObjectId create_cell_object(const std::string& cell_name) {
         CellObjectId cell_object_id = CellObjectId("__vtr_obj_cell_" + std::to_string(cell_objects.size()));
         assert(object_name.count(cell_object_id) == 0);
         object_name[cell_object_id] = cell_name;
@@ -87,7 +87,7 @@ class TimingObjectDatabase {
      *
      *  @return The ID of the created object.
      */
-    ClockObjectId create_clock_object(const std::string& clock_name) {
+    inline ClockObjectId create_clock_object(const std::string& clock_name) {
         ClockObjectId clock_object_id = ClockObjectId("__vtr_obj_clock_" + std::to_string(clock_objects.size()));
         assert(object_name.count(clock_object_id) == 0);
         object_name[clock_object_id] = clock_name;
@@ -105,7 +105,7 @@ class TimingObjectDatabase {
      *
      *  @return The ID of the created object.
      */
-    PortObjectId create_port_object(const std::string& port_name, PortDirection port_direction) {
+    inline PortObjectId create_port_object(const std::string& port_name, PortDirection port_direction) {
         PortObjectId port_object_id = PortObjectId("__vtr_obj_port_" + std::to_string(port_objects.size()));
         assert(object_name.count(port_object_id) == 0);
         object_name[port_object_id] = port_name;
@@ -122,7 +122,7 @@ class TimingObjectDatabase {
      *
      *  @return The ID of the created object.
      */
-    PinObjectId create_pin_object(const std::string& pin_name) {
+    inline PinObjectId create_pin_object(const std::string& pin_name) {
         PinObjectId pin_object_id = PinObjectId("__vtr_obj_pin_" + std::to_string(pin_objects.size()));
         assert(object_name.count(pin_object_id) == 0);
         object_name[pin_object_id] = pin_name;
@@ -179,7 +179,7 @@ class TimingObjectDatabase {
      * This returns a vector of strings to make it more convenient for the
      * parser.
      */
-    const std::vector<std::string> get_cell_objects() const {
+    inline std::vector<std::string> get_cell_objects() const {
         std::vector<std::string> all_cells;
         all_cells.reserve(cell_objects.size());
         for (const CellObjectId& cell_id : cell_objects) {
@@ -194,7 +194,7 @@ class TimingObjectDatabase {
      * This returns a vector of strings to make it more convenient for the
      * parser.
      */
-    const std::vector<std::string> get_clock_objects() const {
+    inline std::vector<std::string> get_clock_objects() const {
         std::vector<std::string> all_clocks;
         all_clocks.reserve(clock_objects.size());
         for (const ClockObjectId& clock_id : clock_objects) {
@@ -209,7 +209,7 @@ class TimingObjectDatabase {
      * This returns a vector of strings to make it more convenient for the
      * parser.
      */
-    const std::vector<std::string> get_port_objects() const {
+    inline std::vector<std::string> get_port_objects() const {
         std::vector<std::string> all_ports;
         all_ports.reserve(port_objects.size());
         for (const PortObjectId& port_id: port_objects) {
@@ -224,7 +224,7 @@ class TimingObjectDatabase {
      * This returns a vector of strings to make it more convenient for the
      * parser.
      */
-    const std::vector<std::string> get_input_port_objects() const {
+    inline std::vector<std::string> get_input_port_objects() const {
         std::vector<std::string> all_inputs;
         all_inputs.reserve(port_objects.size());
         for (const PortObjectId& input: port_objects) {
@@ -244,7 +244,7 @@ class TimingObjectDatabase {
      * This returns a vector of strings to make it more convenient for the
      * parser.
      */
-    const std::vector<std::string> get_output_port_objects() const {
+    inline std::vector<std::string> get_output_port_objects() const {
         std::vector<std::string> all_outputs;
         all_outputs.reserve(port_objects.size());
         for (const PortObjectId& output: port_objects) {
@@ -264,7 +264,7 @@ class TimingObjectDatabase {
      * This returns a vector of strings to make it more convenient for the
      * parser.
      */
-    const std::vector<std::string> get_pin_objects() const {
+    inline std::vector<std::string> get_pin_objects() const {
         std::vector<std::string> all_pins;
         all_pins.reserve(pin_objects.size());
         for (const PinObjectId& pin_id : pin_objects) {
