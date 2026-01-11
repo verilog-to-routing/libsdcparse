@@ -303,7 +303,7 @@ proc create_generated_clock {args} {
     }
 
     if {$divide_by == -1 && $multiply_by == -1} {
-        error "create_generated_clock: Either -multiply_by or -divide-by is required."
+        error "create_generated_clock: Either -multiply_by or -divide_by is required."
     }
 
     set add [dict get $params -add]

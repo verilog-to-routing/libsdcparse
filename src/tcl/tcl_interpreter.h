@@ -30,14 +30,14 @@ namespace sdcparse {
  *        and the underlying callback which is handled by a downstream user.
  *
  * This variable is initialized by the TCL interpreter (only one interpreter
- * object can be alive at atime).
+ * object can be alive at a time).
  *
  * This variable is then used by the interface functions to callback to the user.
  */
 extern Callback* g_callback;
 
 /**
- * brief A TCL Interpreter object used to parse SDC files.
+ * @brief A TCL Interpreter object used to parse SDC files.
  *
  * Usage:
  *  // callback is an implementation of the callback object.
@@ -68,6 +68,10 @@ class TclInterpreter {
         : interp(nullptr), init_success_(false) {
 
         // Register the callback.
+        if (g_callback != nullptr) {
+            callback.parse_error(0, "", "Cannot register callback. A callback is already registered.");
+            return;
+        }
         g_callback = &callback;
 
         // Initialize the Tcl Library.
@@ -163,6 +167,7 @@ class TclInterpreter {
             }
             // Clean up
             Tcl_DecrRefCount(lineKey);
+            Tcl_DecrRefCount(options);
 
             // Signal that an error has occured.
             g_callback->parse_error(line_number, "", Tcl_GetStringResult(interp));

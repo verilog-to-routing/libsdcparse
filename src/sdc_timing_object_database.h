@@ -29,7 +29,7 @@ enum class PortDirection {
 /**
  * @brief Convert a string into a port direction.
  */
-inline PortDirection from_string_to_port_dir(std::string port_type) {
+inline PortDirection from_string_to_port_dir(const std::string& port_type) {
     if (port_type == "INPUT")
         return PortDirection::INPUT;
     if (port_type == "OUTPUT")
@@ -67,7 +67,7 @@ class TimingObjectDatabase {
      * @brief Create a cell object.
      *
      *  @param cell_name
-     *      The name of the port to create. This does not need to be unique.
+     *      The name of the cell to create. This does not need to be unique.
      *
      *  @return The ID of the created object.
      */
@@ -83,7 +83,7 @@ class TimingObjectDatabase {
      * @brief Create a clock object.
      *
      *  @param clock_name
-     *      The name of the port to create. This does not need to be unique.
+     *      The name of the clock to create. This does not need to be unique.
      *
      *  @return The ID of the created object.
      */
@@ -118,7 +118,7 @@ class TimingObjectDatabase {
      * @brief Create a pin object.
      *
      *  @param pin_name
-     *      The name of the port to create. This does not need to be unique.
+     *      The name of the pin to create. This does not need to be unique.
      *
      *  @return The ID of the created object.
      */

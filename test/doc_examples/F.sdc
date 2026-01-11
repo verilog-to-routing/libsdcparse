@@ -43,11 +43,11 @@ set_clock_groups -asynchronous -group input_clk -group clk2
 # CHECK: set_false_path -from {__vtr_obj_clock_0} -to {__vtr_obj_clock_3}
 set_false_path -from [get_clocks {clk}] -to [get_clocks {output_clk}]
 
-# TODO: The order here is not guarenteed.
+# TODO: The order here is not guaranteed.
 # CHECK: set_input_delay -clock input_clk -max {{0.50*}} {[[in1_port_ptr]] [[in2_port_ptr]] [[in3_port_ptr]]}
 set_input_delay -clock input_clk -max 0.5 [get_ports {in1 in2 in3}]
 
-# TODO: The order here is not guarenteed.
+# TODO: The order here is not guaranteed.
 # CHECK: set_output_delay -clock output_clk -max {{1.0*}} {[[out1_port_ptr]] [[out2_port_ptr]]}
 set_output_delay -clock output_clk -max 1 [get_ports {out*}]
 

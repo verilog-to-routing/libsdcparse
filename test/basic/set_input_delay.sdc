@@ -38,6 +38,6 @@ set_input_delay -clock clk1 -max 0.5 in3
 # CHECK: set_input_delay -clock clk1 -min {{1.0*}} {[[in4_port_ptr]]}
 set_input_delay -clock clk1 -min 1 in4
 
-# TODO: The order may not be guarenteed. Need to make this more stable.
+# TODO: The order may not be guaranteed. Need to make this more stable.
 # CHECK: set_input_delay -clock virtual_clock {{0.0*}} {[[A1_port_ptr]] [[A2_port_ptr]] [[A3_port_ptr]] [[A4_port_ptr]]}
 set_input_delay -clock virtual_clock 0.0 [get_ports A*]

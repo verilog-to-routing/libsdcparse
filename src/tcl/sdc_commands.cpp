@@ -6,6 +6,7 @@
  */
 
 #include <cassert>
+#include <stdexcept>
 #include <string>
 
 #include "sdcparse.hpp"
@@ -14,8 +15,20 @@
 
 sdcparse::Callback* sdcparse::g_callback = nullptr;
 
+/**
+ * @brief Check that the g_callback object is defined.
+ *
+ * This will throw a runtime error if no callback is registered. This should
+ * never happen if the TCL interpreter is setup properly.
+ */
+static void check_g_callback_defined() {
+    if (sdcparse::g_callback == nullptr) {
+        throw std::runtime_error("LibSDCParse: no callback registered");
+    }
+}
+
 void libsdcparse_lineno_internal(int line_num) {
-    assert(sdcparse::g_callback != nullptr);
+    check_g_callback_defined();
     sdcparse::g_callback->lineno(line_num);
 }
 
@@ -41,7 +54,7 @@ void libsdcparse_create_clock_internal(double period,
 
     create_clock_cmd.add = add;
 
-    assert(sdcparse::g_callback != nullptr);
+    check_g_callback_defined();
     sdcparse::g_callback->create_clock(create_clock_cmd);
 }
 
@@ -61,7 +74,7 @@ void libsdcparse_create_generated_clock_internal(const std::string& name,
     create_gen_clock_cmd.targets.strings = targets;
     create_gen_clock_cmd.targets.type = sdcparse::StringGroupType::OBJECT;
 
-    assert(sdcparse::g_callback != nullptr);
+    check_g_callback_defined();
     sdcparse::g_callback->create_generated_clock(create_gen_clock_cmd);
 }
 
@@ -71,6 +84,7 @@ void libsdcparse_set_clock_groups_internal(const std::vector<std::string>& clock
                                             bool is_physically_exclusive,
                                             bool is_asynchronous) {
     sdcparse::SetClockGroups set_clock_groups_cmd;
+    assert(clock_group_start_pos.size() > 1);
     for (size_t i = 0; i < clock_group_start_pos.size() - 1; i++) {
         sdcparse::StringGroup new_group;
         new_group.type = sdcparse::StringGroupType::OBJECT;
@@ -89,7 +103,7 @@ void libsdcparse_set_clock_groups_internal(const std::vector<std::string>& clock
     else if (is_asynchronous)
         set_clock_groups_cmd.type = sdcparse::ClockGroupsType::ASYNCHRONOUS;
 
-    assert(sdcparse::g_callback != nullptr);
+    check_g_callback_defined();
     sdcparse::g_callback->set_clock_groups(set_clock_groups_cmd);
 }
 
@@ -101,7 +115,7 @@ void libsdcparse_set_false_path_internal(const std::vector<std::string>& from_li
     set_false_path_cmd.to.strings = to_list;
     set_false_path_cmd.to.type = sdcparse::StringGroupType::OBJECT;
 
-    assert(sdcparse::g_callback != nullptr);
+    check_g_callback_defined();
     sdcparse::g_callback->set_false_path(set_false_path_cmd);
 }
 
@@ -116,7 +130,7 @@ void libsdcparse_set_min_delay_internal(double delay,
     set_min_delay_cmd.to.strings = to_list;
     set_min_delay_cmd.to.type = sdcparse::StringGroupType::OBJECT;
 
-    assert(sdcparse::g_callback != nullptr);
+    check_g_callback_defined();
     sdcparse::g_callback->set_min_max_delay(set_min_delay_cmd);
 }
 
@@ -131,7 +145,7 @@ void libsdcparse_set_max_delay_internal(double delay,
     set_max_delay_cmd.to.strings = to_list;
     set_max_delay_cmd.to.type = sdcparse::StringGroupType::OBJECT;
 
-    assert(sdcparse::g_callback != nullptr);
+    check_g_callback_defined();
     sdcparse::g_callback->set_min_max_delay(set_max_delay_cmd);
 }
 
@@ -149,7 +163,7 @@ void libsdcparse_set_multicycle_path_internal(bool is_setup,
     set_multicycle_path_cmd.to.type = sdcparse::StringGroupType::OBJECT;
     set_multicycle_path_cmd.mcp_value = path_multiplier;
 
-    assert(sdcparse::g_callback != nullptr);
+    check_g_callback_defined();
     sdcparse::g_callback->set_multicycle_path(set_multicycle_path_cmd);
 }
 
@@ -168,7 +182,7 @@ void libsdcparse_set_input_delay_internal(bool max_delay_flag,
     set_input_delay_cmd.target_ports.type = sdcparse::StringGroupType::OBJECT;
     set_input_delay_cmd.type = sdcparse::IoDelayType::INPUT;
 
-    assert(sdcparse::g_callback != nullptr);
+    check_g_callback_defined();
     sdcparse::g_callback->set_io_delay(set_input_delay_cmd);
 }
 
@@ -187,7 +201,7 @@ void libsdcparse_set_output_delay_internal(bool max_delay_flag,
     set_output_delay_cmd.target_ports.type = sdcparse::StringGroupType::OBJECT;
     set_output_delay_cmd.type = sdcparse::IoDelayType::OUTPUT;
 
-    assert(sdcparse::g_callback != nullptr);
+    check_g_callback_defined();
     sdcparse::g_callback->set_io_delay(set_output_delay_cmd);
 }
 
@@ -205,7 +219,7 @@ void libsdcparse_set_clock_uncertainty_internal(bool is_setup,
     set_clock_uncertainty_cmd.to.type = sdcparse::StringGroupType::OBJECT;
     set_clock_uncertainty_cmd.value = uncertainty;
 
-    assert(sdcparse::g_callback != nullptr);
+    check_g_callback_defined();
     sdcparse::g_callback->set_clock_uncertainty(set_clock_uncertainty_cmd);
 }
 
@@ -226,7 +240,7 @@ void libsdcparse_set_clock_latency_internal(bool is_source,
     set_clock_latency_cmd.target_clocks.strings = targets;
     set_clock_latency_cmd.target_clocks.type = sdcparse::StringGroupType::OBJECT;
 
-    assert(sdcparse::g_callback != nullptr);
+    check_g_callback_defined();
     sdcparse::g_callback->set_clock_latency(set_clock_latency_cmd);
 }
 
@@ -238,7 +252,7 @@ void libsdcparse_set_disable_timing_internal(const std::vector<std::string>& fro
     set_disable_timing_cmd.to.strings = to_list;
     set_disable_timing_cmd.to.type = sdcparse::StringGroupType::OBJECT;
 
-    assert(sdcparse::g_callback != nullptr);
+    check_g_callback_defined();
     sdcparse::g_callback->set_disable_timing(set_disable_timing_cmd);
 }
 
@@ -257,52 +271,52 @@ void libsdcparse_set_timing_derate_internal(bool is_early,
     set_timing_derate_cmd.cell_targets.strings = targets;
     set_timing_derate_cmd.cell_targets.type = sdcparse::StringGroupType::OBJECT;
 
-    assert(sdcparse::g_callback != nullptr);
+    check_g_callback_defined();
     sdcparse::g_callback->set_timing_derate(set_timing_derate_cmd);
 }
 
 std::vector<std::string> libsdcparse_all_ports_internal() {
-    assert(sdcparse::g_callback != nullptr);
+    check_g_callback_defined();
     return sdcparse::g_callback->obj_database.get_port_objects();
 }
 
 std::vector<std::string> libsdcparse_all_clocks_internal() {
-    assert(sdcparse::g_callback != nullptr);
+    check_g_callback_defined();
     return sdcparse::g_callback->obj_database.get_clock_objects();
 }
 
 std::vector<std::string> libsdcparse_all_inputs_internal() {
-    assert(sdcparse::g_callback != nullptr);
+    check_g_callback_defined();
     return sdcparse::g_callback->obj_database.get_input_port_objects();
 }
 
 std::vector<std::string> libsdcparse_all_outputs_internal() {
-    assert(sdcparse::g_callback != nullptr);
+    check_g_callback_defined();
     return sdcparse::g_callback->obj_database.get_output_port_objects();
 }
 
 std::vector<std::string> libsdcparse_all_pins_internal() {
-    assert(sdcparse::g_callback != nullptr);
+    check_g_callback_defined();
     return sdcparse::g_callback->obj_database.get_pin_objects();
 }
 
 std::vector<std::string> libsdcparse_all_cells_internal() {
-    assert(sdcparse::g_callback != nullptr);
+    check_g_callback_defined();
     return sdcparse::g_callback->obj_database.get_cell_objects();
 }
 
 std::string libsdcparse_get_name_internal(const std::string& object_id) {
-    assert(sdcparse::g_callback != nullptr);
+    check_g_callback_defined();
     return sdcparse::g_callback->obj_database.get_object_name(sdcparse::ObjectId(object_id));
 }
 
 bool libsdcparse_is_object_id_internal(const std::string& object_id) {
-    assert(sdcparse::g_callback != nullptr);
+    check_g_callback_defined();
     return sdcparse::g_callback->obj_database.is_object_id(object_id);
 }
 
 std::string libsdcparse_get_object_type_internal(const std::string& object_id) {
-    assert(sdcparse::g_callback != nullptr);
+    check_g_callback_defined();
     sdcparse::ObjectType object_type = sdcparse::g_callback->obj_database.get_object_type(object_id);
     return sdcparse::to_string(object_type);
 }
@@ -312,21 +326,21 @@ std::string libsdcparse_create_port_internal(const std::string& port_name,
     sdcparse::PortDirection port_dir = sdcparse::from_string_to_port_dir(port_dir_str);
     assert(port_dir != sdcparse::PortDirection::UNKNOWN);
 
-    assert(sdcparse::g_callback != nullptr);
+    check_g_callback_defined();
     return sdcparse::g_callback->obj_database.create_port_object(port_name, port_dir).to_string();
 }
 
 std::string libsdcparse_create_pin_internal(const std::string& pin_name) {
-    assert(sdcparse::g_callback != nullptr);
+    check_g_callback_defined();
     return sdcparse::g_callback->obj_database.create_pin_object(pin_name).to_string();
 }
 
 std::string libsdcparse_create_cell_internal(const std::string& cell_name) {
-    assert(sdcparse::g_callback != nullptr);
+    check_g_callback_defined();
     return sdcparse::g_callback->obj_database.create_cell_object(cell_name).to_string();
 }
 
 void libsdcparse_raise_warning(const std::string& msg) {
-    assert(sdcparse::g_callback != nullptr);
+    check_g_callback_defined();
     sdcparse::g_callback->parse_warning(msg);
 }

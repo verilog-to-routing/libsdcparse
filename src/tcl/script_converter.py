@@ -45,12 +45,11 @@ if __name__ == "__main__":
 
                 # Some special characters need to be properly terminated to make
                 # a valid C-string.
+                line = line.replace('\\', '\\\\')
                 line = line.replace('\"', '\\"')
-                line = line.replace('\\[', '\\\\[')
-                line = line.replace("\\]", "\\\\]")
 
                 # Write this line to the file.
                 output_file.write(f"\t\"{line}\\n\"\n")
 
         # Finish the return line.
-        output_file.write(";\n}")
+        output_file.write(";\n}\n")

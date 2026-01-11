@@ -65,6 +65,9 @@ public:
             clock_name = cmd.name;
             obj_database.create_clock_object(clock_name);
         } else {
+            if (cmd.targets.strings.empty()) {
+                throw std::runtime_error("create_clock: clock name or target required");
+            }
             // If no name is given, use the first target for the name. This
             // matches the behaviour of other tools.
             if (cmd.targets.type == StringGroupType::OBJECT) {
@@ -110,6 +113,9 @@ public:
             clock_name = cmd.name;
             obj_database.create_clock_object(clock_name);
         } else {
+            if (cmd.targets.strings.empty()) {
+                throw std::runtime_error("create_clock: clock name or target required");
+            }
             // If no name is given, use the first target for the name. This
             // matches the behaviour of other tools.
             if (cmd.targets.type == StringGroupType::OBJECT) {
@@ -268,7 +274,7 @@ public:
 
     // Warning during parsing
     void parse_warning(const std::string& msg) override {
-        flushing_printf("Warning at line %d: %s", lineno_, msg.c_str());
+        flushing_printf("Warning at line %d: %s\n", lineno_, msg.c_str());
     }
 
     bool error() { return error_; }
