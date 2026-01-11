@@ -2,15 +2,15 @@
 
 # COM: TODO: Add the filecheck.
 
-puts [_libsdcparse_create_port "clk" -direction INPUT]
-puts [_libsdcparse_create_port "clk2" -direction INPUT]
-puts [_libsdcparse_create_port "clk_extra" -direction INPUT]
-puts [_libsdcparse_create_port "in1" -direction INPUT]
-puts [_libsdcparse_create_port "in2" -direction INPUT]
-puts [_libsdcparse_create_port "in3" -direction INPUT]
-puts [_libsdcparse_create_port "out1" -direction OUTPUT]
-puts [_libsdcparse_create_port "out2" -direction OUTPUT]
-puts [_libsdcparse_create_port "out3" -direction OUTPUT]
+puts [libsdcparse_create_port "clk" -direction INPUT]
+puts [libsdcparse_create_port "clk2" -direction INPUT]
+puts [libsdcparse_create_port "clk_extra" -direction INPUT]
+puts [libsdcparse_create_port "in1" -direction INPUT]
+puts [libsdcparse_create_port "in2" -direction INPUT]
+puts [libsdcparse_create_port "in3" -direction INPUT]
+puts [libsdcparse_create_port "out1" -direction OUTPUT]
+puts [libsdcparse_create_port "out2" -direction OUTPUT]
+puts [libsdcparse_create_port "out3" -direction OUTPUT]
 
 create_clock -period 3 -waveform {1.25 2.75} clk
 create_clock -period 2 {clk2 clk_extra}

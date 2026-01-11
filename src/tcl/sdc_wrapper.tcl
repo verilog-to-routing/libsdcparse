@@ -3,7 +3,7 @@
 # pre-processing to occur within TCL, which is a easier to work with for parsing.
 
 # Check if the given string looks like a bus, i.e. [0], [*], [15:0], etc.
-proc _libsdcparse_is_bus_str { str } {
+proc libsdcparse_is_bus_str { str } {
     if {[string is integer $str]} { return 1 }
     if {[string equal $str "*"]} { return 1 }
     if {[regexp {[0-9]+:[0-9]+} $str]} { return 1 }
@@ -16,14 +16,14 @@ proc _libsdcparse_is_bus_str { str } {
 # we override TCL's behaviour such that when it tries to execute the [*] command,
 # and fails, we check if it looks like a bus and instead return the string literal.
 # This appears to be the common way of dealing with this.
-rename unknown _libsdcparse_original_unknown
+rename unknown libsdcparse_original_unknown
 proc unknown {args} {
     set cmd [lindex $args 0]
-    if { [llength $args] == 1 && [_libsdcparse_is_bus_str $cmd] } {
+    if { [llength $args] == 1 && [libsdcparse_is_bus_str $cmd] } {
         return "\[$cmd\]"
     }
 
-    uplevel 1 _libsdcparse_original_unknown $args
+    uplevel 1 libsdcparse_original_unknown $args
 }
 
 # =====================================================================
@@ -42,7 +42,7 @@ proc unknown {args} {
 #                        Supported types: double, integer, boolean
 #   raw_args  - The actual 'args' list passed to the command
 # =====================================================================
-proc _libsdcparse_generic_sdc_parser {cmd_name spec raw_args} {
+proc libsdcparse_generic_sdc_parser {cmd_name spec raw_args} {
     # Extract schema details
     set val_flags [dict get $spec flags]
     set bool_flags [dict get $spec bools]
@@ -169,13 +169,13 @@ proc _libsdcparse_generic_sdc_parser {cmd_name spec raw_args} {
 #   targets          - A list of targets (either names or IDs)
 #   object_type_list - A list of types (cell, clock, port, pin)
 # =====================================================================
-proc _libsdcparse_convert_to_objects {cmd_name targets object_type_list} {
+proc libsdcparse_convert_to_objects {cmd_name targets object_type_list} {
     set id_targets {}
     foreach item $targets {
-        if {[_libsdcparse_is_object_id_internal $item]} {
+        if {[libsdcparse_is_object_id_internal $item]} {
             # Already is an object.
             # Check that the object is the correct type.
-            set object_type [_libsdcparse_get_object_type_internal $item]
+            set object_type [libsdcparse_get_object_type_internal $item]
             if {$object_type ni $object_type_list} {
                 error "$cmd_name: Target is not the correct type: $targets. Expected one of $object_type_list, got $object_type."
             }
@@ -194,19 +194,19 @@ proc _libsdcparse_convert_to_objects {cmd_name targets object_type_list} {
             foreach object_type $object_type_list {
                 switch -- $object_type {
                     "port" {
-                        set matches [_libsdcparse_query_get_impl $cmd_name _libsdcparse_all_ports_internal $params]
+                        set matches [libsdcparse_query_get_impl $cmd_name libsdcparse_all_ports_internal $params]
                         lappend id_targets {*}$matches
                     }
                     "clock" {
-                        set matches [_libsdcparse_query_get_impl $cmd_name _libsdcparse_all_clocks_internal $params]
+                        set matches [libsdcparse_query_get_impl $cmd_name libsdcparse_all_clocks_internal $params]
                         lappend id_targets {*}$matches
                     }
                     "pin" {
-                        set matches [_libsdcparse_query_get_impl $cmd_name _libsdcparse_all_pins_internal $params]
+                        set matches [libsdcparse_query_get_impl $cmd_name libsdcparse_all_pins_internal $params]
                         lappend id_targets {*}$matches
                     }
                     "cell" {
-                        set matches [_libsdcparse_query_get_impl $cmd_name _libsdcparse_all_cells_internal $params]
+                        set matches [libsdcparse_query_get_impl $cmd_name libsdcparse_all_cells_internal $params]
                         lappend id_targets {*}$matches
                     }
                 }
@@ -221,17 +221,17 @@ proc _libsdcparse_convert_to_objects {cmd_name targets object_type_list} {
     return $id_targets
 }
 
-proc _libsdcparse_set_lineno {} {
+proc libsdcparse_set_lineno {} {
     # Set the line number from the caller's frame
     # Here, we are assuming that the top-level file is two calls above this
     # procedure.
     set frame_info [info frame -2]
     set line_num [dict get $frame_info line]
-    _libsdcparse_lineno_internal $line_num
+    libsdcparse_lineno_internal $line_num
 }
 
 proc create_clock {args} {
-    _libsdcparse_set_lineno
+    libsdcparse_set_lineno
 
     # TODO: Either target or name is required. Need to improve the parser to handle
     #       this.
@@ -243,7 +243,7 @@ proc create_clock {args} {
         types   {-period double}
     }
 
-    set params [_libsdcparse_generic_sdc_parser "create_clock" $spec $args]
+    set params [libsdcparse_generic_sdc_parser "create_clock" $spec $args]
 
     set period [dict get $params -period]
 
@@ -259,18 +259,18 @@ proc create_clock {args} {
         error "create_clock: Waveform must have rise_time and fall_time."
     }
 
-    set id_targets [_libsdcparse_convert_to_objects "create_clock" [dict get $params targets] {port}]
+    set id_targets [libsdcparse_convert_to_objects "create_clock" [dict get $params targets] {port}]
 
     # TODO: This should be added to the parser for better generality.
     if {$name == "" && [llength $id_targets] == 0} {
         error "create_clock: Either name or target must be provided."
     }
 
-    _libsdcparse_create_clock_internal $period $name $waveform [dict get $params -add] $id_targets
+    libsdcparse_create_clock_internal $period $name $waveform [dict get $params -add] $id_targets
 }
 
 proc create_generated_clock {args} {
-    _libsdcparse_set_lineno
+    libsdcparse_set_lineno
 
     set spec {
         flags   {-name -source -divide_by -multiply_by}
@@ -280,11 +280,11 @@ proc create_generated_clock {args} {
         types   {-divide_by integer -multiply_by integer}
     }
 
-    set params [_libsdcparse_generic_sdc_parser "create_generated_clock" $spec $args]
+    set params [libsdcparse_generic_sdc_parser "create_generated_clock" $spec $args]
 
     set name [dict get $params -name]
 
-    set src [_libsdcparse_convert_to_objects "create_generated_clock" [dict get $params -source] {port pin}]
+    set src [libsdcparse_convert_to_objects "create_generated_clock" [dict get $params -source] {port pin}]
     if {[llength $src] != 1} {
         error "create_generated_clock: Only one source can be defined, found: '$src'"
     }
@@ -308,13 +308,13 @@ proc create_generated_clock {args} {
 
     set add [dict get $params -add]
 
-    set id_targets [_libsdcparse_convert_to_objects "create_generated_clock" [dict get $params targets] {port}]
+    set id_targets [libsdcparse_convert_to_objects "create_generated_clock" [dict get $params targets] {port}]
 
-    _libsdcparse_create_generated_clock_internal $name $src $divide_by $multiply_by $add $id_targets
+    libsdcparse_create_generated_clock_internal $name $src $divide_by $multiply_by $add $id_targets
 }
 
 proc set_clock_groups {args} {
-    _libsdcparse_set_lineno
+    libsdcparse_set_lineno
 
     set spec {
         flags        {}
@@ -325,7 +325,7 @@ proc set_clock_groups {args} {
         types        {}
     }
 
-    set params [_libsdcparse_generic_sdc_parser "set_clock_groups" $spec $args]
+    set params [libsdcparse_generic_sdc_parser "set_clock_groups" $spec $args]
 
     set logically_exclusive [dict get $params -logically_exclusive]
 
@@ -336,7 +336,7 @@ proc set_clock_groups {args} {
     # that it is deprecated.
     set asynchronous [dict get $params -asynchronous]
     if {[dict get $params -exclusive]} {
-        _libsdcparse_raise_warning "set_clock_groups: '-exclusive' argument is deprecated. Use '-asynchronous' instead."
+        libsdcparse_raise_warning "set_clock_groups: '-exclusive' argument is deprecated. Use '-asynchronous' instead."
         set asynchronous 1
     }
 
@@ -350,18 +350,18 @@ proc set_clock_groups {args} {
     set clock_group_start_pos { 0 }
     set i 0
     foreach group [dict get $params -group] {
-        foreach clk [_libsdcparse_convert_to_objects "set_clock_groups" $group {clock}] {
+        foreach clk [libsdcparse_convert_to_objects "set_clock_groups" $group {clock}] {
             lappend clock_list $clk
             incr i
         }
         lappend clock_group_start_pos $i
     }
 
-    _libsdcparse_set_clock_groups_internal $clock_list $clock_group_start_pos $logically_exclusive $physically_exclusive $asynchronous
+    libsdcparse_set_clock_groups_internal $clock_list $clock_group_start_pos $logically_exclusive $physically_exclusive $asynchronous
 }
 
 proc set_false_path {args} {
-    _libsdcparse_set_lineno
+    libsdcparse_set_lineno
 
     set spec {
         flags   {-from -to}
@@ -371,16 +371,16 @@ proc set_false_path {args} {
         types   {}
     }
 
-    set params [_libsdcparse_generic_sdc_parser "set_false_path" $spec $args]
+    set params [libsdcparse_generic_sdc_parser "set_false_path" $spec $args]
 
-    set from_list [_libsdcparse_convert_to_objects "set_false_path" [dict get $params -from] {clock cell port pin}]
-    set to_list [_libsdcparse_convert_to_objects "set_false_path" [dict get $params -to] {clock cell port pin}]
+    set from_list [libsdcparse_convert_to_objects "set_false_path" [dict get $params -from] {clock cell port pin}]
+    set to_list [libsdcparse_convert_to_objects "set_false_path" [dict get $params -to] {clock cell port pin}]
 
-    _libsdcparse_set_false_path_internal $from_list $to_list
+    libsdcparse_set_false_path_internal $from_list $to_list
 }
 
 proc set_max_delay {args} {
-    _libsdcparse_set_lineno
+    libsdcparse_set_lineno
 
     set spec {
         flags   {-from -to}
@@ -390,16 +390,16 @@ proc set_max_delay {args} {
         types   {delay double}
     }
 
-    set params [_libsdcparse_generic_sdc_parser "set_max_delay" $spec $args]
+    set params [libsdcparse_generic_sdc_parser "set_max_delay" $spec $args]
 
-    set from_list [_libsdcparse_convert_to_objects "set_max_delay" [dict get $params -from] {clock cell port pin}]
-    set to_list [_libsdcparse_convert_to_objects "set_max_delay" [dict get $params -to] {clock cell port pin}]
+    set from_list [libsdcparse_convert_to_objects "set_max_delay" [dict get $params -from] {clock cell port pin}]
+    set to_list [libsdcparse_convert_to_objects "set_max_delay" [dict get $params -to] {clock cell port pin}]
 
-    _libsdcparse_set_max_delay_internal [dict get $params delay] $from_list $to_list
+    libsdcparse_set_max_delay_internal [dict get $params delay] $from_list $to_list
 }
 
 proc set_min_delay {args} {
-    _libsdcparse_set_lineno
+    libsdcparse_set_lineno
 
     set spec {
         flags   {-from -to}
@@ -409,16 +409,16 @@ proc set_min_delay {args} {
         types   {delay double}
     }
 
-    set params [_libsdcparse_generic_sdc_parser "set_min_delay" $spec $args]
+    set params [libsdcparse_generic_sdc_parser "set_min_delay" $spec $args]
 
-    set from_list [_libsdcparse_convert_to_objects "set_min_delay" [dict get $params -from] {clock cell port pin}]
-    set to_list [_libsdcparse_convert_to_objects "set_min_delay" [dict get $params -to] {clock cell port pin}]
+    set from_list [libsdcparse_convert_to_objects "set_min_delay" [dict get $params -from] {clock cell port pin}]
+    set to_list [libsdcparse_convert_to_objects "set_min_delay" [dict get $params -to] {clock cell port pin}]
 
-    _libsdcparse_set_min_delay_internal [dict get $params delay] $from_list $to_list
+    libsdcparse_set_min_delay_internal [dict get $params delay] $from_list $to_list
 }
 
 proc set_multicycle_path {args} {
-    _libsdcparse_set_lineno
+    libsdcparse_set_lineno
 
     set spec {
         flags   {-from -to}
@@ -428,16 +428,16 @@ proc set_multicycle_path {args} {
         types   {path_multiplier integer}
     }
 
-    set params [_libsdcparse_generic_sdc_parser "set_multicycle_path" $spec $args]
+    set params [libsdcparse_generic_sdc_parser "set_multicycle_path" $spec $args]
 
-    set from_list [_libsdcparse_convert_to_objects "set_multicycle_path" [dict get $params -from] {clock cell port pin}]
-    set to_list [_libsdcparse_convert_to_objects "set_multicycle_path" [dict get $params -to] {clock cell port pin}]
+    set from_list [libsdcparse_convert_to_objects "set_multicycle_path" [dict get $params -from] {clock cell port pin}]
+    set to_list [libsdcparse_convert_to_objects "set_multicycle_path" [dict get $params -to] {clock cell port pin}]
 
-    _libsdcparse_set_multicycle_path_internal [dict get $params -setup] [dict get $params -hold] $from_list $to_list [dict get $params path_multiplier]
+    libsdcparse_set_multicycle_path_internal [dict get $params -setup] [dict get $params -hold] $from_list $to_list [dict get $params path_multiplier]
 }
 
 proc set_input_delay {args} {
-    _libsdcparse_set_lineno
+    libsdcparse_set_lineno
 
     set spec {
         flags   {-clock}
@@ -447,15 +447,15 @@ proc set_input_delay {args} {
         types   {delay double}
     }
 
-    set params [_libsdcparse_generic_sdc_parser "set_input_delay" $spec $args]
+    set params [libsdcparse_generic_sdc_parser "set_input_delay" $spec $args]
 
-    set id_targets [_libsdcparse_convert_to_objects "set_input_delay" [dict get $params targets] {port pin}]
+    set id_targets [libsdcparse_convert_to_objects "set_input_delay" [dict get $params targets] {port pin}]
 
-    _libsdcparse_set_input_delay_internal [dict get $params -max] [dict get $params -min] [dict get $params -clock] [dict get $params delay] $id_targets
+    libsdcparse_set_input_delay_internal [dict get $params -max] [dict get $params -min] [dict get $params -clock] [dict get $params delay] $id_targets
 }
 
 proc set_output_delay {args} {
-    _libsdcparse_set_lineno
+    libsdcparse_set_lineno
 
     set spec {
         flags   {-clock}
@@ -465,15 +465,15 @@ proc set_output_delay {args} {
         types   {delay double}
     }
 
-    set params [_libsdcparse_generic_sdc_parser "set_output_delay" $spec $args]
+    set params [libsdcparse_generic_sdc_parser "set_output_delay" $spec $args]
 
-    set id_targets [_libsdcparse_convert_to_objects "set_output_delay" [dict get $params targets] {port pin}]
+    set id_targets [libsdcparse_convert_to_objects "set_output_delay" [dict get $params targets] {port pin}]
 
-    _libsdcparse_set_output_delay_internal [dict get $params -max] [dict get $params -min] [dict get $params -clock] [dict get $params delay] $id_targets
+    libsdcparse_set_output_delay_internal [dict get $params -max] [dict get $params -min] [dict get $params -clock] [dict get $params delay] $id_targets
 }
 
 proc set_clock_uncertainty {args} {
-    _libsdcparse_set_lineno
+    libsdcparse_set_lineno
 
     set spec {
         flags   {-from -to}
@@ -483,16 +483,16 @@ proc set_clock_uncertainty {args} {
         types   {uncertainty double}
     }
 
-    set params [_libsdcparse_generic_sdc_parser "set_clock_uncertainty" $spec $args]
+    set params [libsdcparse_generic_sdc_parser "set_clock_uncertainty" $spec $args]
 
-    set from_list [_libsdcparse_convert_to_objects "set_clock_uncertainty" [dict get $params -from] {clock}]
-    set to_list [_libsdcparse_convert_to_objects "set_clock_uncertainty" [dict get $params -to] {clock}]
+    set from_list [libsdcparse_convert_to_objects "set_clock_uncertainty" [dict get $params -from] {clock}]
+    set to_list [libsdcparse_convert_to_objects "set_clock_uncertainty" [dict get $params -to] {clock}]
 
-    _libsdcparse_set_clock_uncertainty_internal [dict get $params -setup] [dict get $params -hold] $from_list $to_list [dict get $params uncertainty]
+    libsdcparse_set_clock_uncertainty_internal [dict get $params -setup] [dict get $params -hold] $from_list $to_list [dict get $params uncertainty]
 }
 
 proc set_clock_latency {args} {
-    _libsdcparse_set_lineno
+    libsdcparse_set_lineno
 
     set spec {
         flags   {}
@@ -502,15 +502,15 @@ proc set_clock_latency {args} {
         types   {latency double}
     }
 
-    set params [_libsdcparse_generic_sdc_parser "set_clock_latency" $spec $args]
+    set params [libsdcparse_generic_sdc_parser "set_clock_latency" $spec $args]
 
-    set target_list [_libsdcparse_convert_to_objects "set_clock_latency" [dict get $params targets] {clock}]
+    set target_list [libsdcparse_convert_to_objects "set_clock_latency" [dict get $params targets] {clock}]
 
-    _libsdcparse_set_clock_latency_internal [dict get $params -source] [dict get $params -early] [dict get $params -late] [dict get $params latency] $target_list
+    libsdcparse_set_clock_latency_internal [dict get $params -source] [dict get $params -early] [dict get $params -late] [dict get $params latency] $target_list
 }
 
 proc set_disable_timing {args} {
-    _libsdcparse_set_lineno
+    libsdcparse_set_lineno
 
     set spec {
         flags   {-from -to}
@@ -520,16 +520,16 @@ proc set_disable_timing {args} {
         types   {}
     }
 
-    set params [_libsdcparse_generic_sdc_parser "set_disable_timing" $spec $args]
+    set params [libsdcparse_generic_sdc_parser "set_disable_timing" $spec $args]
 
-    set from_list [_libsdcparse_convert_to_objects "set_disable_timing" [dict get $params -from] {pin}]
-    set to_list [_libsdcparse_convert_to_objects "set_disable_timing" [dict get $params -to] {pin}]
+    set from_list [libsdcparse_convert_to_objects "set_disable_timing" [dict get $params -from] {pin}]
+    set to_list [libsdcparse_convert_to_objects "set_disable_timing" [dict get $params -to] {pin}]
 
-    _libsdcparse_set_disable_timing_internal $from_list $to_list
+    libsdcparse_set_disable_timing_internal $from_list $to_list
 }
 
 proc set_timing_derate {args} {
-    _libsdcparse_set_lineno
+    libsdcparse_set_lineno
 
     set spec {
         flags   {}
@@ -539,15 +539,15 @@ proc set_timing_derate {args} {
         types   {derate double}
     }
 
-    set params [_libsdcparse_generic_sdc_parser "set_timing_derate" $spec $args]
+    set params [libsdcparse_generic_sdc_parser "set_timing_derate" $spec $args]
 
-    set targets [_libsdcparse_convert_to_objects "set_timing_derate" [dict get $params targets] {cell}]
+    set targets [libsdcparse_convert_to_objects "set_timing_derate" [dict get $params targets] {cell}]
 
-    _libsdcparse_set_timing_derate_internal [dict get $params -early] [dict get $params -late] [dict get $params -net_delay] [dict get $params -cell_delay] [dict get $params derate] $targets
+    libsdcparse_set_timing_derate_internal [dict get $params -early] [dict get $params -late] [dict get $params -net_delay] [dict get $params -cell_delay] [dict get $params derate] $targets
 }
 
 proc get_name {args} {
-    _libsdcparse_set_lineno
+    libsdcparse_set_lineno
 
     set spec {
         flags   {}
@@ -557,11 +557,11 @@ proc get_name {args} {
         types   {}
     }
 
-    set params [_libsdcparse_generic_sdc_parser "get_name" $spec $args]
+    set params [libsdcparse_generic_sdc_parser "get_name" $spec $args]
 
     # Get the object and ensure that it is an ID.
     set object [dict get $params object]
-    if {![_libsdcparse_is_object_id_internal $object]} {
+    if {![libsdcparse_is_object_id_internal $object]} {
         error "get_name: Can only get name of an object."
     }
 
@@ -571,7 +571,7 @@ proc get_name {args} {
 }
 
 proc get_property {args} {
-    _libsdcparse_set_lineno
+    libsdcparse_set_lineno
 
     set spec {
         flags   {-object_type}
@@ -581,7 +581,7 @@ proc get_property {args} {
         types   {}
     }
 
-    set params [_libsdcparse_generic_sdc_parser "get_property" $spec $args]
+    set params [libsdcparse_generic_sdc_parser "get_property" $spec $args]
 
     # Get the object and ensure that only one object is provided.
     set object [dict get $params object]
@@ -590,7 +590,7 @@ proc get_property {args} {
     }
 
     set object_type [dict get $params -object_type]
-    if {[_libsdcparse_is_object_id_internal $object]} {
+    if {[libsdcparse_is_object_id_internal $object]} {
         # TODO: Need to check that the ID matches the object type (if one is provided).
         set object_id $object
     } else {
@@ -616,13 +616,13 @@ proc get_property {args} {
                 error "get_property: Unknown object_type: '$object_type'"
             }
         }
-        set object_id [_libsdcparse_convert_to_objects "get_property" $object $object_type_list]
+        set object_id [libsdcparse_convert_to_objects "get_property" $object $object_type_list]
     }
 
     # TODO: Handle more properties.
     set property [dict get $params property]
     if {$property == "name"} {
-        return [_libsdcparse_get_name_internal $object_id]
+        return [libsdcparse_get_name_internal $object_id]
     } else {
         error "get_property: Unknown property: '$property'"
     }
@@ -641,7 +641,7 @@ proc get_property {args} {
 #   all_func  - A function that is used to get all IDs for the query type.
 #   params    - The params that are passed into the search.
 # =====================================================================
-proc _libsdcparse_query_get_impl {cmd_name all_func params} {
+proc libsdcparse_query_get_impl {cmd_name all_func params} {
     # Create the options for the search.
     set search_options {}
     if {[dict get $params -nocase]} {
@@ -650,7 +650,7 @@ proc _libsdcparse_query_get_impl {cmd_name all_func params} {
 
     set matches [lmap id [$all_func] {
         # Get the name from the ID.
-        set name [_libsdcparse_get_name_internal $id]
+        set name [libsdcparse_get_name_internal $id]
 
         # Go through each pattern and see if the name matches the pattern.
         set match 0
@@ -690,14 +690,14 @@ proc _libsdcparse_query_get_impl {cmd_name all_func params} {
 
     # If unique matches is empty, raise error unless quiet is active.
     if {[llength $matches] == 0 && ![dict get $params -quiet]} {
-        _libsdcparse_raise_warning "no matches found for $cmd_name [dict get $params patterns]"
+        libsdcparse_raise_warning "no matches found for $cmd_name [dict get $params patterns]"
     }
 
     return $matches
 }
 
 proc get_ports {args} {
-    _libsdcparse_set_lineno
+    libsdcparse_set_lineno
 
     set spec {
         flags   {}
@@ -707,15 +707,15 @@ proc get_ports {args} {
         types   {}
     }
 
-    set params [_libsdcparse_generic_sdc_parser "get_ports" $spec $args]
+    set params [libsdcparse_generic_sdc_parser "get_ports" $spec $args]
 
-    set matches [_libsdcparse_query_get_impl "get_ports" _libsdcparse_all_ports_internal $params]
+    set matches [libsdcparse_query_get_impl "get_ports" libsdcparse_all_ports_internal $params]
 
     return $matches
 }
 
 proc get_clocks {args} {
-    _libsdcparse_set_lineno
+    libsdcparse_set_lineno
 
     set spec {
         flags   {}
@@ -725,15 +725,15 @@ proc get_clocks {args} {
         types   {}
     }
 
-    set params [_libsdcparse_generic_sdc_parser "get_clocks" $spec $args]
+    set params [libsdcparse_generic_sdc_parser "get_clocks" $spec $args]
 
-    set matches [_libsdcparse_query_get_impl "get_clocks" _libsdcparse_all_clocks_internal $params]
+    set matches [libsdcparse_query_get_impl "get_clocks" libsdcparse_all_clocks_internal $params]
 
     return $matches
 }
 
 proc get_pins {args} {
-    _libsdcparse_set_lineno
+    libsdcparse_set_lineno
 
     set spec {
         flags   {}
@@ -743,15 +743,15 @@ proc get_pins {args} {
         types   {}
     }
 
-    set params [_libsdcparse_generic_sdc_parser "get_pins" $spec $args]
+    set params [libsdcparse_generic_sdc_parser "get_pins" $spec $args]
 
-    set matches [_libsdcparse_query_get_impl "get_pins" _libsdcparse_all_pins_internal $params]
+    set matches [libsdcparse_query_get_impl "get_pins" libsdcparse_all_pins_internal $params]
 
     return $matches
 }
 
 proc get_cells {args} {
-    _libsdcparse_set_lineno
+    libsdcparse_set_lineno
 
     set spec {
         flags   {}
@@ -761,35 +761,35 @@ proc get_cells {args} {
         types   {}
     }
 
-    set params [_libsdcparse_generic_sdc_parser "get_cells" $spec $args]
+    set params [libsdcparse_generic_sdc_parser "get_cells" $spec $args]
 
-    set matches [_libsdcparse_query_get_impl "get_cells" _libsdcparse_all_cells_internal $params]
+    set matches [libsdcparse_query_get_impl "get_cells" libsdcparse_all_cells_internal $params]
 
     return $matches
 }
 
 proc all_inputs {} {
-    _libsdcparse_set_lineno
+    libsdcparse_set_lineno
 
     # TODO: Handle -no_clocks bool
 
-    return [_libsdcparse_all_inputs_internal]
+    return [libsdcparse_all_inputs_internal]
 }
 
 proc all_outputs {} {
-    _libsdcparse_set_lineno
+    libsdcparse_set_lineno
 
-    return [_libsdcparse_all_outputs_internal]
+    return [libsdcparse_all_outputs_internal]
 }
 
 proc all_clocks {} {
-    _libsdcparse_set_lineno
+    libsdcparse_set_lineno
 
-    return [_libsdcparse_all_clocks_internal]
+    return [libsdcparse_all_clocks_internal]
 }
 
-proc _libsdcparse_create_port {args} {
-    _libsdcparse_set_lineno
+proc libsdcparse_create_port {args} {
+    libsdcparse_set_lineno
 
     set spec {
         flags   {-direction}
@@ -799,13 +799,13 @@ proc _libsdcparse_create_port {args} {
         types   {}
     }
 
-    set params [_libsdcparse_generic_sdc_parser "create_port" $spec $args]
+    set params [libsdcparse_generic_sdc_parser "create_port" $spec $args]
 
-    return [_libsdcparse_create_port_internal [dict get $params port_name] [dict get $params -direction]]
+    return [libsdcparse_create_port_internal [dict get $params port_name] [dict get $params -direction]]
 }
 
-proc _libsdcparse_create_pin {args} {
-    _libsdcparse_set_lineno
+proc libsdcparse_create_pin {args} {
+    libsdcparse_set_lineno
 
     set spec {
         flags   {-direction}
@@ -815,15 +815,15 @@ proc _libsdcparse_create_pin {args} {
         types   {}
     }
 
-    set params [_libsdcparse_generic_sdc_parser "create_pin" $spec $args]
+    set params [libsdcparse_generic_sdc_parser "create_pin" $spec $args]
 
     # NOTE: Right now we ignore the pin direction. Eventually we will need the
     #       direction.
-    return [_libsdcparse_create_pin_internal [dict get $params pin_name]]
+    return [libsdcparse_create_pin_internal [dict get $params pin_name]]
 }
 
-proc _libsdcparse_create_cell {args} {
-    _libsdcparse_set_lineno
+proc libsdcparse_create_cell {args} {
+    libsdcparse_set_lineno
 
     set spec {
         flags   {}
@@ -833,7 +833,7 @@ proc _libsdcparse_create_cell {args} {
         types   {}
     }
 
-    set params [_libsdcparse_generic_sdc_parser "create_cell" $spec $args]
+    set params [libsdcparse_generic_sdc_parser "create_cell" $spec $args]
 
-    return [_libsdcparse_create_cell_internal [dict get $params cell_name]]
+    return [libsdcparse_create_cell_internal [dict get $params cell_name]]
 }

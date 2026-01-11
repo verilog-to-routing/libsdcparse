@@ -2,9 +2,9 @@
 
 # COM: TODO: Add the filecheck.
 
-puts [_libsdcparse_create_port "clk1" -direction INPUT]
-puts [_libsdcparse_create_port "clk2" -direction INPUT]
-puts [_libsdcparse_create_port "clk3" -direction INPUT]
+puts [libsdcparse_create_port "clk1" -direction INPUT]
+puts [libsdcparse_create_port "clk2" -direction INPUT]
+puts [libsdcparse_create_port "clk3" -direction INPUT]
 
 create_clock -period 1 [get_ports clk1]
 create_clock -period 1 [get_ports clk2]

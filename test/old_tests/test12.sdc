@@ -2,14 +2,14 @@
 
 # COM: TODO: Add the filecheck.
 
-puts [_libsdcparse_create_port "clk" -direction INPUT]
-puts [_libsdcparse_create_port "output_clk" -direction INPUT]
-puts [_libsdcparse_create_cell "asdf~/ff"]
-puts [_libsdcparse_create_cell "wer/234/ff3"]
-puts [_libsdcparse_create_cell "xcw/32|ff2"]
-puts [_libsdcparse_create_cell "asdf/ff"]
-puts [_libsdcparse_create_cell "qwert/asd/ff"]
-puts [_libsdcparse_create_cell "asdf/ff2"]
+puts [libsdcparse_create_port "clk" -direction INPUT]
+puts [libsdcparse_create_port "output_clk" -direction INPUT]
+puts [libsdcparse_create_cell "asdf~/ff"]
+puts [libsdcparse_create_cell "wer/234/ff3"]
+puts [libsdcparse_create_cell "xcw/32|ff2"]
+puts [libsdcparse_create_cell "asdf/ff"]
+puts [libsdcparse_create_cell "qwert/asd/ff"]
+puts [libsdcparse_create_cell "asdf/ff2"]
 
 create_clock -period 1 [get_ports clk]
 create_clock -period 1 [get_ports output_clk]

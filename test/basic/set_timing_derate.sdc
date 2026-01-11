@@ -1,9 +1,9 @@
 # RUN: %sdcparse-test %s 2>&1 | filecheck %s
 
 # CHECK: [[cell1_ptr:__vtr_obj_cell_[0-9]+]]
-puts [_libsdcparse_create_cell "cell1"]
+puts [libsdcparse_create_cell "cell1"]
 # CHECK: [[cell2_ptr:__vtr_obj_cell_[0-9]+]]
-puts [_libsdcparse_create_cell "cell2"]
+puts [libsdcparse_create_cell "cell2"]
 
 # CHECK: set_timing_derate {{1.0*}} {[[cell1_ptr]]}
 set_timing_derate 1.0 [get_cells "cell1"]

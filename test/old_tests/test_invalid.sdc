@@ -1,6 +1,6 @@
 # RUN: %not %sdcparse-test %s 2>&1 | filecheck %s
 
-_libsdcparse_create_port "clk" -direction INPUT
+libsdcparse_create_port "clk" -direction INPUT
 create_clock -period 1.0 clk
 
 # CHECK: Custom Error at line [[# @LINE + 1]]: set_false_path: Unknown flag '-max'

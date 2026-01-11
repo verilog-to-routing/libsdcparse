@@ -1,13 +1,13 @@
 # RUN: %sdcparse-test %s 2>&1 | filecheck %s
 
 # CHECK: [[clk1_port_ptr:__vtr_obj_port_[0-9]+]]
-puts [_libsdcparse_create_port "clk1" -direction INPUT]
+puts [libsdcparse_create_port "clk1" -direction INPUT]
 # CHECK: [[gen_clk1_port_ptr:__vtr_obj_port_[0-9]+]]
-puts [_libsdcparse_create_port "gen_clk1" -direction INPUT]
+puts [libsdcparse_create_port "gen_clk1" -direction INPUT]
 # CHECK: [[gen_clk2_port_ptr:__vtr_obj_port_[0-9]+]]
-puts [_libsdcparse_create_port "gen_clk2" -direction INPUT]
+puts [libsdcparse_create_port "gen_clk2" -direction INPUT]
 # CHECK: [[gen_clk3_port_ptr:__vtr_obj_port_[0-9]+]]
-puts [_libsdcparse_create_port "gen_clk3" -direction INPUT]
+puts [libsdcparse_create_port "gen_clk3" -direction INPUT]
 
 create_clock -period 1.0 clk1
 

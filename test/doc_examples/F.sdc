@@ -1,24 +1,24 @@
 # RUN: %sdcparse-test %s 2>&1 | filecheck %s
 
 # CHECK: [[in1_port_ptr:__vtr_obj_port_[0-9]+]]
-puts [_libsdcparse_create_port "in1" -direction INPUT]
+puts [libsdcparse_create_port "in1" -direction INPUT]
 # CHECK-NEXT: [[in2_port_ptr:__vtr_obj_port_[0-9]+]]
-puts [_libsdcparse_create_port "in2" -direction INPUT]
+puts [libsdcparse_create_port "in2" -direction INPUT]
 # CHECK-NEXT: [[in3_port_ptr:__vtr_obj_port_[0-9]+]]
-puts [_libsdcparse_create_port "in3" -direction INPUT]
+puts [libsdcparse_create_port "in3" -direction INPUT]
 # CHECK-NEXT: [[out1_port_ptr:__vtr_obj_port_[0-9]+]]
-puts [_libsdcparse_create_port "out1" -direction OUTPUT]
+puts [libsdcparse_create_port "out1" -direction OUTPUT]
 # CHECK-NEXT: [[out2_port_ptr:__vtr_obj_port_[0-9]+]]
-puts [_libsdcparse_create_port "out2" -direction OUTPUT]
+puts [libsdcparse_create_port "out2" -direction OUTPUT]
 # CHECK-NEXT: [[clk_port_ptr:__vtr_obj_port_[0-9]+]]
-puts [_libsdcparse_create_port "clk" -direction INPUT]
+puts [libsdcparse_create_port "clk" -direction INPUT]
 # CHECK-NEXT: [[clk2_port_ptr:__vtr_obj_port_[0-9]+]]
-puts [_libsdcparse_create_port "clk2" -direction INPUT]
+puts [libsdcparse_create_port "clk2" -direction INPUT]
 
 # CHECK-NEXT: [[FFAQ0_pin_ptr:__vtr_obj_pin_[0-9]+]]
-puts [_libsdcparse_create_pin "FFA.Q\[0\]" -direction OUTPUT]
+puts [libsdcparse_create_pin "FFA.Q\[0\]" -direction OUTPUT]
 # CHECK-NEXT: [[FFDin0_pin_ptr:__vtr_obj_pin_[0-9]+]]
-puts [_libsdcparse_create_pin "to_FFD.in\[0\]" -direction INPUT]
+puts [libsdcparse_create_pin "to_FFD.in\[0\]" -direction INPUT]
 
 # CHECK: create_clock -period {{3.0*}} -waveform {{{1.250*}} {{2.750*}}} {[[clk_port_ptr]]}
 create_clock -period 3 -waveform {1.25 2.75} clk

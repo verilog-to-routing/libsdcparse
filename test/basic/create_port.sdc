@@ -5,7 +5,7 @@
 #       this more robust.
 
 # CHECK: __vtr_obj_port_0
-puts [_libsdcparse_create_port in1 -direction INPUT]
+puts [libsdcparse_create_port in1 -direction INPUT]
 
 # CHECK: __vtr_obj_port_1
-puts [_libsdcparse_create_port in1 -direction INPUT]
+puts [libsdcparse_create_port in1 -direction INPUT]

@@ -4,17 +4,17 @@
 
 #VPR compatible SDC file for benchmark 'minres'
 
-puts [_libsdcparse_create_port "clk0" -direction INPUT]
-puts [_libsdcparse_create_port "a\[0\]" -direction INPUT]
-puts [_libsdcparse_create_port "pll_minres:inst_pll_minres|altpll:altpll_component|pll_minres_altpll:auto_generated|wire_pll1_clk\[0\]" -direction INPUT]
+puts [libsdcparse_create_port "clk0" -direction INPUT]
+puts [libsdcparse_create_port "a\[0\]" -direction INPUT]
+puts [libsdcparse_create_port "pll_minres:inst_pll_minres|altpll:altpll_component|pll_minres_altpll:auto_generated|wire_pll1_clk\[0\]" -direction INPUT]
 
 # COM: TODO: We should use the actual minres port names!
-puts [_libsdcparse_create_port "in1" -direction INPUT]
-puts [_libsdcparse_create_port "in2" -direction INPUT]
-puts [_libsdcparse_create_port "in3" -direction INPUT]
-puts [_libsdcparse_create_port "out1" -direction OUTPUT]
-puts [_libsdcparse_create_port "out2" -direction OUTPUT]
-puts [_libsdcparse_create_port "out3" -direction OUTPUT]
+puts [libsdcparse_create_port "in1" -direction INPUT]
+puts [libsdcparse_create_port "in2" -direction INPUT]
+puts [libsdcparse_create_port "in3" -direction INPUT]
+puts [libsdcparse_create_port "out1" -direction OUTPUT]
+puts [libsdcparse_create_port "out2" -direction OUTPUT]
+puts [libsdcparse_create_port "out3" -direction OUTPUT]
 
 #*******************************
 # set_time_format 

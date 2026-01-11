@@ -1,23 +1,23 @@
 # RUN: %sdcparse-test %s 2>&1 | filecheck %s
 
 # CHECK: [[clk1_port_ptr:__vtr_obj_port_[0-9]+]]
-puts [_libsdcparse_create_port "clk1" -direction INPUT]
+puts [libsdcparse_create_port "clk1" -direction INPUT]
 # CHECK-NEXT: [[in1_port_ptr:__vtr_obj_port_[0-9]+]]
-puts [_libsdcparse_create_port "in1" -direction INPUT]
+puts [libsdcparse_create_port "in1" -direction INPUT]
 # CHECK-NEXT: [[in2_port_ptr:__vtr_obj_port_[0-9]+]]
-puts [_libsdcparse_create_port "in2" -direction INPUT]
+puts [libsdcparse_create_port "in2" -direction INPUT]
 # CHECK-NEXT: [[in3_port_ptr:__vtr_obj_port_[0-9]+]]
-puts [_libsdcparse_create_port "in3" -direction INPUT]
+puts [libsdcparse_create_port "in3" -direction INPUT]
 # CHECK-NEXT: [[in4_port_ptr:__vtr_obj_port_[0-9]+]]
-puts [_libsdcparse_create_port "in4" -direction INPUT]
+puts [libsdcparse_create_port "in4" -direction INPUT]
 # CHECK-NEXT: [[A1_port_ptr:__vtr_obj_port_[0-9]+]]
-puts [_libsdcparse_create_port "A1" -direction INPUT]
+puts [libsdcparse_create_port "A1" -direction INPUT]
 # CHECK-NEXT: [[A2_port_ptr:__vtr_obj_port_[0-9]+]]
-puts [_libsdcparse_create_port "A2" -direction INPUT]
+puts [libsdcparse_create_port "A2" -direction INPUT]
 # CHECK-NEXT: [[A3_port_ptr:__vtr_obj_port_[0-9]+]]
-puts [_libsdcparse_create_port "A3" -direction INPUT]
+puts [libsdcparse_create_port "A3" -direction INPUT]
 # CHECK-NEXT: [[A4_port_ptr:__vtr_obj_port_[0-9]+]]
-puts [_libsdcparse_create_port "A4" -direction INPUT]
+puts [libsdcparse_create_port "A4" -direction INPUT]
 
 # CHECK: create_clock -period {{1.0*}} -waveform {{{0.0*}} {{0.50*}}} {__vtr_obj_port_0}
 create_clock -period 1.0 clk1

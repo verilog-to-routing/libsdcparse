@@ -2,13 +2,13 @@
 
 # COM: TODO: Add the filecheck.
 
-puts [_libsdcparse_create_port "clk" -direction INPUT]
-puts [_libsdcparse_create_port "in1" -direction INPUT]
-puts [_libsdcparse_create_port "in2" -direction INPUT]
-puts [_libsdcparse_create_port "in3" -direction INPUT]
-puts [_libsdcparse_create_port "out1" -direction OUTPUT]
-puts [_libsdcparse_create_port "out2" -direction OUTPUT]
-puts [_libsdcparse_create_port "out3" -direction OUTPUT]
+puts [libsdcparse_create_port "clk" -direction INPUT]
+puts [libsdcparse_create_port "in1" -direction INPUT]
+puts [libsdcparse_create_port "in2" -direction INPUT]
+puts [libsdcparse_create_port "in3" -direction INPUT]
+puts [libsdcparse_create_port "out1" -direction OUTPUT]
+puts [libsdcparse_create_port "out2" -direction OUTPUT]
+puts [libsdcparse_create_port "out3" -direction OUTPUT]
 
 create_clock -period 0.5 -name VIRTUAL_INPUT_CLOCK
 create_clock -period 0.4 -name VIRTUAL_OUTPUT_CLOCK

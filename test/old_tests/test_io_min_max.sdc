@@ -2,11 +2,11 @@
 
 # COM: TODO: Add the filecheck.
 
-puts [_libsdcparse_create_port "in1" -direction INPUT]
-puts [_libsdcparse_create_port "in2" -direction INPUT]
-puts [_libsdcparse_create_port "in3" -direction INPUT]
-puts [_libsdcparse_create_port "out1" -direction OUTPUT]
-puts [_libsdcparse_create_port "out2" -direction OUTPUT]
+puts [libsdcparse_create_port "in1" -direction INPUT]
+puts [libsdcparse_create_port "in2" -direction INPUT]
+puts [libsdcparse_create_port "in3" -direction INPUT]
+puts [libsdcparse_create_port "out1" -direction OUTPUT]
+puts [libsdcparse_create_port "out2" -direction OUTPUT]
 
 #I/O Delay
 set_input_delay -clock input_clk -max -min 0.5 [get_ports {in1 in2 in3}]

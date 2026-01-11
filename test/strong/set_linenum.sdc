@@ -1,7 +1,7 @@
 # RUN: %sdcparse-test %s 2>&1 | filecheck %s
 
-puts [_libsdcparse_create_port "clk" -direction INPUT]
-puts [_libsdcparse_create_port "clk2" -direction INPUT]
+puts [libsdcparse_create_port "clk" -direction INPUT]
+puts [libsdcparse_create_port "clk2" -direction INPUT]
 
 # CHECK: #{{.*\.sdc}}:[[# @LINE + 2]]
 # CHECK-NEXT: create_clock
