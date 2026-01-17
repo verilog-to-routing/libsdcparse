@@ -13,3 +13,9 @@ puts [get_clocks clk2]
 
 # CHECK: set_max_delay {{17.0*}} -from {[[clk1_ptr]]} -to {[[clk2_ptr]]}
 set_max_delay 17 -from [get_clocks clk1] -to [get_clocks clk2]
+
+# CHECK: set_max_delay {{16.0*}} -from {[[clk1_ptr]]}
+set_max_delay 16 -from [get_clocks clk1]
+
+# CHECK: set_max_delay {{15.0*}} -to {[[clk2_ptr]]}
+set_max_delay 15 -to [get_clocks clk2]

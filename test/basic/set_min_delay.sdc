@@ -13,3 +13,9 @@ puts [get_clocks clk2]
 
 # CHECK: set_min_delay {{2.0*}} -from {[[clk1_ptr]]} -to {[[clk2_ptr]]}
 set_min_delay 2 -from [get_clocks clk1] -to [get_clocks clk2]
+
+# CHECK: set_min_delay {{3.0*}} -from {[[clk1_ptr]]}
+set_min_delay 3 -from [get_clocks clk1]
+
+# CHECK: set_min_delay {{4.0*}} -to {[[clk2_ptr]]}
+set_min_delay 4 -to [get_clocks clk2]

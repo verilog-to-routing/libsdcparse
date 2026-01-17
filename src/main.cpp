@@ -134,7 +134,12 @@ public:
         } else {
             flushing_printf("set_output_delay");
         }
-        flushing_printf(" -clock %s", cmd.clock_name.c_str());
+
+        // The clock name can be empty, meaning the arrival time is
+        // with respect to all clocks that arrive at the reference
+        // pin.
+        if (!cmd.clock_name.empty())
+            flushing_printf(" -clock %s", cmd.clock_name.c_str());
 
         if (cmd.is_max) {
             flushing_printf(" -max");

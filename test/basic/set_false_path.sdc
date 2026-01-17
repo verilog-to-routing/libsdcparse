@@ -23,3 +23,14 @@ set_false_path -from clk1 -to virtual
 
 # CHECK: set_false_path -from {[[clk2_ptr]]} -to {[[virtual2_ptr]]}
 set_false_path -from [get_clocks clk2] -to [get_clocks virtual2]
+
+# CHECK: [[out_pin1_ptr:__vtr_obj_pin_[0-9]+]]
+puts [libsdcparse_create_pin "out_pin1" -direction OUTPUT]
+# CHECK: [[in_pin1_ptr:__vtr_obj_pin_[0-9]+]]
+puts [libsdcparse_create_pin "in_pin1" -direction INPUT]
+
+# CHECK: set_false_path -from {[[out_pin1_ptr]]} -to {[[in_pin1_ptr]]}
+set_false_path -from out_pin1 -to in_pin1
+
+# CHECK: set_false_path -from {[[out_pin1_ptr]]} -to {[[in_pin1_ptr]]}
+set_false_path -from [get_pins out_pin1] -to [get_pins in_pin1]

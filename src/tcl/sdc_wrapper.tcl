@@ -443,7 +443,7 @@ proc set_input_delay {args} {
         flags   {-clock}
         bools   {-max -min}
         pos     {delay targets}
-        require {-clock targets}
+        require {targets}
         types   {delay double}
     }
 
@@ -461,7 +461,7 @@ proc set_output_delay {args} {
         flags   {-clock}
         bools   {-max -min}
         pos     {delay targets}
-        require {-clock targets}
+        require {targets}
         types   {delay double}
     }
 

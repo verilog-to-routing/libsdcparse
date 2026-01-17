@@ -19,3 +19,9 @@ set_multicycle_path -setup -from [get_clocks clk1] -to [get_clocks clk2] 3
 
 # CHECK: set_multicycle_path 2 -hold -from {[[clk1_ptr]]} -to {[[clk2_ptr]]}
 set_multicycle_path -hold -from [get_clocks clk1] -to [get_clocks clk2] 2
+
+# CHECK: set_multicycle_path 5 -from {[[clk1_ptr]]}
+set_multicycle_path -from [get_clocks clk1] 5
+
+# CHECK: set_multicycle_path 6 -to {[[clk2_ptr]]}
+set_multicycle_path -to [get_clocks clk2] 6
