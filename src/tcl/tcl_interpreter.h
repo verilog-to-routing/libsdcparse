@@ -169,7 +169,7 @@ class TclInterpreter {
             Tcl_DecrRefCount(lineKey);
             Tcl_DecrRefCount(options);
 
-            // Signal that an error has occured.
+            // Signal that an error has occurred.
             g_callback->parse_error(line_number, "", Tcl_GetStringResult(interp));
         }
 

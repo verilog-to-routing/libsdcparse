@@ -106,6 +106,7 @@ class TimingObjectDatabase {
      *  @return The ID of the created object.
      */
     inline PortObjectId create_port_object(const std::string& port_name, PortDirection port_direction) {
+        assert(port_direction != PortDirection::UNKNOWN);
         PortObjectId port_object_id = PortObjectId("__vtr_obj_port_" + std::to_string(port_objects.size()));
         assert(object_name.count(port_object_id) == 0);
         object_name[port_object_id] = port_name;

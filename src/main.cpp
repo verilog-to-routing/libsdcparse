@@ -114,7 +114,7 @@ public:
             obj_database.create_clock_object(clock_name);
         } else {
             if (cmd.targets.strings.empty()) {
-                throw std::runtime_error("create_clock: clock name or target required");
+                throw std::runtime_error("create_generated_clock: clock name or target required");
             }
             // If no name is given, use the first target for the name. This
             // matches the behaviour of other tools.

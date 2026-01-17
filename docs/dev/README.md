@@ -3,6 +3,7 @@
 ## TCL Interpreter for SDC Parsing
 
 Synopsys Design Constraints (SDCs) are a set of TCL procedures that a user can call to constrain parts of their ASIC designs. SDC has been adopted by FPGA vendors to allow users to constrain aspects of their design (such as the clock frequencies). There are many SDC procedures that are not necessary for FPGAs, and so are often not supported. For FPGA designs, we are most interested in three sets of constraints:
+
 1. Timing Constraints
 2. Timing Exceptions
 3. Object Queries
@@ -11,7 +12,7 @@ See the following documentation for more information: [FPGA Timing Suite Syntax 
 
 ### The TCL Interpreter in C++
 
-Due to SDC being necessarily a TCL file, SDCs are actually interpretted. This means that an SDC file is not executed line-by-line, but is executed similarly to how Python is executed. As such, it is necessary for a fully SDC compliant parser to be a TCL interpreter.
+Due to SDC being necessarily a TCL file, SDCs are actually interpreted. This means that an SDC file is not executed line-by-line but is executed similarly to Python. As such, it is necessary for a fully SDC compliant parser to be a TCL interpreter.
 
 Fortunately, it is somewhat trivial to construct a TCL interpreter since it is provided as a very well documented library. The [TCL/Tk](https://www.tcl-lang.org/) toolkits provide C APIs for creating and invoking a TCL interpreter. See the following [wiki page](https://wiki.tcl-lang.org/page/Adding+Tcl%2FTk+to+a+C+application) for more information.
 
@@ -42,7 +43,7 @@ We then hit our next problem. We do not want to write all of our code in TCL. Ma
 src/
     sdcparse.hpp
 ```
-This is an object which will be inhereted by the downstream tool and then a reference to the base class will be provided to the parser. When an SDC command is parsed, the corresponding callback will be called.
+This is an object which will be inherited by the downstream tool and then a reference to the base class will be provided to the parser. When an SDC command is parsed, the corresponding callback will be called.
 
 ### SWIG
 
@@ -80,7 +81,7 @@ src/
     sdc_timing_object_database.h
     sdc_timing_object.h
 ```
-This database is accessible by the tool (i.e. VPR), allowing it create different types of objects that it needs. For example, before parsing the SDC file, it is expected that VPR would create port objects for all ports in the netlist. The parser will then use that information to manage what to do when an SDC file contains the `get_ports` procedure.
+This database is accessible by the tool (i.e. VPR), allowing it to create different types of objects that it needs. For example, before parsing the SDC file, it is expected that VPR would create port objects for all ports in the netlist. The parser will then use that information to manage what to do when an SDC file contains the `get_ports` procedure.
 
 All timing objects have unique IDs which act like pointers in TCL. To make the interface as easy as possible, on the TCL side, these objects appear as strings with a unique format: `__vtr_obj_<type>_<id>`. This is used to encode information about the object to make debugging easier. This is different from how other SDC parsers normally store these objects. Normally, these objects are stored as pointers to TCL objects. This is because these objects are accessed by other algorithms and are timing critical. Since the goal of this code is to just act like a parser, it is not as timing critical. So we would prefer the simplicity and debuggability of using strings instead.
 
@@ -100,14 +101,14 @@ The unit testing framework for LibSDCParse is based off of [LLVM's Integration T
 
 LLVM-LIT is provided as part of the LLVM tool; however, it is unreasonable to include the entire LLVM project in this library just for unit testing; so, instead we use a [python version of the LIT tool](https://pypi.org/project/lit/). This works very similar to the original LLVM-LIT tool, however it is provided as a Python library. We can then create a basic Python script which will act like LLVM-LIT, which can be found at: `test/libsdcparse-lit.py`.
 
-The testsuite is configured by two config files which can be found here:
+The test suite is configured by two config files which can be found here:
 ```txt
 test/
     lit.cfg.py
     lit.site.cfg.py.in
 ```
 
-`lit.site.cfg.py.in` defines enviornment variables which are not known until build time (such as the location of the build folder). This information is populated in the `test/CMakeLists.txt` file.
+`lit.site.cfg.py.in` defines environment variables which are not known until build time (such as the location of the build folder). This information is populated in the `test/CMakeLists.txt` file.
 
 `lit.cfg.py` configures the test suite by pointing out which tests can be run and what commands they are able to use.
 
@@ -117,7 +118,7 @@ make check-libsdcparse
 ```
 This will run the entire test suite (using as many cores as available).
 
-There is another Python script found in the test folder: `test/not.py`. This is a helper script based on the `not` utility executable in LLVM. This Python script negates the return of an executable such that when the executable fails (returns 1), this script returns 0, and vice-versa. This allows us to create test cases which are "expected to fail", such as syntax errors.
+There is another Python script found in the test folder: `test/not.py`. This is a helper script based on the `not` utility executable in LLVM. This Python script negates the return of an executable such that when the executable fails (returns 1), this script returns 0, and vice versa. This allows us to create test cases which are "expected to fail", such as syntax errors.
 
 There is also a suppression file, `test/tcl.supp`, which is used to suppress known false-positives for Valgrind. Valgrind can be run using a custom executable defined in `test/CMakeLists.txt`:
 ```sh
@@ -140,7 +141,7 @@ Due to using the LIT testing framework, adding a new test is very easy.
 
 The unit test suite is set up to run any file in the `test/` directory (or any of its subdirectories) that end in `.sdc`. So all you need to do is create an SDC file in the appropriate folder. I generally put basic syntax tests in the `test/basic/` directory (these are also sent through Valgrind), and I put all other tests that test less-used features in the `test/strong/` directory.
 
-#### 2. Add the RUN command to the top of th file
+#### 2. Add the RUN command to the top of the file
 
 For all of the tests in this repository, the RUN command will look basically the same. At the top of the file, write the following:
 ```tcl
