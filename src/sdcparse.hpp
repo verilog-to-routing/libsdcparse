@@ -131,6 +131,9 @@ class Callback {
 
         virtual void parse_warning(const std::string& msg) = 0;
 
+        // Log error message in downstream tool.
+        virtual void log_error_msg(const std::string& msg) = 0;
+
     public:
         TimingObjectDatabase obj_database;
 };

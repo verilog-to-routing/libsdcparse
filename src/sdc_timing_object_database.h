@@ -10,6 +10,7 @@
 #include <cassert>
 #include <string>
 #include <unordered_map>
+#include <set>
 #include <vector>
 
 #include "sdc_timing_object.h"
@@ -52,6 +53,8 @@ class TimingObjectDatabase {
     std::unordered_map<ObjectId, std::string> object_name;
     /// @brief A mapping between a port object and its direction.
     std::unordered_map<PortObjectId, PortDirection> port_direction_;
+    /// @brief A collection of all clock driver objects.
+    std::vector<ObjectId> clock_driver_objects_;
 
     /// @brief A collection of all cell objects.
     std::vector<CellObjectId> cell_objects;
@@ -102,16 +105,25 @@ class TimingObjectDatabase {
      *      The name of the port to create. This does not need to be unique.
      *  @param port_direction
      *      The direction of the port (i.e. input, output, or inout).
+     *  @param is_clock_driver
+     *      If this port is the driver of a clock in the netlist.
      *
      *  @return The ID of the created object.
      */
-    inline PortObjectId create_port_object(const std::string& port_name, PortDirection port_direction) {
+    inline PortObjectId create_port_object(const std::string& port_name,
+                                           PortDirection port_direction,
+                                           bool is_clock_driver) {
         assert(port_direction != PortDirection::UNKNOWN);
         PortObjectId port_object_id = PortObjectId("__vtr_obj_port_" + std::to_string(port_objects.size()));
         assert(object_name.count(port_object_id) == 0);
         object_name[port_object_id] = port_name;
         port_direction_[port_object_id] = port_direction;
         port_objects.push_back(port_object_id);
+
+        if (is_clock_driver) {
+            clock_driver_objects_.push_back(port_object_id);
+        }
+
         return port_object_id;
     }
 
@@ -120,14 +132,22 @@ class TimingObjectDatabase {
      *
      *  @param pin_name
      *      The name of the pin to create. This does not need to be unique.
+     *  @param is_clock_driver
+     *      If this port is the driver of a clock in the netlist.
      *
      *  @return The ID of the created object.
      */
-    inline PinObjectId create_pin_object(const std::string& pin_name) {
+    inline PinObjectId create_pin_object(const std::string& pin_name,
+                                         bool is_clock_driver) {
         PinObjectId pin_object_id = PinObjectId("__vtr_obj_pin_" + std::to_string(pin_objects.size()));
         assert(object_name.count(pin_object_id) == 0);
         object_name[pin_object_id] = pin_name;
         pin_objects.push_back(pin_object_id);
+
+        if (is_clock_driver) {
+            clock_driver_objects_.push_back(pin_object_id);
+        }
+
         return pin_object_id;
     }
 
@@ -272,6 +292,20 @@ class TimingObjectDatabase {
             all_pins.push_back(pin_id.to_string());
         }
         return all_pins;
+    }
+
+    /**
+     * @brief Get a list of the IDs of all clock driver objects.
+     *
+     * This returns a vector of strings to make it more convenient for the
+     * parser.
+     */
+    inline std::vector<std::string> get_clock_driver_objects() const {
+        std::vector<std::string> all_clock_drivers;
+        for (const ObjectId& object_id : clock_driver_objects_) {
+            all_clock_drivers.push_back(object_id.to_string());
+        }
+        return all_clock_drivers;
     }
 };
 
