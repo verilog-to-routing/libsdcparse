@@ -10,7 +10,6 @@
 #include <cassert>
 #include <string>
 #include <unordered_map>
-#include <set>
 #include <vector>
 
 #include "sdc_timing_object.h"
@@ -302,6 +301,7 @@ class TimingObjectDatabase {
      */
     inline std::vector<std::string> get_clock_driver_objects() const {
         std::vector<std::string> all_clock_drivers;
+        all_clock_drivers.reserve(clock_driver_objects_.size());
         for (const ObjectId& object_id : clock_driver_objects_) {
             all_clock_drivers.push_back(object_id.to_string());
         }

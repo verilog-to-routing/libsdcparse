@@ -6,6 +6,7 @@
  * @brief   A TCL-interpreter object used to parse SDC files.
  */
 
+#include <cassert>
 #include <tcl/tcl.h>
 #include <string>
 
@@ -127,12 +128,9 @@ class TclInterpreter {
      */
     void eval_file(const std::string& filename) {
         // Ensure that the class was initialized correctly.
+        assert(g_callback != nullptr && "Callback must be registered");
         if (!init_success_) {
             g_callback->parse_error(0, "", "Failed to parse due to interpreter initialization error.");
-            return;
-        }
-        if (g_callback == nullptr) {
-            g_callback->parse_error(0, "", "Failed to parse due to callback not being registered.");
             return;
         }
 
