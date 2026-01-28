@@ -3,6 +3,8 @@
 # COM: TODO: Add the filecheck.
 
 # COM: TODO: We can make this more interesting.
+puts [libsdcparse_create_port "clk1" -direction INPUT -clock_driver]
+puts [libsdcparse_create_port "clk2" -direction INPUT -clock_driver]
 puts [libsdcparse_create_port "in1" -direction INPUT]
 puts [libsdcparse_create_port "in2" -direction INPUT]
 puts [libsdcparse_create_port "in3" -direction INPUT]

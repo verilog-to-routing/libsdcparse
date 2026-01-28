@@ -7,7 +7,6 @@
  */
 
 #include <cassert>
-#include <iostream>
 #include <tcl/tcl.h>
 #include <string>
 
@@ -129,7 +128,7 @@ class TclInterpreter {
      */
     void eval_file(const std::string& filename) {
         // Ensure that the class was initialized correctly.
-        assert(g_callback != nullptr);
+        assert(g_callback != nullptr && "Callback must be registered");
         if (!init_success_) {
             g_callback->parse_error(0, "", "Failed to parse due to interpreter initialization error.");
             return;
@@ -188,15 +187,19 @@ class TclInterpreter {
      * the error came from.
      */
     void print_error_log_() {
-        std::cerr << "--- SDC TCL Parse Error ---" << std::endl;
+        g_callback->log_error_msg("--- SDC TCL Parse Error ---\n");
+        g_callback->log_error_msg("Message: ");
         const char* msg = Tcl_GetStringResult(interp);
-        std::cerr << "Message: " << msg << std::endl;
+        g_callback->log_error_msg(msg);
+        g_callback->log_error_msg("\n");
 
         const char* stack_trace = Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY);
         if (stack_trace) {
-            std::cerr << "Stack Trace:\n" << stack_trace << std::endl;
+            g_callback->log_error_msg("Stack Trace:\n");
+            g_callback->log_error_msg(stack_trace);
+            g_callback->log_error_msg("\n");
         }
-        std::cerr << "---------------------------" << std::endl;
+        g_callback->log_error_msg("---------------------------\n");
     }
 };
 

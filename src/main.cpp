@@ -282,6 +282,11 @@ public:
         flushing_printf("Warning at line %d: %s\n", lineno_, msg.c_str());
     }
 
+    // Error message during parsing.
+    void log_error_msg(const std::string& msg) override {
+        flushing_fprintf(stderr, "%s", msg.c_str());
+    }
+
     bool error() { return error_; }
 
 private:

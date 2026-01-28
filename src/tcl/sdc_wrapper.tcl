@@ -259,7 +259,19 @@ proc create_clock {args} {
         error "create_clock: Waveform must have rise_time and fall_time."
     }
 
-    set id_targets [libsdcparse_convert_to_objects "create_clock" [dict get $params targets] {port}]
+    # Special case for VTR:
+    # Specifically for VTR, when the user writes something of the form:
+    #       create_clock * -period ...
+    # This implies that the user wants all of the clock drivers in the netlist,
+    # not all of the ports and pins in the netlist. Instead of doing the
+    # standard pattern matcher, just set the target to the clock drivers
+    # from the object database.
+    set id_targets [dict get $params targets]
+    if {$id_targets == "*"} {
+        set id_targets [libsdcparse_all_clock_drivers_internal]
+    } else {
+        set id_targets [libsdcparse_convert_to_objects "create_clock" $id_targets {port pin}]
+    }
 
     # TODO: This should be added to the parser for better generality.
     if {$name == "" && [llength $id_targets] == 0} {
@@ -793,7 +805,7 @@ proc libsdcparse_create_port {args} {
 
     set spec {
         flags   {-direction}
-        bools   {}
+        bools   {-clock_driver}
         pos     {port_name}
         require {port_name -direction}
         types   {}
@@ -801,7 +813,7 @@ proc libsdcparse_create_port {args} {
 
     set params [libsdcparse_generic_sdc_parser "create_port" $spec $args]
 
-    return [libsdcparse_create_port_internal [dict get $params port_name] [dict get $params -direction]]
+    return [libsdcparse_create_port_internal [dict get $params port_name] [dict get $params -direction] [dict get $params -clock_driver]]
 }
 
 proc libsdcparse_create_pin {args} {
@@ -809,7 +821,7 @@ proc libsdcparse_create_pin {args} {
 
     set spec {
         flags   {-direction}
-        bools   {}
+        bools   {-clock_driver}
         pos     {pin_name}
         require {pin_name -direction}
         types   {}
@@ -819,7 +831,7 @@ proc libsdcparse_create_pin {args} {
 
     # NOTE: Right now we ignore the pin direction. Eventually we will need the
     #       direction.
-    return [libsdcparse_create_pin_internal [dict get $params pin_name]]
+    return [libsdcparse_create_pin_internal [dict get $params pin_name] [dict get $params -clock_driver]]
 }
 
 proc libsdcparse_create_cell {args} {
