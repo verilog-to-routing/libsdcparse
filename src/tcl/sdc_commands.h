@@ -109,6 +109,8 @@ std::vector<std::string> libsdcparse_all_pins_internal();
 
 std::vector<std::string> libsdcparse_all_cells_internal();
 
+std::vector<std::string> libsdcparse_all_clock_drivers_internal();
+
 std::string libsdcparse_get_name_internal(const std::string& object_id);
 
 bool libsdcparse_is_object_id_internal(const std::string& object_id);
@@ -116,9 +118,11 @@ bool libsdcparse_is_object_id_internal(const std::string& object_id);
 std::string libsdcparse_get_object_type_internal(const std::string& object_id);
 
 std::string libsdcparse_create_port_internal(const std::string& port_name,
-                                              const std::string& port_dir_str);
+                                             const std::string& port_dir_str,
+                                             bool is_clock_driver);
 
-std::string libsdcparse_create_pin_internal(const std::string& pin_name);
+std::string libsdcparse_create_pin_internal(const std::string& pin_name,
+                                            bool is_clock_driver);
 
 std::string libsdcparse_create_cell_internal(const std::string& cell_name);
 

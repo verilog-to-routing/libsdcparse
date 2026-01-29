@@ -305,6 +305,11 @@ std::vector<std::string> libsdcparse_all_cells_internal() {
     return sdcparse::g_callback->obj_database.get_cell_objects();
 }
 
+std::vector<std::string> libsdcparse_all_clock_drivers_internal() {
+    check_g_callback_defined();
+    return sdcparse::g_callback->obj_database.get_clock_driver_objects();
+}
+
 std::string libsdcparse_get_name_internal(const std::string& object_id) {
     check_g_callback_defined();
     return sdcparse::g_callback->obj_database.get_object_name(sdcparse::ObjectId(object_id));
@@ -322,17 +327,19 @@ std::string libsdcparse_get_object_type_internal(const std::string& object_id) {
 }
 
 std::string libsdcparse_create_port_internal(const std::string& port_name,
-                                              const std::string& port_dir_str) {
+                                             const std::string& port_dir_str,
+                                             bool is_clock_driver) {
     sdcparse::PortDirection port_dir = sdcparse::from_string_to_port_dir(port_dir_str);
     assert(port_dir != sdcparse::PortDirection::UNKNOWN);
 
     check_g_callback_defined();
-    return sdcparse::g_callback->obj_database.create_port_object(port_name, port_dir).to_string();
+    return sdcparse::g_callback->obj_database.create_port_object(port_name, port_dir, is_clock_driver).to_string();
 }
 
-std::string libsdcparse_create_pin_internal(const std::string& pin_name) {
+std::string libsdcparse_create_pin_internal(const std::string& pin_name,
+                                            bool is_clock_driver) {
     check_g_callback_defined();
-    return sdcparse::g_callback->obj_database.create_pin_object(pin_name).to_string();
+    return sdcparse::g_callback->obj_database.create_pin_object(pin_name, is_clock_driver).to_string();
 }
 
 std::string libsdcparse_create_cell_internal(const std::string& cell_name) {
