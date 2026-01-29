@@ -209,6 +209,10 @@ proc libsdcparse_convert_to_objects {cmd_name targets object_type_list} {
                         set matches [libsdcparse_query_get_impl $cmd_name libsdcparse_all_cells_internal $params]
                         lappend id_targets {*}$matches
                     }
+                    "net" {
+                        set matches [libsdcparse_query_get_impl $cmd_name libsdcparse_all_nets_internal $params]
+                        lappend id_targets {*}$matches
+                    }
                 }
             }
         }
@@ -270,7 +274,7 @@ proc create_clock {args} {
     if {$id_targets == "*"} {
         set id_targets [libsdcparse_all_clock_drivers_internal]
     } else {
-        set id_targets [libsdcparse_convert_to_objects "create_clock" $id_targets {port pin}]
+        set id_targets [libsdcparse_convert_to_objects "create_clock" $id_targets {port pin net}]
     }
 
     # TODO: This should be added to the parser for better generality.
@@ -296,7 +300,7 @@ proc create_generated_clock {args} {
 
     set name [dict get $params -name]
 
-    set src [libsdcparse_convert_to_objects "create_generated_clock" [dict get $params -source] {port pin}]
+    set src [libsdcparse_convert_to_objects "create_generated_clock" [dict get $params -source] {port pin net}]
     if {[llength $src] != 1} {
         error "create_generated_clock: Only one source can be defined, found: '$src'"
     }
@@ -621,6 +625,9 @@ proc get_property {args} {
             "clock" {
                 set object_type_list clock
             }
+            "net" {
+                set object_type_list net
+            }
             "" {
                 error "get_property: -object_type is required if object is a name"
             }
@@ -780,6 +787,24 @@ proc get_cells {args} {
     return $matches
 }
 
+proc get_nets {args} {
+    libsdcparse_set_lineno
+
+    set spec {
+        flags   {}
+        bools   {-regexp -nocase -quiet}
+        pos     {patterns}
+        require {patterns}
+        types   {}
+    }
+
+    set params [libsdcparse_generic_sdc_parser "get_nets" $spec $args]
+
+    set matches [libsdcparse_query_get_impl "get_nets" libsdcparse_all_nets_internal $params]
+
+    return $matches
+}
+
 proc all_inputs {} {
     libsdcparse_set_lineno
 
@@ -848,4 +873,20 @@ proc libsdcparse_create_cell {args} {
     set params [libsdcparse_generic_sdc_parser "create_cell" $spec $args]
 
     return [libsdcparse_create_cell_internal [dict get $params cell_name]]
+}
+
+proc libsdcparse_create_net {args} {
+    libsdcparse_set_lineno
+
+    set spec {
+        flags   {}
+        bools   {}
+        pos     {net_name}
+        require {net_name}
+        types   {}
+    }
+
+    set params [libsdcparse_generic_sdc_parser "create_net" $spec $args]
+
+    return [libsdcparse_create_net_internal [dict get $params net_name]]
 }

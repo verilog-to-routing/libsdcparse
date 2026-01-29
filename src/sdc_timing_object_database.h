@@ -63,6 +63,8 @@ class TimingObjectDatabase {
     std::vector<PortObjectId> port_objects;
     /// @brief A collection of all pin objects.
     std::vector<PinObjectId> pin_objects;
+    /// @brief A collection of all net objects.
+    std::vector<NetObjectId> net_objects;
 
   public:
     /**
@@ -151,6 +153,23 @@ class TimingObjectDatabase {
     }
 
     /**
+     * @brief Create a net object.
+     *
+     *  @param net_name
+     *      The name of the net to create. This does not need to be unique.
+     *
+     *  @return The ID of the created object.
+     */
+    inline NetObjectId create_net_object(const std::string& net_name) {
+        NetObjectId net_object_id = NetObjectId("__vtr_obj_net_" + std::to_string(net_objects.size()));
+        assert(object_name.count(net_object_id) == 0);
+        object_name[net_object_id] = net_name;
+        net_objects.push_back(net_object_id);
+
+        return net_object_id;
+    }
+
+    /**
      * @brief Check if the given string represents an object.
      *
      * Since we are using strings to identify objects, we need to prepend all
@@ -180,6 +199,8 @@ class TimingObjectDatabase {
             return ObjectType::Port;
         if (object_id.rfind("__vtr_obj_pin_", 0) == 0)
             return ObjectType::Pin;
+        if (object_id.rfind("__vtr_obj_net_", 0) == 0)
+            return ObjectType::Net;
 
         return ObjectType::Unknown;
     }
@@ -291,6 +312,21 @@ class TimingObjectDatabase {
             all_pins.push_back(pin_id.to_string());
         }
         return all_pins;
+    }
+
+    /**
+     * @brief Get a list of the IDs of all net objects.
+     *
+     * This returns a vector of strings to make it more convenient for the
+     * parser.
+     */
+    inline std::vector<std::string> get_net_objects() const {
+        std::vector<std::string> all_nets;
+        all_nets.reserve(net_objects.size());
+        for (const NetObjectId& net_id : net_objects) {
+            all_nets.push_back(net_id.to_string());
+        }
+        return all_nets;
     }
 
     /**

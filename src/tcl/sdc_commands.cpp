@@ -310,6 +310,11 @@ std::vector<std::string> libsdcparse_all_clock_drivers_internal() {
     return sdcparse::g_callback->obj_database.get_clock_driver_objects();
 }
 
+std::vector<std::string> libsdcparse_all_nets_internal() {
+    check_g_callback_defined();
+    return sdcparse::g_callback->obj_database.get_net_objects();
+}
+
 std::string libsdcparse_get_name_internal(const std::string& object_id) {
     check_g_callback_defined();
     return sdcparse::g_callback->obj_database.get_object_name(sdcparse::ObjectId(object_id));
@@ -345,6 +350,11 @@ std::string libsdcparse_create_pin_internal(const std::string& pin_name,
 std::string libsdcparse_create_cell_internal(const std::string& cell_name) {
     check_g_callback_defined();
     return sdcparse::g_callback->obj_database.create_cell_object(cell_name).to_string();
+}
+
+std::string libsdcparse_create_net_internal(const std::string& net_name) {
+    check_g_callback_defined();
+    return sdcparse::g_callback->obj_database.create_net_object(net_name).to_string();
 }
 
 void libsdcparse_raise_warning(const std::string& msg) {
