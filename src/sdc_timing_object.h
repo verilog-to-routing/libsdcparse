@@ -19,6 +19,7 @@ enum class ObjectType {
     Clock,  ///< Clock type. This is created by commands such as create_clock.
     Port,   ///< Port type. This is a top-level pin.
     Pin,    ///< Pin type. This is a pin on a cell.
+    Net,    ///< Net type. This is a net connecting a set of ports/pins.
     Unknown ///< Unknown type. Should never see this.
 };
 
@@ -31,6 +32,7 @@ inline std::string to_string(ObjectType object_type) {
         case ObjectType::Clock: return "clock";
         case ObjectType::Port: return "port";
         case ObjectType::Pin: return "pin";
+        case ObjectType::Net: return "net";
         default: return "unknown";
     }
 }
@@ -103,6 +105,13 @@ struct PinObjectId final : ObjectId {
     using ObjectId::ObjectId;
 };
 
+/**
+ * @brief A strong identifier to a net object.
+ */
+struct NetObjectId final : ObjectId {
+    using ObjectId::ObjectId;
+};
+
 } // namespace sdcparse
 
 // The following are hash functions for the strong IDs above to allow them to
@@ -136,6 +145,12 @@ struct hash<sdcparse::PortObjectId> {
 template<>
 struct hash<sdcparse::PinObjectId> {
     std::size_t operator()(const sdcparse::PinObjectId& obj) const noexcept {
+        return std::hash<std::string>{}(obj.to_string());
+    }
+};
+template<>
+struct hash<sdcparse::NetObjectId> {
+    std::size_t operator()(const sdcparse::NetObjectId& obj) const noexcept {
         return std::hash<std::string>{}(obj.to_string());
     }
 };
