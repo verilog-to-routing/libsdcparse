@@ -12,6 +12,8 @@ puts [libsdcparse_create_port "clk4" -direction INPUT]
 puts [libsdcparse_create_port "clk5" -direction INPUT]
 # CHECK: [[clk6_port_ptr:__vtr_obj_port_[0-9]+]]
 puts [libsdcparse_create_port "clk6" -direction INPUT]
+# CHECK: [[clk7_net_ptr:__vtr_obj_net_[0-9]+]]
+puts [libsdcparse_create_net "clk7_net"]
 
 # CHECK: create_clock -period {{1.0*}} -waveform {{{0.0*}} {{0.50*}}} {[[clk1_port_ptr]]}
 create_clock -period 1.0 clk1
@@ -30,3 +32,9 @@ create_clock -period 5 -name Jeff
 
 # CHECK: create_clock -period {{3.0*}} -waveform {{{1.0*}} {{2.0*}}} {[[clk6_port_ptr]]}
 create_clock -period 3 -waveform {1 2} clk6
+
+# CHECK: create_clock -period {{1.0*}} -waveform {{{0.0*}} {{0.50*}}} {[[clk7_net_ptr]]}
+create_clock -period 1.0 clk7_net
+
+# CHECK: create_clock -period {{1.0*}} -waveform {{{0.0*}} {{0.50*}}} {[[clk7_net_ptr]]}
+create_clock -period 1.0 [get_nets clk7_net]
