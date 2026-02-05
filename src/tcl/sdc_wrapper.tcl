@@ -190,7 +190,8 @@ proc libsdcparse_convert_to_objects {cmd_name targets object_type_list} {
             dict set params -quiet 1
             dict set params -nocase 0
             dict set params -regexp 0
-            dict set params patterns $item
+            # Ensure item is treated as a list of one pattern. This prevents issues with special characters.
+            dict set params patterns [list $item]
             foreach object_type $object_type_list {
                 switch -- $object_type {
                     "port" {
@@ -661,45 +662,45 @@ proc get_property {args} {
 #   params    - The params that are passed into the search.
 # =====================================================================
 proc libsdcparse_query_get_impl {cmd_name all_func params} {
-    # Create the options for the search.
+    # 1. Pre-calculate search options
     set search_options {}
     if {[dict get $params -nocase]} {
         lappend search_options -nocase
     }
 
+    # 2. Extract and Pre-process Patterns
+    set is_regexp [dict get $params -regexp]
+    set raw_patterns [dict get $params patterns]
+
+    set processed_patterns [lmap pattern $raw_patterns {
+        if {$is_regexp} {
+            # Regexp: Escape backslashes, brackets, and dots
+            string map {\\ \\\\ \[ \\\[ \] \\\] . \\.} $pattern
+        } else {
+            # Glob: Escape backslashes and brackets
+            string map {\\ \\\\ \[ \\\[ \] \\\]} $pattern
+        }
+    }]
+
+    # 3. Iterate through the design objects
     set matches [lmap id [$all_func] {
-        # Get the name from the ID.
         set name [libsdcparse_get_name_internal $id]
-
-        # Go through each pattern and see if the name matches the pattern.
         set match 0
-        foreach pattern [dict get $params patterns] {
-            # Since square brackets are used for ports, and are not used for
-            # any other pattern as far as I am aware, we can just always assume
-            # that the square brackets should be escaped. Any square brackets
-            # that are not escaped, make them escaped.
-            # TODO: Is there a cleaner way to do this?
-            # TODO: Ports should just be handled special. We could match for the
-            #       port pattern and make special patterns which get the correct
-            #       ports.
-            set tmp [string map {\\\[ "___ESC_BRACKET___"} $pattern]
-            set tmp [string map {[ "\\\["} $tmp]
-            set escaped_pattern [string map {"___ESC_BRACKET___" \\\[} $tmp]
 
-            if {[dict get $params -regexp]} {
+        foreach escaped_pattern $processed_patterns {
+            if {$is_regexp} {
                 if {[regexp {*}$search_options -- $escaped_pattern $name]} {
                     set match 1
-                    break;
+                    break
                 }
             } else {
                 if {[string match {*}$search_options $escaped_pattern $name]} {
                     set match 1
-                    break;
+                    break
                 }
             }
         }
 
-        # If a match is found, add the ID to the resulting list.
         if {$match} {
             set id
         } else {
@@ -707,9 +708,9 @@ proc libsdcparse_query_get_impl {cmd_name all_func params} {
         }
     }]
 
-    # If unique matches is empty, raise error unless quiet is active.
+    # 4. Error Handling
     if {[llength $matches] == 0 && ![dict get $params -quiet]} {
-        libsdcparse_raise_warning "no matches found for $cmd_name [dict get $params patterns]"
+        libsdcparse_raise_warning "no matches found for $cmd_name $raw_patterns"
     }
 
     return $matches
