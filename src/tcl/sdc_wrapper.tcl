@@ -192,30 +192,32 @@ proc libsdcparse_convert_to_objects {cmd_name targets object_type_list} {
             dict set params -regexp 0
             # Ensure item is treated as a list of one pattern. This prevents issues with special characters.
             dict set params patterns [list $item]
-            foreach object_type $object_type_list {
-                switch -- $object_type {
-                    "port" {
-                        set matches [libsdcparse_query_get_impl $cmd_name libsdcparse_all_ports_internal $params]
-                        lappend id_targets {*}$matches
-                    }
-                    "clock" {
-                        set matches [libsdcparse_query_get_impl $cmd_name libsdcparse_all_clocks_internal $params]
-                        lappend id_targets {*}$matches
-                    }
-                    "pin" {
-                        set matches [libsdcparse_query_get_impl $cmd_name libsdcparse_all_pins_internal $params]
-                        lappend id_targets {*}$matches
-                    }
-                    "cell" {
-                        set matches [libsdcparse_query_get_impl $cmd_name libsdcparse_all_cells_internal $params]
-                        lappend id_targets {*}$matches
-                    }
-                    "net" {
-                        set matches [libsdcparse_query_get_impl $cmd_name libsdcparse_all_nets_internal $params]
-                        lappend id_targets {*}$matches
-                    }
-                }
-            }
+            set matches [libsdcparse_query_get_impl $cmd_name $params $object_type_list]
+            lappend id_targets {*}$matches
+            # foreach object_type $object_type_list {
+            #     switch -- $object_type {
+            #         "port" {
+            #             set matches [libsdcparse_query_get_impl $cmd_name libsdcparse_all_ports_internal $params]
+            #             lappend id_targets {*}$matches
+            #         }
+            #         "clock" {
+            #             set matches [libsdcparse_query_get_impl $cmd_name libsdcparse_all_clocks_internal $params]
+            #             lappend id_targets {*}$matches
+            #         }
+            #         "pin" {
+            #             set matches [libsdcparse_query_get_impl $cmd_name libsdcparse_all_pins_internal $params]
+            #             lappend id_targets {*}$matches
+            #         }
+            #         "cell" {
+            #             set matches [libsdcparse_query_get_impl $cmd_name libsdcparse_all_cells_internal $params]
+            #             lappend id_targets {*}$matches
+            #         }
+            #         "net" {
+            #             set matches [libsdcparse_query_get_impl $cmd_name libsdcparse_all_nets_internal $params]
+            #             lappend id_targets {*}$matches
+            #         }
+            #     }
+            # }
         }
     }
 
@@ -651,6 +653,7 @@ proc get_property {args} {
 # =====================================================================
 # Query "get" Implementation
 # =====================================================================
+# FIXME: Update this comment.
 # This procedure performs the query necessary for the get commands
 # provided by SDC (such as get_ports, get_clocks, etc.).
 #
@@ -661,56 +664,14 @@ proc get_property {args} {
 #   all_func  - A function that is used to get all IDs for the query type.
 #   params    - The params that are passed into the search.
 # =====================================================================
-proc libsdcparse_query_get_impl {cmd_name all_func params} {
-    # 1. Pre-calculate search options
-    set search_options {}
-    if {[dict get $params -nocase]} {
-        lappend search_options -nocase
-    }
-
-    # 2. Extract and Pre-process Patterns
+proc libsdcparse_query_get_impl {cmd_name params target_object_types} {
+    set nocase [dict get $params -nocase]
     set is_regexp [dict get $params -regexp]
-    set raw_patterns [dict get $params patterns]
+    set patterns [dict get $params patterns]
+    set matches [libsdcparse_query_pattern_match_internal $patterns $nocase $is_regexp $target_object_types]
 
-    set processed_patterns [lmap pattern $raw_patterns {
-        if {$is_regexp} {
-            # Regexp: Escape backslashes, brackets, and dots
-            string map {\\ \\\\ \[ \\\[ \] \\\] . \\.} $pattern
-        } else {
-            # Glob: Escape backslashes and brackets
-            string map {\\ \\\\ \[ \\\[ \] \\\]} $pattern
-        }
-    }]
-
-    # 3. Iterate through the design objects
-    set matches [lmap id [$all_func] {
-        set name [libsdcparse_get_name_internal $id]
-        set match 0
-
-        foreach escaped_pattern $processed_patterns {
-            if {$is_regexp} {
-                if {[regexp {*}$search_options -- $escaped_pattern $name]} {
-                    set match 1
-                    break
-                }
-            } else {
-                if {[string match {*}$search_options $escaped_pattern $name]} {
-                    set match 1
-                    break
-                }
-            }
-        }
-
-        if {$match} {
-            set id
-        } else {
-            continue
-        }
-    }]
-
-    # 4. Error Handling
     if {[llength $matches] == 0 && ![dict get $params -quiet]} {
-        libsdcparse_raise_warning "no matches found for $cmd_name $raw_patterns"
+        libsdcparse_raise_warning "no matches found for $cmd_name $patterns"
     }
 
     return $matches
@@ -729,7 +690,7 @@ proc get_ports {args} {
 
     set params [libsdcparse_generic_sdc_parser "get_ports" $spec $args]
 
-    set matches [libsdcparse_query_get_impl "get_ports" libsdcparse_all_ports_internal $params]
+    set matches [libsdcparse_query_get_impl "get_ports" $params {port}]
 
     return $matches
 }
@@ -747,7 +708,7 @@ proc get_clocks {args} {
 
     set params [libsdcparse_generic_sdc_parser "get_clocks" $spec $args]
 
-    set matches [libsdcparse_query_get_impl "get_clocks" libsdcparse_all_clocks_internal $params]
+    set matches [libsdcparse_query_get_impl "get_clocks" $params {clock}]
 
     return $matches
 }
@@ -765,7 +726,7 @@ proc get_pins {args} {
 
     set params [libsdcparse_generic_sdc_parser "get_pins" $spec $args]
 
-    set matches [libsdcparse_query_get_impl "get_pins" libsdcparse_all_pins_internal $params]
+    set matches [libsdcparse_query_get_impl "get_pins" $params {pin}]
 
     return $matches
 }
@@ -783,7 +744,7 @@ proc get_cells {args} {
 
     set params [libsdcparse_generic_sdc_parser "get_cells" $spec $args]
 
-    set matches [libsdcparse_query_get_impl "get_cells" libsdcparse_all_cells_internal $params]
+    set matches [libsdcparse_query_get_impl "get_cells" $params {cell}]
 
     return $matches
 }
@@ -801,7 +762,7 @@ proc get_nets {args} {
 
     set params [libsdcparse_generic_sdc_parser "get_nets" $spec $args]
 
-    set matches [libsdcparse_query_get_impl "get_nets" libsdcparse_all_nets_internal $params]
+    set matches [libsdcparse_query_get_impl "get_nets" $params {net}]
 
     return $matches
 }
