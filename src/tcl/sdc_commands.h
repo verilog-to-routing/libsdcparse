@@ -119,6 +119,11 @@ bool libsdcparse_is_object_id_internal(const std::string& object_id);
 
 std::string libsdcparse_get_object_type_internal(const std::string& object_id);
 
+std::vector<std::string> libsdcparse_query_pattern_match_internal(const std::vector<std::string>& patterns,
+                                                                  bool nocase,
+                                                                  bool regexp,
+                                                                  const std::vector<std::string>& object_types);
+
 std::string libsdcparse_create_port_internal(const std::string& port_name,
                                              const std::string& port_dir_str,
                                              bool is_clock_driver);

@@ -37,6 +37,15 @@ inline std::string to_string(ObjectType object_type) {
     }
 }
 
+inline ObjectType object_type_from_string(const std::string& object_type_str) {
+    if (object_type_str == "cell") return ObjectType::Cell;
+    if (object_type_str == "clock") return ObjectType::Clock;
+    if (object_type_str == "port") return ObjectType::Port;
+    if (object_type_str == "pin") return ObjectType::Pin;
+    if (object_type_str == "net") return ObjectType::Net;
+    return ObjectType::Unknown;
+}
+
 /**
  * @brief A strong identifier to an object.
  *

@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <string>
 
+#include "sdc_timing_object.h"
 #include "sdcparse.hpp"
 #include "sdc_commands.h"
 #include "tcl_interpreter.h"
@@ -329,6 +330,24 @@ std::string libsdcparse_get_object_type_internal(const std::string& object_id) {
     check_g_callback_defined();
     sdcparse::ObjectType object_type = sdcparse::g_callback->obj_database.get_object_type(object_id);
     return sdcparse::to_string(object_type);
+}
+
+std::vector<std::string> libsdcparse_query_pattern_match_internal(const std::vector<std::string>& patterns,
+                                                                  bool nocase,
+                                                                  bool regexp,
+                                                                  const std::vector<std::string>& object_types) {
+    check_g_callback_defined();
+
+    std::vector<sdcparse::ObjectType> target_object_types;
+    for (const std::string& object_string : object_types) {
+        sdcparse::ObjectType object_type = sdcparse::object_type_from_string(object_string);
+        if (object_type == sdcparse::ObjectType::Unknown) {
+            throw std::runtime_error("LibSDCParse: trying to query an invalid type.");
+        }
+        target_object_types.push_back(object_type);
+    }
+
+    return sdcparse::g_callback->obj_database.query_pattern_match(patterns, nocase, regexp, target_object_types);
 }
 
 std::string libsdcparse_create_port_internal(const std::string& port_name,

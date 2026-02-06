@@ -8,6 +8,7 @@
  */
 
 #include <cassert>
+#include <regex>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -37,6 +38,26 @@ inline PortDirection from_string_to_port_dir(const std::string& port_type) {
     if (port_type == "INOUT")
         return PortDirection::INOUT;
     return PortDirection::UNKNOWN;
+}
+
+inline std::string glob_to_regex(const std::string& glob) {
+    std::string res = "^"; // Ensure we match the whole string
+    for (char c : glob) {
+        switch (c) {
+            case '*':  res += ".*";  break;
+            case '?':  res += ".";   break;
+            // Escape regex special characters
+            case '.': case '+': case '(': case ')': 
+            case '[': case ']': case '{': case '}':
+            case '^': case '$': case '|': case '\\':
+                res += '\\';
+                res += c;
+                break;
+            default:   res += c;     break;
+        }
+    }
+    res += "$"; // Ensure we match until the end
+    return res;
 }
 
 /**
@@ -342,6 +363,85 @@ class TimingObjectDatabase {
             all_clock_drivers.push_back(object_id.to_string());
         }
         return all_clock_drivers;
+    }
+
+    inline std::vector<std::string> query_pattern_match(const std::vector<std::string>& patterns,
+                                                        bool nocase,
+                                                        bool regexp,
+                                                        const std::vector<ObjectType>& object_types) {
+
+        // Pre-process the patterns.
+        std::vector<std::regex> regex_patterns;
+        for (const std::string& raw_pattern : patterns) {
+            std::string pattern;
+            if (regexp) {
+                pattern = raw_pattern;
+            } else {
+                pattern = glob_to_regex(raw_pattern);
+            }
+            if (nocase) {
+                regex_patterns.push_back(std::regex(pattern, std::regex::icase|std::regex::optimize));
+            } else {
+                regex_patterns.push_back(std::regex(pattern, std::regex::optimize));
+            }
+        }
+
+        std::vector<std::string> matches;
+        for (ObjectType target_object_type : object_types) {
+            switch (target_object_type) {
+                case ObjectType::Cell:
+                    for (const std::regex& pattern : regex_patterns) {
+                        for (CellObjectId cell_object_id : cell_objects) {
+                            if (std::regex_match(get_object_name(cell_object_id), pattern)) {
+                                matches.push_back(cell_object_id.to_string());
+                            }
+                        }
+                    }
+                    break;
+                case ObjectType::Clock:
+                    for (const std::regex& pattern : regex_patterns) {
+                        for (ClockObjectId clock_object_id : clock_objects) {
+                            if (std::regex_match(get_object_name(clock_object_id), pattern)) {
+                                matches.push_back(clock_object_id.to_string());
+                            }
+                        }
+                    }
+                    break;
+                case ObjectType::Net:
+                    for (const std::regex& pattern : regex_patterns) {
+                        for (NetObjectId net_object_id : net_objects) {
+                            if (std::regex_match(get_object_name(net_object_id), pattern)) {
+                                matches.push_back(net_object_id.to_string());
+                            }
+                        }
+                    }
+                    break;
+                case ObjectType::Port:
+                    for (const std::regex& pattern : regex_patterns) {
+                        for (PortObjectId port_object_id : port_objects) {
+                            if (std::regex_match(get_object_name(port_object_id), pattern)) {
+                                matches.push_back(port_object_id.to_string());
+                            }
+                        }
+                    }
+                    break;
+                case ObjectType::Pin:
+                    for (const std::regex& pattern : regex_patterns) {
+                        for (PinObjectId pin_object_id : pin_objects) {
+                            if (std::regex_match(get_object_name(pin_object_id), pattern)) {
+                                matches.push_back(pin_object_id.to_string());
+                            }
+                        }
+                    }
+                    break;
+                default:
+                    assert(false);
+                    break;
+            }
+
+        }
+
+        return matches;
     }
 };
 
