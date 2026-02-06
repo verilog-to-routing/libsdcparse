@@ -11,6 +11,7 @@
 #include <regex>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "sdc_timing_object.h"
@@ -70,7 +71,7 @@ inline std::string glob_to_regex(const std::string& glob) {
 class TimingObjectDatabase {
   private:
     /// @brief A mapping between an object ID and its name.
-    std::unordered_map<ObjectId, std::string> object_name;
+    std::unordered_map<ObjectId, std::string> object_name_;
     /// @brief A mapping between a port object and its direction.
     std::unordered_map<PortObjectId, PortDirection> port_direction_;
     /// @brief A collection of all clock driver objects.
@@ -98,8 +99,8 @@ class TimingObjectDatabase {
      */
     inline CellObjectId create_cell_object(const std::string& cell_name) {
         CellObjectId cell_object_id = CellObjectId("__vtr_obj_cell_" + std::to_string(cell_objects.size()));
-        assert(object_name.count(cell_object_id) == 0);
-        object_name[cell_object_id] = cell_name;
+        assert(object_name_.count(cell_object_id) == 0);
+        object_name_[cell_object_id] = cell_name;
         cell_objects.push_back(cell_object_id);
         return cell_object_id;
     }
@@ -114,8 +115,8 @@ class TimingObjectDatabase {
      */
     inline ClockObjectId create_clock_object(const std::string& clock_name) {
         ClockObjectId clock_object_id = ClockObjectId("__vtr_obj_clock_" + std::to_string(clock_objects.size()));
-        assert(object_name.count(clock_object_id) == 0);
-        object_name[clock_object_id] = clock_name;
+        assert(object_name_.count(clock_object_id) == 0);
+        object_name_[clock_object_id] = clock_name;
         clock_objects.push_back(clock_object_id);
         return clock_object_id;
     }
@@ -137,8 +138,8 @@ class TimingObjectDatabase {
                                            bool is_clock_driver) {
         assert(port_direction != PortDirection::UNKNOWN);
         PortObjectId port_object_id = PortObjectId("__vtr_obj_port_" + std::to_string(port_objects.size()));
-        assert(object_name.count(port_object_id) == 0);
-        object_name[port_object_id] = port_name;
+        assert(object_name_.count(port_object_id) == 0);
+        object_name_[port_object_id] = port_name;
         port_direction_[port_object_id] = port_direction;
         port_objects.push_back(port_object_id);
 
@@ -162,8 +163,8 @@ class TimingObjectDatabase {
     inline PinObjectId create_pin_object(const std::string& pin_name,
                                          bool is_clock_driver) {
         PinObjectId pin_object_id = PinObjectId("__vtr_obj_pin_" + std::to_string(pin_objects.size()));
-        assert(object_name.count(pin_object_id) == 0);
-        object_name[pin_object_id] = pin_name;
+        assert(object_name_.count(pin_object_id) == 0);
+        object_name_[pin_object_id] = pin_name;
         pin_objects.push_back(pin_object_id);
 
         if (is_clock_driver) {
@@ -183,8 +184,8 @@ class TimingObjectDatabase {
      */
     inline NetObjectId create_net_object(const std::string& net_name) {
         NetObjectId net_object_id = NetObjectId("__vtr_obj_net_" + std::to_string(net_objects.size()));
-        assert(object_name.count(net_object_id) == 0);
-        object_name[net_object_id] = net_name;
+        assert(object_name_.count(net_object_id) == 0);
+        object_name_[net_object_id] = net_name;
         net_objects.push_back(net_object_id);
 
         return net_object_id;
@@ -229,9 +230,9 @@ class TimingObjectDatabase {
     /**
      * @brief Get the name of the given object.
      */
-    inline std::string get_object_name(ObjectId object_id) const {
-        auto it = object_name.find(object_id);
-        assert(it != object_name.end());
+    const std::string& get_object_name(ObjectId object_id) const {
+        auto it = object_name_.find(object_id);
+        assert(it != object_name_.end());
         return it->second;
     }
 
@@ -387,58 +388,48 @@ class TimingObjectDatabase {
         }
 
         std::vector<std::string> matches;
+
+        // Lambda to check an object against all patterns
+        auto check_object = [&matches, &regex_patterns](const ObjectId& object_id, const std::string& object_name) {
+            for (const std::regex& pattern : regex_patterns) {
+                if (std::regex_match(object_name, pattern)) {
+                    matches.push_back(object_id.to_string());
+                    return; // Early exit once we find a match
+                }
+            }
+        };
+
         for (ObjectType target_object_type : object_types) {
             switch (target_object_type) {
                 case ObjectType::Cell:
-                    for (const std::regex& pattern : regex_patterns) {
-                        for (CellObjectId cell_object_id : cell_objects) {
-                            if (std::regex_match(get_object_name(cell_object_id), pattern)) {
-                                matches.push_back(cell_object_id.to_string());
-                            }
-                        }
+                    for (const CellObjectId& cell_object_id : cell_objects) {
+                        check_object(cell_object_id, get_object_name(cell_object_id));
                     }
                     break;
                 case ObjectType::Clock:
-                    for (const std::regex& pattern : regex_patterns) {
-                        for (ClockObjectId clock_object_id : clock_objects) {
-                            if (std::regex_match(get_object_name(clock_object_id), pattern)) {
-                                matches.push_back(clock_object_id.to_string());
-                            }
-                        }
+                    for (const ClockObjectId& clock_object_id : clock_objects) {
+                        check_object(clock_object_id, get_object_name(clock_object_id));
                     }
                     break;
                 case ObjectType::Net:
-                    for (const std::regex& pattern : regex_patterns) {
-                        for (NetObjectId net_object_id : net_objects) {
-                            if (std::regex_match(get_object_name(net_object_id), pattern)) {
-                                matches.push_back(net_object_id.to_string());
-                            }
-                        }
+                    for (const NetObjectId& net_object_id : net_objects) {
+                        check_object(net_object_id, get_object_name(net_object_id));
                     }
                     break;
                 case ObjectType::Port:
-                    for (const std::regex& pattern : regex_patterns) {
-                        for (PortObjectId port_object_id : port_objects) {
-                            if (std::regex_match(get_object_name(port_object_id), pattern)) {
-                                matches.push_back(port_object_id.to_string());
-                            }
-                        }
+                    for (const PortObjectId& port_object_id : port_objects) {
+                        check_object(port_object_id, get_object_name(port_object_id));
                     }
                     break;
                 case ObjectType::Pin:
-                    for (const std::regex& pattern : regex_patterns) {
-                        for (PinObjectId pin_object_id : pin_objects) {
-                            if (std::regex_match(get_object_name(pin_object_id), pattern)) {
-                                matches.push_back(pin_object_id.to_string());
-                            }
-                        }
+                    for (const PinObjectId& pin_object_id : pin_objects) {
+                        check_object(pin_object_id, get_object_name(pin_object_id));
                     }
                     break;
                 default:
                     assert(false);
                     break;
             }
-
         }
 
         return matches;
