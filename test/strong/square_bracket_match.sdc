@@ -61,6 +61,7 @@ puts DONE
 # CHECK-DAG: [[B1_ptr]]
 # CHECK-DAG: [[B2_ptr]]
 # CHECK-DAG: [[B3_ptr]]
+# CHECK-DAG: [[B10_ptr]]
 # CHECK-NEXT: DONE
 puts "get_ports B\[*\]:"
 puts [get_ports B[*]]
