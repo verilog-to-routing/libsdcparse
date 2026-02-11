@@ -4,6 +4,11 @@
 
 /**
  * @brief Helper function to convert a glob pattern into a regex pattern.
+ * 
+ * NOTE: This function currently does not support character classes, instead
+ *       it just escapes square brackets to support buses correctly.
+ * 
+ * TODO: Should support character classes without breaking buses.
  *
  *  @param glob The glob pattern to convert.
  *
@@ -43,12 +48,18 @@ std::vector<std::string> TimingObjectDatabase::query_pattern_match(const std::ve
         if (regexp) {
             pattern = raw_pattern;
         } else {
+            // TODO: A hand-rolled glob pattern matcher would likely be substantially faster.
+            //       Should investigate.
             pattern = glob_to_regex(raw_pattern);
         }
-        if (nocase) {
-            regex_patterns.push_back(std::regex(pattern, std::regex::icase|std::regex::optimize));
-        } else {
-            regex_patterns.push_back(std::regex(pattern, std::regex::optimize));
+        try {
+            if (nocase) {
+                regex_patterns.push_back(std::regex(pattern, std::regex::icase|std::regex::optimize));
+            } else {
+                regex_patterns.push_back(std::regex(pattern, std::regex::optimize));
+            }
+        } catch (const std::regex_error& e) {
+            throw std::runtime_error("LibSDCParse: invalid pattern '" + raw_pattern + "': " + e.what());
         }
     }
 

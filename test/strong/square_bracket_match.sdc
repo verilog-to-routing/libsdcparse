@@ -16,6 +16,8 @@ puts [libsdcparse_create_port "B\[1\]" -direction INPUT]
 puts [libsdcparse_create_port "B\[2\]" -direction INPUT]
 # CHECK: [[B3_ptr:__vtr_obj_port_[0-9]+]]
 puts [libsdcparse_create_port "B\[3\]" -direction INPUT]
+# CHECK: [[B10_ptr:__vtr_obj_port_[0-9]+]]
+puts [libsdcparse_create_port {B[10]} -direction INPUT]
 
 # CHECK-DAG: [[A0_ptr]]
 # CHECK-DAG: [[A1_ptr]]
@@ -63,6 +65,9 @@ puts DONE
 puts "get_ports B\[*\]:"
 puts [get_ports B[*]]
 puts DONE
+
+# CHECK: [[B10_ptr]]
+puts [get_ports B[10]]
 
 # TODO: Should we handle more interesting cases like A[3:0]?
 #       This will return A[3], A[2], A[1], A[0].

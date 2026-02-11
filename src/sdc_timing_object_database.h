@@ -349,6 +349,7 @@ class TimingObjectDatabase {
      *        names matching the given patterns.
      *
      *  @param patterns     A list of patterns to search for.
+     *  @param nocase       If true, performs case-insensitive matching.
      *  @param regexp       Set to true to use a regex pattern matcher, false to use a glob pattern matcher.
      *  @param object_types The types of objects to match for.
      *
