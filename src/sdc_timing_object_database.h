@@ -41,26 +41,6 @@ inline PortDirection from_string_to_port_dir(const std::string& port_type) {
     return PortDirection::UNKNOWN;
 }
 
-inline std::string glob_to_regex(const std::string& glob) {
-    std::string res = "^"; // Ensure we match the whole string
-    for (char c : glob) {
-        switch (c) {
-            case '*':  res += ".*";  break;
-            case '?':  res += ".";   break;
-            // Escape regex special characters
-            case '.': case '+': case '(': case ')': 
-            case '[': case ']': case '{': case '}':
-            case '^': case '$': case '|': case '\\':
-                res += '\\';
-                res += c;
-                break;
-            default:   res += c;     break;
-        }
-    }
-    res += "$"; // Ensure we match until the end
-    return res;
-}
-
 /**
  * @brief Database of the timing objects in the netlist.
  *
@@ -366,74 +346,20 @@ class TimingObjectDatabase {
         return all_clock_drivers;
     }
 
-    inline std::vector<std::string> query_pattern_match(const std::vector<std::string>& patterns,
-                                                        bool nocase,
-                                                        bool regexp,
-                                                        const std::vector<ObjectType>& object_types) {
-
-        // Pre-process the patterns.
-        std::vector<std::regex> regex_patterns;
-        for (const std::string& raw_pattern : patterns) {
-            std::string pattern;
-            if (regexp) {
-                pattern = raw_pattern;
-            } else {
-                pattern = glob_to_regex(raw_pattern);
-            }
-            if (nocase) {
-                regex_patterns.push_back(std::regex(pattern, std::regex::icase|std::regex::optimize));
-            } else {
-                regex_patterns.push_back(std::regex(pattern, std::regex::optimize));
-            }
-        }
-
-        std::vector<std::string> matches;
-
-        // Lambda to check an object against all patterns
-        auto check_object = [&matches, &regex_patterns](const ObjectId& object_id, const std::string& object_name) {
-            for (const std::regex& pattern : regex_patterns) {
-                if (std::regex_match(object_name, pattern)) {
-                    matches.push_back(object_id.to_string());
-                    return; // Early exit once we find a match
-                }
-            }
-        };
-
-        for (ObjectType target_object_type : object_types) {
-            switch (target_object_type) {
-                case ObjectType::Cell:
-                    for (const CellObjectId& cell_object_id : cell_objects) {
-                        check_object(cell_object_id, get_object_name(cell_object_id));
-                    }
-                    break;
-                case ObjectType::Clock:
-                    for (const ClockObjectId& clock_object_id : clock_objects) {
-                        check_object(clock_object_id, get_object_name(clock_object_id));
-                    }
-                    break;
-                case ObjectType::Net:
-                    for (const NetObjectId& net_object_id : net_objects) {
-                        check_object(net_object_id, get_object_name(net_object_id));
-                    }
-                    break;
-                case ObjectType::Port:
-                    for (const PortObjectId& port_object_id : port_objects) {
-                        check_object(port_object_id, get_object_name(port_object_id));
-                    }
-                    break;
-                case ObjectType::Pin:
-                    for (const PinObjectId& pin_object_id : pin_objects) {
-                        check_object(pin_object_id, get_object_name(pin_object_id));
-                    }
-                    break;
-                default:
-                    assert(false);
-                    break;
-            }
-        }
-
-        return matches;
-    }
+    /**
+     * @brief Query the object database for objects of the given types with
+     *        names matching the given patterns.
+     * 
+     *  @param patterns     A list of patterns to search for.
+     *  @param regexp       Set to true to use a regex pattern matcher, false to use a glob pattern matcher.
+     *  @param object_types The types of objects to match for.
+     * 
+     *  @return A list of object IDs that match the query.
+     */
+    std::vector<std::string> query_pattern_match(const std::vector<std::string>& patterns,
+                                                 bool nocase,
+                                                 bool regexp,
+                                                 const std::vector<ObjectType>& object_types);
 };
 
 } // namespace sdcparse
