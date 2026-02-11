@@ -8,6 +8,7 @@
 #include <cassert>
 #include <stdexcept>
 #include <string>
+#include <unordered_set>
 
 #include "sdc_timing_object.h"
 #include "sdcparse.hpp"
@@ -339,13 +340,19 @@ std::vector<std::string> libsdcparse_query_pattern_match_internal(const std::vec
     check_g_callback_defined();
 
     // Collect a list of object types to parse.
+    std::unordered_set<sdcparse::ObjectType> seen_types;
     std::vector<sdcparse::ObjectType> target_object_types;
     for (const std::string& object_string : object_types) {
         sdcparse::ObjectType object_type = sdcparse::object_type_from_string(object_string);
         if (object_type == sdcparse::ObjectType::Unknown) {
             throw std::runtime_error("LibSDCParse: trying to query an invalid type.");
         }
+        if (seen_types.count(object_type) > 0) {
+            continue;
+        }
+
         target_object_types.push_back(object_type);
+        seen_types.insert(object_type);
     }
 
     return sdcparse::g_callback->obj_database.query_pattern_match(patterns, nocase, regexp, target_object_types);

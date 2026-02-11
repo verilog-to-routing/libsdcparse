@@ -54,9 +54,9 @@ std::vector<std::string> TimingObjectDatabase::query_pattern_match(const std::ve
         }
         try {
             if (nocase) {
-                regex_patterns.push_back(std::regex(pattern, std::regex::icase|std::regex::optimize));
+                regex_patterns.emplace_back(pattern, std::regex::icase|std::regex::optimize);
             } else {
-                regex_patterns.push_back(std::regex(pattern, std::regex::optimize));
+                regex_patterns.emplace_back(pattern, std::regex::optimize);
             }
         } catch (const std::regex_error& e) {
             throw std::runtime_error("LibSDCParse: invalid pattern '" + raw_pattern + "': " + e.what());
