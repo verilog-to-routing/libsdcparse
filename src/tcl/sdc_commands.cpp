@@ -338,6 +338,7 @@ std::vector<std::string> libsdcparse_query_pattern_match_internal(const std::vec
                                                                   const std::vector<std::string>& object_types) {
     check_g_callback_defined();
 
+    // Collect a list of object types to parse.
     std::vector<sdcparse::ObjectType> target_object_types;
     for (const std::string& object_string : object_types) {
         sdcparse::ObjectType object_type = sdcparse::object_type_from_string(object_string);

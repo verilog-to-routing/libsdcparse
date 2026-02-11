@@ -194,30 +194,6 @@ proc libsdcparse_convert_to_objects {cmd_name targets object_type_list} {
             dict set params patterns [list $item]
             set matches [libsdcparse_query_get_impl $cmd_name $params $object_type_list]
             lappend id_targets {*}$matches
-            # foreach object_type $object_type_list {
-            #     switch -- $object_type {
-            #         "port" {
-            #             set matches [libsdcparse_query_get_impl $cmd_name libsdcparse_all_ports_internal $params]
-            #             lappend id_targets {*}$matches
-            #         }
-            #         "clock" {
-            #             set matches [libsdcparse_query_get_impl $cmd_name libsdcparse_all_clocks_internal $params]
-            #             lappend id_targets {*}$matches
-            #         }
-            #         "pin" {
-            #             set matches [libsdcparse_query_get_impl $cmd_name libsdcparse_all_pins_internal $params]
-            #             lappend id_targets {*}$matches
-            #         }
-            #         "cell" {
-            #             set matches [libsdcparse_query_get_impl $cmd_name libsdcparse_all_cells_internal $params]
-            #             lappend id_targets {*}$matches
-            #         }
-            #         "net" {
-            #             set matches [libsdcparse_query_get_impl $cmd_name libsdcparse_all_nets_internal $params]
-            #             lappend id_targets {*}$matches
-            #         }
-            #     }
-            # }
         }
     }
 
@@ -653,16 +629,15 @@ proc get_property {args} {
 # =====================================================================
 # Query "get" Implementation
 # =====================================================================
-# FIXME: Update this comment.
 # This procedure performs the query necessary for the get commands
 # provided by SDC (such as get_ports, get_clocks, etc.).
 #
 # This performs the necessary searches for a compliant SDC interface.
 #
 # Parameters:
-#   cmd_name  - Name of the command (for error reporting)
-#   all_func  - A function that is used to get all IDs for the query type.
-#   params    - The params that are passed into the search.
+#   cmd_name            - Name of the command (for error reporting)
+#   params              - The params that are passed into the search.
+#   target_object_types - A list of object types to query.
 # =====================================================================
 proc libsdcparse_query_get_impl {cmd_name params target_object_types} {
     set nocase [dict get $params -nocase]

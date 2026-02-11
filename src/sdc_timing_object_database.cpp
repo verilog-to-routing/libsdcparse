@@ -1,8 +1,10 @@
 #include "sdc_timing_object_database.h"
 
+#include <regex>
+
 /**
  * @brief Helper function to convert a glob pattern into a regex pattern.
- * 
+ *
  *  @param glob The glob pattern to convert.
  *
  *  @return The equivalent regex pattern.
@@ -14,7 +16,7 @@ static inline std::string glob_to_regex(const std::string& glob) {
             case '*':  res += ".*";  break;
             case '?':  res += ".";   break;
             // Escape regex special characters
-            case '.': case '+': case '(': case ')': 
+            case '.': case '+': case '(': case ')':
             case '[': case ']': case '{': case '}':
             case '^': case '$': case '|': case '\\':
                 res += '\\';

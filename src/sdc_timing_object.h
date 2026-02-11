@@ -37,6 +37,9 @@ inline std::string to_string(ObjectType object_type) {
     }
 }
 
+/**
+ * @brief Converts the given string to an object type.
+ */
 inline ObjectType object_type_from_string(const std::string& object_type_str) {
     if (object_type_str == "cell") return ObjectType::Cell;
     if (object_type_str == "clock") return ObjectType::Clock;

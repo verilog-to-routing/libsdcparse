@@ -8,10 +8,8 @@
  */
 
 #include <cassert>
-#include <regex>
 #include <string>
 #include <unordered_map>
-#include <unordered_set>
 #include <vector>
 
 #include "sdc_timing_object.h"
@@ -349,11 +347,11 @@ class TimingObjectDatabase {
     /**
      * @brief Query the object database for objects of the given types with
      *        names matching the given patterns.
-     * 
+     *
      *  @param patterns     A list of patterns to search for.
      *  @param regexp       Set to true to use a regex pattern matcher, false to use a glob pattern matcher.
      *  @param object_types The types of objects to match for.
-     * 
+     *
      *  @return A list of object IDs that match the query.
      */
     std::vector<std::string> query_pattern_match(const std::vector<std::string>& patterns,
