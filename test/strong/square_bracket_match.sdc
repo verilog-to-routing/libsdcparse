@@ -67,7 +67,9 @@ puts [get_ports B[*]]
 puts DONE
 
 # CHECK: [[B10_ptr]]
+# CHECK-NEXT: DONE
 puts [get_ports B[10]]
+puts DONE
 
 # TODO: Should we handle more interesting cases like A[3:0]?
 #       This will return A[3], A[2], A[1], A[0].

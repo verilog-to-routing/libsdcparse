@@ -103,7 +103,7 @@ std::vector<std::string> TimingObjectDatabase::query_pattern_match(const std::ve
                 }
                 break;
             default:
-                assert(false);
+                throw std::runtime_error("LibSDCParse: unexpected object type in query.");
                 break;
         }
     }
