@@ -7,7 +7,7 @@
  */
 
 #include <cassert>
-#include <tcl/tcl.h>
+#include <tcl.h>
 #include <string>
 
 #include "sdc_wrapper.h"
