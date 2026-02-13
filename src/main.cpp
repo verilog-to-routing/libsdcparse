@@ -297,7 +297,7 @@ private:
 };
 
 int main(int argc, char **argv) {
-    if(argc != 2 && argc != 3) {
+    if(argc != 2) {
         flushing_fprintf(stderr, "Usage: %s filename.sdc\n", argv[0]);
         flushing_fprintf(stderr, "\n");
         flushing_fprintf(stderr, "Reads in an SDC file into internal data structures\n");

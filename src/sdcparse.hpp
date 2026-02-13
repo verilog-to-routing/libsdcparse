@@ -16,7 +16,7 @@
  * This library uses a full TCL interpreter to parse incoming SDC files. It includes
  * an internal database of netlist objects and their names. At the start of parsing,
  * the application will update the database with all of the netlist objects that
- * it expects to be refrenced in the SDC file. The parser will then match for these
+ * it expects to be referenced in the SDC file. The parser will then match for these
  * objects. The parser will communicate these objects with the application using
  * unique object IDs, where an ID refers to some database object created by the
  * application.
