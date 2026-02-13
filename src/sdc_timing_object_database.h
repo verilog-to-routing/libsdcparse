@@ -348,16 +348,16 @@ class TimingObjectDatabase {
      * @brief Query the object database for objects of the given types with
      *        names matching the given patterns.
      *
-     *  @param patterns     A list of patterns to search for.
-     *  @param nocase       If true, performs case-insensitive matching.
-     *  @param regexp       Set to true to use a regex pattern matcher, false to use a glob pattern matcher.
-     *  @param object_types The types of objects to match for.
+     *  @param patterns             A list of patterns to search for.
+     *  @param is_case_insensitive  If true, performs case-insensitive matching.
+     *  @param is_regex             Set to true to use a regex pattern matcher, false to use a glob pattern matcher.
+     *  @param object_types         The types of objects to match for.
      *
      *  @return A list of object IDs that match the query.
      */
     std::vector<std::string> query_pattern_match(const std::vector<std::string>& patterns,
-                                                 bool nocase,
-                                                 bool regexp,
+                                                 bool is_case_insensitive,
+                                                 bool is_regex,
                                                  const std::vector<ObjectType>& object_types);
 };
 

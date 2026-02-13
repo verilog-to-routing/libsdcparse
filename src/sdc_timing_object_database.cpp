@@ -37,15 +37,15 @@ static inline std::string glob_to_regex(const std::string& glob) {
 namespace sdcparse {
 
 std::vector<std::string> TimingObjectDatabase::query_pattern_match(const std::vector<std::string>& patterns,
-                                                                   bool nocase,
-                                                                   bool regexp,
+                                                                   bool is_case_insensitive,
+                                                                   bool is_regex,
                                                                    const std::vector<ObjectType>& object_types) {
 
     // Pre-process the patterns.
     std::vector<std::regex> regex_patterns;
     for (const std::string& raw_pattern : patterns) {
         std::string pattern;
-        if (regexp) {
+        if (is_regex) {
             pattern = raw_pattern;
         } else {
             // TODO: A hand-rolled glob pattern matcher would likely be substantially faster.
@@ -53,7 +53,7 @@ std::vector<std::string> TimingObjectDatabase::query_pattern_match(const std::ve
             pattern = glob_to_regex(raw_pattern);
         }
         try {
-            if (nocase) {
+            if (is_case_insensitive) {
                 regex_patterns.emplace_back(pattern, std::regex::icase|std::regex::optimize);
             } else {
                 regex_patterns.emplace_back(pattern, std::regex::optimize);
