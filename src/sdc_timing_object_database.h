@@ -49,7 +49,7 @@ inline PortDirection from_string_to_port_dir(const std::string& port_type) {
 class TimingObjectDatabase {
   private:
     /// @brief A mapping between an object ID and its name.
-    std::unordered_map<ObjectId, std::string> object_name;
+    std::unordered_map<ObjectId, std::string> object_name_;
     /// @brief A mapping between a port object and its direction.
     std::unordered_map<PortObjectId, PortDirection> port_direction_;
     /// @brief A collection of all clock driver objects.
@@ -77,8 +77,8 @@ class TimingObjectDatabase {
      */
     inline CellObjectId create_cell_object(const std::string& cell_name) {
         CellObjectId cell_object_id = CellObjectId("__vtr_obj_cell_" + std::to_string(cell_objects.size()));
-        assert(object_name.count(cell_object_id) == 0);
-        object_name[cell_object_id] = cell_name;
+        assert(object_name_.count(cell_object_id) == 0);
+        object_name_[cell_object_id] = cell_name;
         cell_objects.push_back(cell_object_id);
         return cell_object_id;
     }
@@ -93,8 +93,8 @@ class TimingObjectDatabase {
      */
     inline ClockObjectId create_clock_object(const std::string& clock_name) {
         ClockObjectId clock_object_id = ClockObjectId("__vtr_obj_clock_" + std::to_string(clock_objects.size()));
-        assert(object_name.count(clock_object_id) == 0);
-        object_name[clock_object_id] = clock_name;
+        assert(object_name_.count(clock_object_id) == 0);
+        object_name_[clock_object_id] = clock_name;
         clock_objects.push_back(clock_object_id);
         return clock_object_id;
     }
@@ -116,8 +116,8 @@ class TimingObjectDatabase {
                                            bool is_clock_driver) {
         assert(port_direction != PortDirection::UNKNOWN);
         PortObjectId port_object_id = PortObjectId("__vtr_obj_port_" + std::to_string(port_objects.size()));
-        assert(object_name.count(port_object_id) == 0);
-        object_name[port_object_id] = port_name;
+        assert(object_name_.count(port_object_id) == 0);
+        object_name_[port_object_id] = port_name;
         port_direction_[port_object_id] = port_direction;
         port_objects.push_back(port_object_id);
 
@@ -141,8 +141,8 @@ class TimingObjectDatabase {
     inline PinObjectId create_pin_object(const std::string& pin_name,
                                          bool is_clock_driver) {
         PinObjectId pin_object_id = PinObjectId("__vtr_obj_pin_" + std::to_string(pin_objects.size()));
-        assert(object_name.count(pin_object_id) == 0);
-        object_name[pin_object_id] = pin_name;
+        assert(object_name_.count(pin_object_id) == 0);
+        object_name_[pin_object_id] = pin_name;
         pin_objects.push_back(pin_object_id);
 
         if (is_clock_driver) {
@@ -162,8 +162,8 @@ class TimingObjectDatabase {
      */
     inline NetObjectId create_net_object(const std::string& net_name) {
         NetObjectId net_object_id = NetObjectId("__vtr_obj_net_" + std::to_string(net_objects.size()));
-        assert(object_name.count(net_object_id) == 0);
-        object_name[net_object_id] = net_name;
+        assert(object_name_.count(net_object_id) == 0);
+        object_name_[net_object_id] = net_name;
         net_objects.push_back(net_object_id);
 
         return net_object_id;
@@ -208,9 +208,9 @@ class TimingObjectDatabase {
     /**
      * @brief Get the name of the given object.
      */
-    inline std::string get_object_name(ObjectId object_id) const {
-        auto it = object_name.find(object_id);
-        assert(it != object_name.end());
+    const std::string& get_object_name(ObjectId object_id) const {
+        auto it = object_name_.find(object_id);
+        assert(it != object_name_.end());
         return it->second;
     }
 
@@ -343,6 +343,22 @@ class TimingObjectDatabase {
         }
         return all_clock_drivers;
     }
+
+    /**
+     * @brief Query the object database for objects of the given types with
+     *        names matching the given patterns.
+     *
+     *  @param patterns             A list of patterns to search for.
+     *  @param is_case_insensitive  If true, performs case-insensitive matching.
+     *  @param is_regex             Set to true to use a regex pattern matcher, false to use a glob pattern matcher.
+     *  @param object_types         The types of objects to match for.
+     *
+     *  @return A list of object IDs that match the query.
+     */
+    std::vector<std::string> query_pattern_match(const std::vector<std::string>& patterns,
+                                                 bool is_case_insensitive,
+                                                 bool is_regex,
+                                                 const std::vector<ObjectType>& object_types);
 };
 
 } // namespace sdcparse
