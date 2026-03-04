@@ -74,7 +74,6 @@ enum class IoDelayType;
 enum class ClockGroupsType;
 enum class FromToType;
 enum class McpType;
-enum class StringGroupType;
 
 struct CreateClock;
 struct CreateGeneratedClock;
@@ -87,8 +86,6 @@ struct SetClockUncertainty;
 struct SetClockLatency;
 struct SetDisableTiming;
 struct SetTimingDerate;
-
-struct StringGroup;
 
 class Callback {
 
@@ -181,31 +178,6 @@ enum class ClockLatencyType {
     NONE
 };
 
-enum class StringGroupType {
-    STRING, 
-    PORT, 
-    CLOCK,
-    CELL,
-    PIN,
-    OBJECT
-};
-
-/*
- * Common SDC data structures
- */
-
-struct StringGroup {
-    StringGroup() = default;
-    StringGroup(StringGroupType group_type)
-        : type(group_type) {}
-
-    StringGroupType type = StringGroupType::STRING;   //The type of the string group, default is STRING. 
-                                                            // Groups derived from 'calls' to [get_clocks {...}] 
-                                                            // and [get_ports {...}] will have types SDC_CLOCK 
-                                                            // and SDC_PORT respectively.
-    std::vector<std::string> strings;                       //The strings in the group
-};
-
 /*
  * Structures defining different SDC commands
  */
@@ -214,20 +186,18 @@ struct CreateClock {
     double period = UNINITIALIZED_FLOAT;        //Clock period
     double rise_edge = UNINITIALIZED_FLOAT;     //Rise time from waveform definition
     double fall_edge = UNINITIALIZED_FLOAT;     //Fall time from waveform definition
-    StringGroup targets;                        //The set of strings indicating clock sources.
-                                                // May be explicit strings or regexs.
+    std::vector<ObjectId> targets;              //The list of objects indicating clock sources.
     bool is_virtual = false;                    //Identifies this as a virtual (non-netlist) clock
     bool add = false;
 };
 
 struct CreateGeneratedClock {
     std::string name = "";
-    std::string source = "";
-    StringGroupType source_string_type = StringGroupType::STRING;
+    ObjectId source = ObjectId("");
     int divide_by = UNINITIALIZED_INT;
     int multiply_by = UNINITIALIZED_INT;
     bool add = false;
-    StringGroup targets;
+    std::vector<ObjectId> targets;
 };
 
 struct SetIoDelay {
@@ -246,17 +216,17 @@ struct SetIoDelay {
                                                     // implicitly specifying both)
     std::string clock_name = "";                    //Name of the clock this constraint is associated with
     double delay = UNINITIALIZED_FLOAT;             //The maximum input delay allowed on the target ports
-    StringGroup target_ports;                       //The target ports
+    std::vector<ObjectId> target_ports;             //The target ports
 };
 
 struct SetClockGroups {
     ClockGroupsType type = ClockGroupsType::NONE;   //The type of clock group relation being specified
-    std::vector<StringGroup> clock_groups;          //The groups of clocks
+    std::vector<std::vector<ObjectId>> clock_groups;//The groups of clocks
 };
 
 struct SetFalsePath {
-    StringGroup from;                           //The source list of startpoints or clocks
-    StringGroup to;                             //The target list of endpoints or clocks
+    std::vector<ObjectId> from;                     //The source list of startpoints or clocks
+    std::vector<ObjectId> to;                       //The target list of endpoints or clocks
 };
 
 struct SetMinMaxDelay {
@@ -266,8 +236,8 @@ struct SetMinMaxDelay {
     MinMaxType type = MinMaxType::NONE;         //Whether this is a min or max delay
     double value = UNINITIALIZED_FLOAT;         //The maximum/minimum allowed delay between the from
                                                 // and to clocks
-    StringGroup from;                           //The source list of startpoints or clocks
-    StringGroup to;                             //The target list of endpoints or clocks
+    std::vector<ObjectId> from;                 //The source list of startpoints or clocks
+    std::vector<ObjectId> to;                   //The target list of endpoints or clocks
 };
 
 struct SetMulticyclePath {
@@ -279,8 +249,8 @@ struct SetMulticyclePath {
                                                 // applying mcp_value for the setup mcp, and 0 for the hold 
                                                 // mcp)
     int mcp_value = UNINITIALIZED_INT;          //The number of cycles specifed
-    StringGroup from;                           //The source list of startpoints or clocks
-    StringGroup to;                             //The target list of endpoints or clocks
+    std::vector<ObjectId> from;                 //The source list of startpoints or clocks
+    std::vector<ObjectId> to;                   //The target list of endpoints or clocks
 };
 
 struct SetClockUncertainty {
@@ -292,8 +262,8 @@ struct SetClockUncertainty {
                                                 // implicitly specifying both)
     float value = UNINITIALIZED_FLOAT;          //The uncertainty value
 
-    StringGroup from;                           //Launch clock domain(s)
-    StringGroup to;                             //Capture clock domain(s)
+    std::vector<ObjectId> from;                 //Launch clock domain(s)
+    std::vector<ObjectId> to;                   //Capture clock domain(s)
 };
 
 struct SetClockLatency {
@@ -306,12 +276,12 @@ struct SetClockLatency {
                                                    // implicitly specifying both)
     float value = UNINITIALIZED_FLOAT;             //The latency value
 
-    StringGroup target_clocks;                     //The target clocks
+    std::vector<ObjectId> target_clocks;           //The target clocks
 };
 
 struct SetDisableTiming {
-    StringGroup from;                           //The source pins
-    StringGroup to;                             //The sink pins
+    std::vector<ObjectId> from;                    //The source pins
+    std::vector<ObjectId> to;                      //The sink pins
 };
 
 struct SetTimingDerate {
@@ -326,7 +296,7 @@ struct SetTimingDerate {
 
     float value = UNINITIALIZED_FLOAT;          //The derate value
 
-    StringGroup cell_targets;                   //The (possibly empty) set of target cells
+    std::vector<ObjectId> cell_targets;         //The (possibly empty) set of target cells
 };
 
 } //namespace
