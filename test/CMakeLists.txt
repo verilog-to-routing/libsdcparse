@@ -11,6 +11,6 @@ add_custom_target(check-libsdcparse-vg
                    -v
                    --vg --vg-leak
                    --vg-arg="--suppressions=${CMAKE_CURRENT_SOURCE_DIR}/tcl.supp"
-                   --filter="basic/.*|legacy/.*"
+                   --filter="basic/.*"
                    --vg-arg="--gen-suppressions=all"
     DEPENDS sdcparse_test)

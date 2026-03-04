@@ -297,27 +297,16 @@ private:
 };
 
 int main(int argc, char **argv) {
-    if(argc != 2 && argc != 3) {
-        flushing_fprintf(stderr, "Usage: %s filename.sdc [-legacy]\n", argv[0]);
+    if(argc != 2) {
+        flushing_fprintf(stderr, "Usage: %s filename.sdc\n", argv[0]);
         flushing_fprintf(stderr, "\n");
         flushing_fprintf(stderr, "Reads in an SDC file into internal data structures\n");
         flushing_fprintf(stderr, "and then prints it out.\n");
-        flushing_fprintf(stderr, "Use -legacy to use the legacy (non-tcl) parser.\n");
         return 1;
     }
 
-    bool use_tcl_interp = true;
-    for (int i = 2; i < argc; i++) {
-        if (std::string(argv[i]) == "-legacy") {
-            use_tcl_interp = false;
-        } else {
-            flushing_fprintf(stderr, "Unknown option: %s\n", argv[i]);
-            return 1;
-        }
-    }
-
     PrintCallback callback;
-    sdc_parse_filename(argv[1], callback, use_tcl_interp);
+    sdc_parse_filename(argv[1], callback);
 
     if(callback.error()) {
         return 1;
