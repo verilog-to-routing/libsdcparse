@@ -131,11 +131,16 @@ class Callback {
         TimingObjectDatabase obj_database;
 };
 
-/*
- * External functions for loading an SDC file
+/**
+ * @brief Parse the given SDC file using the given callback object.
+ *
+ * This will invoke a TCL interpreter which will execute the SDC commands
+ * in the given file, which will call the given callback methods.
+ *
+ *  @param filename     Path to the SDC file to interpret.
+ *  @param callback     Callbacks to execute when the SDC commands are parsed.
  */
-void sdc_parse_filename(std::string filename, Callback& callback);
-void sdc_parse_filename(const char* filename, Callback& callback);
+void sdc_parse_filename(const std::string& filename, Callback& callback);
 
 /*
  * Sentinal values
