@@ -27,8 +27,8 @@
 
 using namespace sdcparse;
 
-void print_string_group(const StringGroup& group);
-void print_from_to_group(const StringGroup& from, const StringGroup& to);
+void print_object_id_vec(const std::vector<ObjectId>& group);
+void print_from_to_object_id_vec(const std::vector<ObjectId>& from, const std::vector<ObjectId>& to);
 
 class PrintCallback : public Callback {
 public:
@@ -51,9 +51,9 @@ public:
             flushing_printf(" -name %s",
                    cmd.name.c_str());
         }
-        if (!cmd.targets.strings.empty()) {
+        if (!cmd.targets.empty()) {
             flushing_printf(" ");
-            print_string_group(cmd.targets);
+            print_object_id_vec(cmd.targets);
         }
         if (cmd.add) {
             flushing_printf(" -add");
@@ -63,20 +63,15 @@ public:
         std::string clock_name = "";
         if (!cmd.name.empty()) {
             clock_name = cmd.name;
-            obj_database.create_clock_object(clock_name);
         } else {
-            if (cmd.targets.strings.empty()) {
+            if (cmd.targets.empty()) {
                 throw std::runtime_error("create_clock: clock name or target required");
             }
             // If no name is given, use the first target for the name. This
             // matches the behaviour of other tools.
-            if (cmd.targets.type == StringGroupType::OBJECT) {
-                clock_name = obj_database.get_object_name(ObjectId(cmd.targets.strings[0]));
-            } else {
-                clock_name = cmd.targets.strings[0];
-            }
-            obj_database.create_clock_object(clock_name);
+            clock_name = obj_database.get_object_name(ObjectId(cmd.targets[0]));
         }
+        obj_database.create_clock_object(clock_name);
     }
 
     void create_generated_clock(const CreateGeneratedClock& cmd) override {
@@ -86,14 +81,7 @@ public:
             flushing_printf(" -name %s",
                    cmd.name.c_str());
         }
-        std::string source_name;
-        if (cmd.source_string_type == StringGroupType::OBJECT) {
-            source_name = obj_database.get_object_name(ObjectId(cmd.source));
-        } else if (cmd.source_string_type == StringGroupType::STRING) {
-            source_name = cmd.source;
-        } else {
-            throw std::runtime_error("Unsupported string type group");
-        }
+        std::string source_name = obj_database.get_object_name(ObjectId(cmd.source));
         flushing_printf(" -source %s", source_name.c_str());
         if (cmd.divide_by != sdcparse::UNINITIALIZED_INT)
             flushing_printf(" -divide_by %d", cmd.divide_by);
@@ -102,29 +90,24 @@ public:
         if (cmd.add) {
             flushing_printf(" -add");
         }
-        if (!cmd.targets.strings.empty()) {
+        if (!cmd.targets.empty()) {
             flushing_printf(" ");
-            print_string_group(cmd.targets);
+            print_object_id_vec(cmd.targets);
         }
         flushing_printf("\n");
 
         std::string clock_name = "";
         if (!cmd.name.empty()) {
             clock_name = cmd.name;
-            obj_database.create_clock_object(clock_name);
         } else {
-            if (cmd.targets.strings.empty()) {
+            if (cmd.targets.empty()) {
                 throw std::runtime_error("create_generated_clock: clock name or target required");
             }
             // If no name is given, use the first target for the name. This
             // matches the behaviour of other tools.
-            if (cmd.targets.type == StringGroupType::OBJECT) {
-                clock_name = obj_database.get_object_name(ObjectId(cmd.targets.strings[0]));
-            } else {
-                clock_name = cmd.targets.strings[0];
-            }
-            obj_database.create_clock_object(clock_name);
+            clock_name = obj_database.get_object_name(ObjectId(cmd.targets[0]));
         }
+        obj_database.create_clock_object(clock_name);
     }
 
     void set_io_delay(const SetIoDelay& cmd) override {
@@ -148,7 +131,7 @@ public:
             flushing_printf(" -min");
         }
         flushing_printf(" %f ", cmd.delay);
-        print_string_group(cmd.target_ports);
+        print_object_id_vec(cmd.target_ports);
         flushing_printf("\n");
     }
     void set_clock_groups(const SetClockGroups& cmd) override {
@@ -165,7 +148,7 @@ public:
             flushing_printf(" -exclusive");
         for(const auto& clk_grp : cmd.clock_groups) {
             flushing_printf(" -group ");
-            print_string_group(clk_grp);
+            print_object_id_vec(clk_grp);
         }
         flushing_printf("\n");
     }
@@ -173,7 +156,7 @@ public:
     void set_false_path(const SetFalsePath& cmd) override {
         flushing_printf("#%s:%d\n", filename_.c_str(), lineno_);
         flushing_printf("set_false_path ");
-        print_from_to_group(cmd.from, cmd.to);
+        print_from_to_object_id_vec(cmd.from, cmd.to);
         flushing_printf("\n");
     }
     void set_min_max_delay(const SetMinMaxDelay& cmd) override {
@@ -184,7 +167,7 @@ public:
             flushing_printf("set_min_delay");
         }
         flushing_printf(" %f ", cmd.value);
-        print_from_to_group(cmd.from, cmd.to);
+        print_from_to_object_id_vec(cmd.from, cmd.to);
         flushing_printf("\n");
     }
     void set_multicycle_path(const SetMulticyclePath& cmd) override {
@@ -196,7 +179,7 @@ public:
         if(cmd.is_hold) {
             flushing_printf("-hold ");
         }
-        print_from_to_group(cmd.from, cmd.to);
+        print_from_to_object_id_vec(cmd.from, cmd.to);
         flushing_printf("\n");
     }
     void set_clock_uncertainty(const SetClockUncertainty& cmd) override {
@@ -208,7 +191,7 @@ public:
         if(cmd.is_hold) {
             flushing_printf("-hold ");
         }
-        print_from_to_group(cmd.from, cmd.to);
+        print_from_to_object_id_vec(cmd.from, cmd.to);
         flushing_printf(" %f ", cmd.value);
         flushing_printf("\n");
     }
@@ -225,13 +208,13 @@ public:
             flushing_printf("-late ");
         }
         flushing_printf("%f ", cmd.value);
-        print_string_group(cmd.target_clocks);
+        print_object_id_vec(cmd.target_clocks);
         flushing_printf("\n");
     }
     void set_disable_timing(const SetDisableTiming& cmd) override {
         flushing_printf("#%s:%d\n", filename_.c_str(), lineno_);
         flushing_printf("set_disable_timing ");
-        print_from_to_group(cmd.from, cmd.to);
+        print_from_to_object_id_vec(cmd.from, cmd.to);
         flushing_printf("\n");
     }
     void set_timing_derate(const SetTimingDerate& cmd) override {
@@ -251,7 +234,7 @@ public:
             flushing_printf("-cell_delay ");
         }
         flushing_printf("%f ", cmd.value);
-        print_string_group(cmd.cell_targets);
+        print_object_id_vec(cmd.cell_targets);
         flushing_printf("\n");
     }
 
@@ -314,56 +297,30 @@ int main(int argc, char **argv) {
     return 0;
 }
 
-void print_string_group(const StringGroup& group) {
-    const char *start_token, *end_token;
-    if(group.type == StringGroupType::STRING) {
-        start_token = "{";
-        end_token   = "}";
-    } else if (group.type == StringGroupType::OBJECT) {
-        start_token = "{";
-        end_token   = "}";
-    } else if (group.type == StringGroupType::CLOCK) {
-        start_token = "[get_clocks {";
-        end_token   = "}]";
+void print_object_id_vec(const std::vector<ObjectId>& object_ids) {
+    if (object_ids.empty())
+        return;
 
-    } else if (group.type == StringGroupType::PORT) {
-        start_token = "[get_ports {";
-        end_token   = "}]";
+    flushing_printf("{");
+    for (size_t i = 0; i < object_ids.size(); ++i) {
+        flushing_printf("%s", object_ids[i].to_string().c_str());
 
-    } else if (group.type == StringGroupType::CELL) {
-        start_token = "[get_cells {";
-        end_token   = "}]";
-    } else if (group.type == StringGroupType::PIN) {
-        start_token = "[get_pins {";
-        end_token   = "}]";
-
-    } else {
-        flushing_printf("Unsupported sdc string group type\n");
-        exit(1);
-    }
-
-    if(!group.strings.empty()) {
-        flushing_printf("%s", start_token);
-        for(size_t i = 0; i < group.strings.size(); ++i) {
-            flushing_printf("%s", group.strings[i].c_str());
-
-            if(i != group.strings.size() - 1) {
-                flushing_printf(" ");
-            }
+        if (i != object_ids.size() - 1) {
+            flushing_printf(" ");
         }
-        flushing_printf("%s", end_token);
     }
+    flushing_printf("}");
 }
 
-void print_from_to_group(const StringGroup& from, const StringGroup& to) {
-    if(!from.strings.empty()) {
+void print_from_to_object_id_vec(const std::vector<ObjectId>& from, const std::vector<ObjectId>& to) {
+    if(!from.empty()) {
         flushing_printf("-from ");
-        print_string_group(from);
+        print_object_id_vec(from);
     }
 
-    if(!to.strings.empty()) {
+    if(!to.empty()) {
         flushing_printf(" -to ");
-        print_string_group(to);
+        print_object_id_vec(to);
     }
 }
 
