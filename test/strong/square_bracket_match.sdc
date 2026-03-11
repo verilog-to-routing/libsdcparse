@@ -1,42 +1,44 @@
 # RUN: %sdcparse-test %s 2>&1 | filecheck %s
 
-# CHECK: [[A0_ptr:__vtr_obj_port_[0-9]+]]
+# CHECK: [[A0_ptr:[0-9]+]]
 puts [libsdcparse_create_port "A\[0\]" -direction INPUT]
-# CHECK: [[A1_ptr:__vtr_obj_port_[0-9]+]]
+# CHECK: [[A1_ptr:[0-9]+]]
 puts [libsdcparse_create_port "A\[1\]" -direction INPUT]
-# CHECK: [[A2_ptr:__vtr_obj_port_[0-9]+]]
+# CHECK: [[A2_ptr:[0-9]+]]
 puts [libsdcparse_create_port "A\[2\]" -direction INPUT]
-# CHECK: [[A3_ptr:__vtr_obj_port_[0-9]+]]
+# CHECK: [[A3_ptr:[0-9]+]]
 puts [libsdcparse_create_port "A\[3\]" -direction INPUT]
-# CHECK: [[B0_ptr:__vtr_obj_port_[0-9]+]]
+# CHECK: [[B0_ptr:[0-9]+]]
 puts [libsdcparse_create_port "B\[0\]" -direction INPUT]
-# CHECK: [[B1_ptr:__vtr_obj_port_[0-9]+]]
+# CHECK: [[B1_ptr:[0-9]+]]
 puts [libsdcparse_create_port "B\[1\]" -direction INPUT]
-# CHECK: [[B2_ptr:__vtr_obj_port_[0-9]+]]
+# CHECK: [[B2_ptr:[0-9]+]]
 puts [libsdcparse_create_port "B\[2\]" -direction INPUT]
-# CHECK: [[B3_ptr:__vtr_obj_port_[0-9]+]]
+# CHECK: [[B3_ptr:[0-9]+]]
 puts [libsdcparse_create_port "B\[3\]" -direction INPUT]
-# CHECK: [[B10_ptr:__vtr_obj_port_[0-9]+]]
+# CHECK: [[B10_ptr:[0-9]+]]
 puts [libsdcparse_create_port {B[10]} -direction INPUT]
 
+# CHECK: START
 # CHECK-DAG: [[A0_ptr]]
 # CHECK-DAG: [[A1_ptr]]
 # CHECK-DAG: [[A2_ptr]]
 # CHECK-DAG: [[A3_ptr]]
 # CHECK-NEXT: DONE
-puts [get_ports A*]
+puts START
+libsdcparse_print_object_id_list_internal [get_ports A*]
 puts DONE
 
 # CHECK: [[A0_ptr]]
-# CHECK-NEXT: DONE
+# CHECK: DONE
 puts "get_ports A\[0\]:"
-puts [get_ports A[0]]
+libsdcparse_print_object_id_list_internal [get_ports A[0]]
 puts DONE
 
 # CHECK: [[A0_ptr]]
-# CHECK-NEXT: DONE
+# CHECK: DONE
 puts "get_ports A\\\[0\\\]:"
-puts [get_ports A\[0\]]
+libsdcparse_print_object_id_list_internal [get_ports A\[0\]]
 puts DONE
 
 # CHECK-DAG: [[A0_ptr]]
@@ -45,7 +47,7 @@ puts DONE
 # CHECK-DAG: [[A3_ptr]]
 # CHECK-NEXT: DONE
 puts "get_ports A\[*\]:"
-puts [get_ports A[*]]
+libsdcparse_print_object_id_list_internal [get_ports A[*]]
 puts DONE
 
 # CHECK-DAG: [[A0_ptr]]
@@ -54,7 +56,7 @@ puts DONE
 # CHECK-DAG: [[A3_ptr]]
 # CHECK-NEXT: DONE
 puts "get_ports {A\\\[*\\\]}:"
-puts [get_ports {A\[*\]}]
+libsdcparse_print_object_id_list_internal [get_ports {A\[*\]}]
 puts DONE
 
 # CHECK-DAG: [[B0_ptr]]
@@ -64,16 +66,16 @@ puts DONE
 # CHECK-DAG: [[B10_ptr]]
 # CHECK-NEXT: DONE
 puts "get_ports B\[*\]:"
-puts [get_ports B[*]]
+libsdcparse_print_object_id_list_internal [get_ports B[*]]
 puts DONE
 
 # CHECK: [[B10_ptr]]
 # CHECK-NEXT: DONE
-puts [get_ports B[10]]
+libsdcparse_print_object_id_list_internal [get_ports B[10]]
 puts DONE
 
 # TODO: Should we handle more interesting cases like A[3:0]?
 #       This will return A[3], A[2], A[1], A[0].
 
 # puts "get_ports A\[3:0\]:"
-# puts [get_ports A[3:0]]
+# libsdcparse_print_object_id_list_internal [get_ports A[3:0]]

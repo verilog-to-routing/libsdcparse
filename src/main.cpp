@@ -303,7 +303,7 @@ void print_object_id_vec(const std::vector<ObjectId>& object_ids) {
 
     flushing_printf("{");
     for (size_t i = 0; i < object_ids.size(); ++i) {
-        flushing_printf("%s", object_ids[i].to_string().c_str());
+        flushing_printf("%zu", (size_t)object_ids[i]);
 
         if (i != object_ids.size() - 1) {
             flushing_printf(" ");

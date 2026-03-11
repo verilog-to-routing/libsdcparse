@@ -1,8 +1,8 @@
 # RUN: %sdcparse-test %s 2>&1 | filecheck %s
 
-# CHECK: [[FFQ0_ptr:__vtr_obj_pin_[0-9]+]]
+# CHECK: [[FFQ0_ptr:[0-9]+]]
 puts [libsdcparse_create_pin "FF.Q0" -direction OUTPUT]
-# CHECK: [[FFDIN0_ptr:__vtr_obj_pin_[0-9]+]]
+# CHECK: [[FFDIN0_ptr:[0-9]+]]
 puts [libsdcparse_create_pin "to_FFD.in0" -direction OUTPUT]
 
 # CHECK: set_disable_timing -from {[[FFQ0_ptr]]} -to {[[FFDIN0_ptr]]}

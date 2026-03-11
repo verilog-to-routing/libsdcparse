@@ -193,7 +193,7 @@ struct CreateClock {
 
 struct CreateGeneratedClock {
     std::string name = "";
-    ObjectId source = ObjectId("");
+    ObjectId source = ObjectId::INVALID();
     int divide_by = UNINITIALIZED_INT;
     int multiply_by = UNINITIALIZED_INT;
     bool add = false;

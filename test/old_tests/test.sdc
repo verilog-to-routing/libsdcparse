@@ -1,53 +1,53 @@
 # RUN: %sdcparse-test %s &> %t
 # RUN: filecheck %s --input-file=%t
 
-# CHECK: [[clk0_port_ptr:__vtr_obj_port_[0-9]+]]
+# CHECK: [[clk0_port_ptr:[0-9]+]]
 puts [libsdcparse_create_port "clk0" -direction INPUT]
-# CHECK: [[clk1_port_ptr:__vtr_obj_port_[0-9]+]]
+# CHECK: [[clk1_port_ptr:[0-9]+]]
 puts [libsdcparse_create_port "clk1" -direction INPUT]
-# CHECK: [[clk2_port_ptr:__vtr_obj_port_[0-9]+]]
+# CHECK: [[clk2_port_ptr:[0-9]+]]
 puts [libsdcparse_create_port "clk2" -direction INPUT]
-# CHECK: [[clk3_port_ptr:__vtr_obj_port_[0-9]+]]
+# CHECK: [[clk3_port_ptr:[0-9]+]]
 puts [libsdcparse_create_port "clk3" -direction INPUT]
-# CHECK: [[clk4_port_ptr:__vtr_obj_port_[0-9]+]]
+# CHECK: [[clk4_port_ptr:[0-9]+]]
 puts [libsdcparse_create_port "clk4" -direction INPUT]
-# CHECK: [[top_clk_port_ptr:__vtr_obj_port_[0-9]+]]
+# CHECK: [[top_clk_port_ptr:[0-9]+]]
 puts [libsdcparse_create_port "top^clk" -direction INPUT]
-# CHECK: [[asdf_port_ptr:__vtr_obj_port_[0-9]+]]
+# CHECK: [[asdf_port_ptr:[0-9]+]]
 puts [libsdcparse_create_port "asdf" -direction INPUT]
-# CHECK: [[qwerty_port_ptr:__vtr_obj_port_[0-9]+]]
+# CHECK: [[qwerty_port_ptr:[0-9]+]]
 puts [libsdcparse_create_port "qwerty" -direction INPUT]
-# CHECK: [[in1_port_ptr:__vtr_obj_port_[0-9]+]]
+# CHECK: [[in1_port_ptr:[0-9]+]]
 puts [libsdcparse_create_port "in1" -direction INPUT]
-# CHECK: [[in2_port_ptr:__vtr_obj_port_[0-9]+]]
+# CHECK: [[in2_port_ptr:[0-9]+]]
 puts [libsdcparse_create_port "in2" -direction INPUT]
-# CHECK: [[in3_port_ptr:__vtr_obj_port_[0-9]+]]
+# CHECK: [[in3_port_ptr:[0-9]+]]
 puts [libsdcparse_create_port "in3" -direction INPUT]
-# CHECK: [[out1_port_ptr:__vtr_obj_port_[0-9]+]]
+# CHECK: [[out1_port_ptr:[0-9]+]]
 puts [libsdcparse_create_port "out1" -direction INPUT]
-# CHECK: [[out2_port_ptr:__vtr_obj_port_[0-9]+]]
+# CHECK: [[out2_port_ptr:[0-9]+]]
 puts [libsdcparse_create_port "out2" -direction INPUT]
-# CHECK: [[eof_test_port1_port_ptr:__vtr_obj_port_[0-9]+]]
+# CHECK: [[eof_test_port1_port_ptr:[0-9]+]]
 puts [libsdcparse_create_port "eof_test_port1" -direction INPUT]
-# CHECK: [[eof_test_port2_port_ptr:__vtr_obj_port_[0-9]+]]
+# CHECK: [[eof_test_port2_port_ptr:[0-9]+]]
 puts [libsdcparse_create_port "eof_test_port2" -direction INPUT]
 
-# CHECK: [[asdf_tff_cell_ptr:__vtr_obj_cell_[0-9]+]]
+# CHECK: [[asdf_tff_cell_ptr:[0-9]+]]
 puts [libsdcparse_create_cell "asdf~/ff"]
-# CHECK: [[wer_cell_ptr:__vtr_obj_cell_[0-9]+]]
+# CHECK: [[wer_cell_ptr:[0-9]+]]
 puts [libsdcparse_create_cell "wer/234/ff3"]
-# CHECK: [[xcw_cell_ptr:__vtr_obj_cell_[0-9]+]]
+# CHECK: [[xcw_cell_ptr:[0-9]+]]
 puts [libsdcparse_create_cell "xcw/32|ff2"]
-# CHECK: [[asdf_ff_cell_ptr:__vtr_obj_cell_[0-9]+]]
+# CHECK: [[asdf_ff_cell_ptr:[0-9]+]]
 puts [libsdcparse_create_cell "asdf/ff"]
-# CHECK: [[qwert_cell_ptr:__vtr_obj_cell_[0-9]+]]
+# CHECK: [[qwert_cell_ptr:[0-9]+]]
 puts [libsdcparse_create_cell "qwert/asd/ff"]
-# CHECK: [[asdf_ff2_cell_ptr:__vtr_obj_cell_[0-9]+]]
+# CHECK: [[asdf_ff2_cell_ptr:[0-9]+]]
 puts [libsdcparse_create_cell "asdf/ff2"]
 
-# CHECK: [[my_inst_in0_pin_ptr:__vtr_obj_pin_[0-9]+]]
+# CHECK: [[my_inst_in0_pin_ptr:[0-9]+]]
 puts [libsdcparse_create_pin "my_inst/in\[0\]" -direction INPUT]
-# CHECK: [[my_inst_out0_pin_ptr:__vtr_obj_pin_[0-9]+]]
+# CHECK: [[my_inst_out0_pin_ptr:[0-9]+]]
 puts [libsdcparse_create_pin "my_inst2/out\[0\]" -direction OUTPUT]
 
 #Netlist Clocks
@@ -76,22 +76,22 @@ create_clock -period 1 -name input_clock2
 # CHECK: create_clock -period {{0.0*}} -waveform {{{0.0*}} {{0.0*}}} -name output_clk
 create_clock -period 0 -name output_clk; #Zero period
 
-# CHECK: clk0: [[clk0_clock_ptr:__vtr_obj_clock_[0-9]+]]
-puts "clk0: [get_clocks clk0]"
-# CHECK: clk2: [[clk2_clock_ptr:__vtr_obj_clock_[0-9]+]]
-puts "clk2: [get_clocks clk2]"
-# CHECK: clk3: [[clk3_clock_ptr:__vtr_obj_clock_[0-9]+]]
-puts "clk3: [get_clocks clk3]"
-# CHECK: input_clk: [[input_clk_clock_ptr:__vtr_obj_clock_[0-9]+]]
-puts "input_clk: [get_clocks input_clk]"
-# CHECK: input_clock2: [[input_clock2_clock_ptr:__vtr_obj_clock_[0-9]+]]
-puts "input_clock2: [get_clocks input_clock2]"
-# CHECK: asdf: [[asdf_clock_ptr:__vtr_obj_clock_[0-9]+]]
-puts "asdf: [get_clocks asdf]"
-# CHECK: qwerty: [[qwerty_clock_ptr:__vtr_obj_clock_[0-9]+]]
-puts "qwerty: [get_clocks qwerty]"
-# CHECK: output_clk: [[output_clk_clock_ptr:__vtr_obj_clock_[0-9]+]]
-puts "output_clk: [get_clocks output_clk]"
+# CHECK: clk0: [[clk0_clock_ptr:[0-9]+]]
+puts "clk0: [libsdcparse_get_object_id_value_internal [get_clocks clk0]]"
+# CHECK: clk2: [[clk2_clock_ptr:[0-9]+]]
+puts "clk2: [libsdcparse_get_object_id_value_internal [get_clocks clk2]]"
+# CHECK: clk3: [[clk3_clock_ptr:[0-9]+]]
+puts "clk3: [libsdcparse_get_object_id_value_internal [get_clocks clk3]]"
+# CHECK: input_clk: [[input_clk_clock_ptr:[0-9]+]]
+puts "input_clk: [libsdcparse_get_object_id_value_internal [get_clocks input_clk]]"
+# CHECK: input_clock2: [[input_clock2_clock_ptr:[0-9]+]]
+puts "input_clock2: [libsdcparse_get_object_id_value_internal [get_clocks input_clock2]]"
+# CHECK: asdf: [[asdf_clock_ptr:[0-9]+]]
+puts "asdf: [libsdcparse_get_object_id_value_internal [get_clocks asdf]]"
+# CHECK: qwerty: [[qwerty_clock_ptr:[0-9]+]]
+puts "qwerty: [libsdcparse_get_object_id_value_internal [get_clocks qwerty]]"
+# CHECK: output_clk: [[output_clk_clock_ptr:[0-9]+]]
+puts "output_clk: [libsdcparse_get_object_id_value_internal [get_clocks output_clk]]"
 
 #Clock Groups
 # CHECK: set_clock_groups -asynchronous -group {[[input_clk_clock_ptr]]} -group {[[clk2_clock_ptr]]} -group {[[clk3_clock_ptr]]}

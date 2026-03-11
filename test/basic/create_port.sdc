@@ -4,8 +4,8 @@
 #       to make sure that these ports are actually getting made. Should make
 #       this more robust.
 
-# CHECK: __vtr_obj_port_0
+# CHECK: 0
 puts [libsdcparse_create_port in1 -direction INPUT]
 
-# CHECK: __vtr_obj_port_1
+# CHECK: 1
 puts [libsdcparse_create_port in1 -direction INPUT]

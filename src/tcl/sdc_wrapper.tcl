@@ -775,7 +775,9 @@ proc libsdcparse_create_port {args} {
 
     set params [libsdcparse_generic_sdc_parser "create_port" $spec $args]
 
-    return [libsdcparse_create_port_internal [dict get $params port_name] [dict get $params -direction] [dict get $params -clock_driver]]
+    set new_port [libsdcparse_create_port_internal [dict get $params port_name] [dict get $params -direction] [dict get $params -clock_driver]]
+
+    return [libsdcparse_get_object_id_value_internal $new_port]
 }
 
 proc libsdcparse_create_pin {args} {
@@ -793,7 +795,9 @@ proc libsdcparse_create_pin {args} {
 
     # NOTE: Right now we ignore the pin direction. Eventually we will need the
     #       direction.
-    return [libsdcparse_create_pin_internal [dict get $params pin_name] [dict get $params -clock_driver]]
+    set new_pin [libsdcparse_create_pin_internal [dict get $params pin_name] [dict get $params -clock_driver]]
+
+    return [libsdcparse_get_object_id_value_internal $new_pin]
 }
 
 proc libsdcparse_create_cell {args} {
@@ -809,7 +813,9 @@ proc libsdcparse_create_cell {args} {
 
     set params [libsdcparse_generic_sdc_parser "create_cell" $spec $args]
 
-    return [libsdcparse_create_cell_internal [dict get $params cell_name]]
+    set new_cell [libsdcparse_create_cell_internal [dict get $params cell_name]]
+
+    return [libsdcparse_get_object_id_value_internal $new_cell]
 }
 
 proc libsdcparse_create_net {args} {
@@ -825,5 +831,35 @@ proc libsdcparse_create_net {args} {
 
     set params [libsdcparse_generic_sdc_parser "create_net" $spec $args]
 
-    return [libsdcparse_create_net_internal [dict get $params net_name]]
+    set new_net [libsdcparse_create_net_internal [dict get $params net_name]]
+
+    return [libsdcparse_get_object_id_value_internal $new_net]
+}
+
+proc libsdcparse_is_object_id_internal {obj} {
+    # if {[string is integer $obj]} { return 1 }
+    # This regex looks for:
+    # 1. A leading underscore
+    # 2. A sequence of hex characters (the address)
+    # 3. The suffix '_p_' (pointer) 
+    # 4. Your specific class/struct name
+    
+    set pattern {^_[0-9a-f]+_p_sdcparse__ObjectId(_t)?$}
+    
+    if {[regexp $pattern $obj]} {
+        return 1
+    } else {
+        return 0
+    }
+}
+
+proc libsdcparse_print_object_id_list_internal {obj_id_list} {
+    if {[llength $obj_id_list] == 0} {
+        puts ""
+        return
+    } else {
+        foreach obj_id $obj_id_list {
+            puts [libsdcparse_get_object_id_value_internal $obj_id]
+        }
+    }
 }
