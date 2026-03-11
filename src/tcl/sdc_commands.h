@@ -35,7 +35,7 @@ void libsdcparse_create_clock_internal(double period,
                                         const std::vector<sdcparse::ObjectId>& targets);
 
 void libsdcparse_create_generated_clock_internal(const std::string& name,
-                                                  const sdcparse::ObjectId& source,
+                                                  sdcparse::ObjectId source,
                                                   int divide_by,
                                                   int multiply_by,
                                                   bool add,
@@ -114,9 +114,9 @@ std::vector<sdcparse::ObjectId> libsdcparse_all_clock_drivers_internal();
 
 std::vector<sdcparse::ObjectId> libsdcparse_all_nets_internal();
 
-std::string libsdcparse_get_name_internal(const sdcparse::ObjectId& object_id);
+std::string libsdcparse_get_name_internal(sdcparse::ObjectId object_id);
 
-std::string libsdcparse_get_object_type_internal(const sdcparse::ObjectId& object_id);
+std::string libsdcparse_get_object_type_internal(sdcparse::ObjectId object_id);
 
 std::vector<sdcparse::ObjectId> libsdcparse_query_pattern_match_internal(const std::vector<std::string>& patterns,
                                                                   bool nocase,

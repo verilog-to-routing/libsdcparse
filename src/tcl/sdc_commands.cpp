@@ -59,7 +59,7 @@ void libsdcparse_create_clock_internal(double period,
 }
 
 void libsdcparse_create_generated_clock_internal(const std::string& name,
-                                                 const sdcparse::ObjectId& source,
+                                                 sdcparse::ObjectId source,
                                                  int divide_by,
                                                  int multiply_by,
                                                  bool add,
@@ -296,12 +296,12 @@ std::vector<sdcparse::ObjectId> libsdcparse_all_nets_internal() {
     return sdcparse::g_callback->obj_database.get_net_objects();
 }
 
-std::string libsdcparse_get_name_internal(const sdcparse::ObjectId& object_id) {
+std::string libsdcparse_get_name_internal(sdcparse::ObjectId object_id) {
     check_g_callback_defined();
     return sdcparse::g_callback->obj_database.get_object_name(object_id);
 }
 
-std::string libsdcparse_get_object_type_internal(const sdcparse::ObjectId& object_id) {
+std::string libsdcparse_get_object_type_internal(sdcparse::ObjectId object_id) {
     check_g_callback_defined();
     sdcparse::ObjectType object_type = sdcparse::g_callback->obj_database.get_object_type(object_id);
     return sdcparse::to_string(object_type);

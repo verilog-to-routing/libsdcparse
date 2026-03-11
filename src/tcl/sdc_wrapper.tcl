@@ -837,7 +837,7 @@ proc libsdcparse_create_net {args} {
 }
 
 proc libsdcparse_is_object_id_internal {obj} {
-    # if {[string is integer $obj]} { return 1 }
+    if {[string is integer $obj]} { return 1 }
     # This regex looks for:
     # 1. A leading underscore
     # 2. A sequence of hex characters (the address)
