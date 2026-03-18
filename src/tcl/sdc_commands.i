@@ -6,102 +6,72 @@
  */
 %module sdc_commands
 
-%typemap(in) sdcparse::ObjectId {
-    int val;
-    // 1. Convert the TCL object (from the script) to a C int
-    if (Tcl_GetIntFromObj(interp, $input, &val) != TCL_OK) {
-        return TCL_ERROR;
-    }
-    // 2. Construct the C++ object on the fly
-    // This assumes your struct has a constructor like ObjectId(int) 
-    // or you can set a member like {val}
-    $1 = sdcparse::ObjectId(val); 
-}
-
-%typemap(out) sdcparse::ObjectId {
-    // Replace .id with the actual member name or accessor method
-    Tcl_SetObjResult(interp, Tcl_NewIntObj(static_cast<size_t>($1.value)));
-}
-
-// %typemap(out) std::vector<sdcparse::ObjectId> {
-//     Tcl_Obj *listPtr = Tcl_NewListObj(0, NULL);
-//     for (const auto& id : $1) {
-//         // Assuming ObjectId has a .name() or can be cast to int
-//         Tcl_ListObjAppendElement(interp, listPtr, Tcl_NewStringObj(id.c_str(), -1));
-//     }
-//     Tcl_SetObjResult(interp, listPtr);
-// }
-
-%typemap(in) std::vector<sdcparse::ObjectId> (std::vector<sdcparse::ObjectId> temp) {
-    int listLen;
-    Tcl_Obj **listPtr;
-
-    // 1. Convert the TCL input into an array of Tcl_Obj pointers
-    if (Tcl_ListObjGetElements(interp, $input, &listLen, &listPtr) != TCL_OK) {
-        return TCL_ERROR;
+/**
+ * Due to using custom ID objects to maintain our Strong IDs, the TCL interpreter needs to
+ * be aware of how to handle these structs.
+ *
+ * We could just turn these IDs into integers; however this may cause issues since there will
+ * be no way of differentiating these IDs from integers. This is because TCL treats all objects
+ * as strings.
+ *
+ * To resolve this, we prefix the object strings for these IDs with "__vtr_obj_". This makes these
+ * objects distinct and in-operable from within TCL.
+ *
+ * The following fragment is a set of helper methods to convert TCL objects and ObjectIds to/from
+ * each other.
+ *
+ * The following typemaps declare to SWIG how it should handle different inputs/outputs of ObjectIds
+ * and vectors of ObjectIds.
+ */
+%fragment("ObjectIdHelpers", "header") {
+    // Convert ObjectId to TCL Handle
+    static Tcl_Obj* ObjectId_To_Tcl(Tcl_Interp */*interp*/, const sdcparse::ObjectId& id) {
+        return Tcl_ObjPrintf("__vtr_obj_%lld", static_cast<Tcl_WideInt>(id.value));
     }
 
-    // 2. Prepare our temporary C++ vector
-    temp.reserve(listLen);
-
-    for (int i = 0; i < listLen; i++) {
-        int val;
-        // 3. Extract the integer from the current list element
-        if (Tcl_GetIntFromObj(interp, listPtr[i], &val) != TCL_OK) {
-            // This provides a helpful error if the user passes a non-integer
-            Tcl_SetObjResult(interp, Tcl_NewStringObj("Vector must contain integers only", -1));
+    // Convert TCL Handle to ObjectId
+    static int Tcl_To_ObjectId(Tcl_Interp *interp, Tcl_Obj *obj, sdcparse::ObjectId *out) {
+        Tcl_WideInt val;
+        char *str = Tcl_GetString(obj);
+        if (sscanf(str, "__vtr_obj_%lld", &val) != 1) {
+            Tcl_SetObjResult(interp, Tcl_ObjPrintf("Invalid ObjectId handle: %s", str));
             return TCL_ERROR;
         }
-        
-        // 4. Create the struct and push it into the vector
-        // Assumes constructor: ObjectId(int) or brace initialization
-        temp.push_back(sdcparse::ObjectId{val});
+        out->value = static_cast<size_t>(val);
+        return TCL_OK;
     }
-    
-    // 5. Assign the temporary vector to the actual function argument
-    $1 = temp;
 }
 
-%typemap(in) std::vector<sdcparse::ObjectId> & (std::vector<sdcparse::ObjectId> temp),
-             const std::vector<sdcparse::ObjectId> & (std::vector<sdcparse::ObjectId> temp) {
+%typemap(in, fragment="ObjectIdHelpers") sdcparse::ObjectId {
+    if (Tcl_To_ObjectId(interp, $input, &$1) != TCL_OK) return TCL_ERROR;
+}
+
+%typemap(out, fragment="ObjectIdHelpers") sdcparse::ObjectId {
+    Tcl_SetObjResult(interp, ObjectId_To_Tcl(interp, $1));
+}
+
+%typemap(in, fragment="ObjectIdHelpers") std::vector<sdcparse::ObjectId> & (std::vector<sdcparse::ObjectId> temp),
+                                         const std::vector<sdcparse::ObjectId> & (std::vector<sdcparse::ObjectId> temp) {
     int listLen;
-    Tcl_Obj **listPtr;
+    Tcl_Obj **elems;
+    if (Tcl_ListObjGetElements(interp, $input, &listLen, &elems) != TCL_OK) return TCL_ERROR;
 
-    // 1. Get the elements from the TCL list
-    if (Tcl_ListObjGetElements(interp, $input, &listLen, &listPtr) != TCL_OK) {
-        return TCL_ERROR;
-    }
-
-    // 2. Fill the temporary vector
     temp.reserve(listLen);
     for (int i = 0; i < listLen; i++) {
-        int val;
-        if (Tcl_GetIntFromObj(interp, listPtr[i], &val) != TCL_OK) {
-            Tcl_SetObjResult(interp, Tcl_NewStringObj("Vector must contain integers only", -1));
-            return TCL_ERROR;
-        }
-        
-        // Construct the struct (assuming .id is the member)
-        sdcparse::ObjectId obj(val);
-        temp.push_back(obj);
+        sdcparse::ObjectId id;
+        if (Tcl_To_ObjectId(interp, elems[i], &id) != TCL_OK) return TCL_ERROR;
+        temp.push_back(id);
     }
     std::vector<sdcparse::ObjectId>* temp_ptr = &temp;
     
-    // 3. Pass the address of 'temp' to the C++ function
     $1 = temp_ptr;
 }
 
-%typemap(out) std::vector<sdcparse::ObjectId> {
+%typemap(out, fragment="ObjectIdHelpers") std::vector<sdcparse::ObjectId> {
     Tcl_Obj *listPtr = Tcl_NewListObj(0, NULL);
-    
-    // Use the SWIG pointer/reference macro $1
-    // We cast it to the actual vector type to bypass the wrapper
     const std::vector<sdcparse::ObjectId>& vec = (const std::vector<sdcparse::ObjectId>&)$1;
-    
-    for (size_t i = 0; i < vec.size(); i++) {
-        // Accessing the ID member (replace .id with your actual member name)
-        size_t id_val = static_cast<size_t>(vec[i]); 
-        Tcl_ListObjAppendElement(interp, listPtr, Tcl_NewIntObj(id_val));
+    for (const auto& id : vec) {
+        Tcl_ListObjAppendElement(interp, listPtr, ObjectId_To_Tcl(interp, id));
     }
     Tcl_SetObjResult(interp, listPtr);
 }
@@ -130,14 +100,11 @@ extern int Sdc_commands_SafeInit(Tcl_Interp* interp);
     }
 }
 
-// %include "../sdc_timing_object.h"
-
 // Declare some standard types that are used within the interface.
 namespace std {
     %template(StringVector) vector<std::string>;
     %template(DoubleVector) vector<double>;
     %template(IntVector) vector<int>;
-    // %template(ObjectIdVector) vector<sdcparse::ObjectId>;
 }
 
 // Include the header file of the internal commands which will be made into

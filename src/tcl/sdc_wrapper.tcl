@@ -837,20 +837,13 @@ proc libsdcparse_create_net {args} {
 }
 
 proc libsdcparse_is_object_id_internal {obj} {
-    if {[string is integer $obj]} { return 1 }
-    # This regex looks for:
-    # 1. A leading underscore
-    # 2. A sequence of hex characters (the address)
-    # 3. The suffix '_p_' (pointer) 
-    # 4. Your specific class/struct name
-    
-    set pattern {^_[0-9a-f]+_p_sdcparse__ObjectId(_t)?$}
-    
-    if {[regexp $pattern $obj]} {
+    # Checks if the object ID is of the form:
+    #       __vtr_obj_<ID>
+    if {[string equal -length 10 "__vtr_obj_" $obj] && \
+        [string is wideinteger -strict [string range $obj 10 end]]} {
         return 1
-    } else {
-        return 0
     }
+    return 0
 }
 
 proc libsdcparse_print_object_id_list_internal {obj_id_list} {
