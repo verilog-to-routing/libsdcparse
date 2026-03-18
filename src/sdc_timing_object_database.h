@@ -58,9 +58,8 @@ class TimingObjectDatabase {
     /// @brief A collection of all clock driver objects.
     std::vector<ObjectId> clock_driver_objects_;
 
-    /// @brief A collection of all objects that have been created.
-    ///        This is used to create the IDs.
-    std::vector<ObjectId> all_objects_;
+    /// `@brief` Counter used to generate unique ObjectIds.
+    size_t next_object_id_ = 0;
 
     /// @brief A collection of all cell objects.
     std::vector<ObjectId> cell_objects_;
@@ -87,8 +86,7 @@ class TimingObjectDatabase {
      *  @return The ID of the created object.
      */
     inline ObjectId create_cell_object(const std::string& cell_name) {
-        ObjectId cell_object_id = ObjectId(all_objects_.size());
-        all_objects_.push_back(cell_object_id);
+        ObjectId cell_object_id = ObjectId(next_object_id_++);
         object_name_.push_back(cell_name);
         object_type_.push_back(ObjectType::Cell);
         cell_objects_.push_back(cell_object_id);
@@ -104,8 +102,7 @@ class TimingObjectDatabase {
      *  @return The ID of the created object.
      */
     inline ObjectId create_clock_object(const std::string& clock_name) {
-        ObjectId clock_object_id = ObjectId(all_objects_.size());
-        all_objects_.push_back(clock_object_id);
+        ObjectId clock_object_id = ObjectId(next_object_id_++);
         object_name_.push_back(clock_name);
         object_type_.push_back(ObjectType::Clock);
         clock_objects_.push_back(clock_object_id);
@@ -130,8 +127,7 @@ class TimingObjectDatabase {
         if (port_direction == PortDirection::UNKNOWN) {
             throw std::invalid_argument("LibSDCParse: invalid port direction");
         }
-        ObjectId port_object_id = ObjectId(all_objects_.size());
-        all_objects_.push_back(port_object_id);
+        ObjectId port_object_id = ObjectId(next_object_id_++);
         object_name_.push_back(port_name);
         object_type_.push_back(ObjectType::Port);
         port_direction_[port_object_id] = port_direction;
@@ -160,8 +156,7 @@ class TimingObjectDatabase {
      */
     inline ObjectId create_pin_object(const std::string& pin_name,
                                       bool is_clock_driver) {
-        ObjectId pin_object_id = ObjectId(all_objects_.size());
-        all_objects_.push_back(pin_object_id);
+        ObjectId pin_object_id = ObjectId(next_object_id_++);
         object_name_.push_back(pin_name);
         object_type_.push_back(ObjectType::Pin);
         pin_objects_.push_back(pin_object_id);
@@ -182,8 +177,7 @@ class TimingObjectDatabase {
      *  @return The ID of the created object.
      */
     inline ObjectId create_net_object(const std::string& net_name) {
-        ObjectId net_object_id = ObjectId(all_objects_.size());
-        all_objects_.push_back(net_object_id);
+        ObjectId net_object_id = ObjectId(next_object_id_++);
         object_name_.push_back(net_name);
         object_type_.push_back(ObjectType::Net);
         net_objects_.push_back(net_object_id);
@@ -205,7 +199,7 @@ class TimingObjectDatabase {
     /**
      * @brief Get the name of the given object.
      */
-    const std::string& get_object_name(ObjectId object_id) const {
+    inline const std::string& get_object_name(ObjectId object_id) const {
         size_t id_val = static_cast<size_t>(object_id);
         if (!object_id.is_valid() || id_val >= object_name_.size()) {
             throw std::out_of_range("LibSDCParse: invalid object ID");
