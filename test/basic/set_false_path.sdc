@@ -1,5 +1,6 @@
 # RUN: %sdcparse-test %s 2>&1 | filecheck %s
 
+# CHECK: [[clk1_port_ptr:__vtr_obj_[0-9]+]]
 libsdcparse_create_port "clk1" -direction INPUT
 libsdcparse_create_port "clk2" -direction INPUT
 
@@ -18,7 +19,7 @@ puts "virtual: [get_clocks virtual]"
 puts "virtual2: [get_clocks virtual2]"
 
 # COM: TODO: Verify that this should return both the clock and the port.
-# CHECK: set_false_path -from {[[clk1_ptr]] __vtr_obj_0} -to {[[virtual_ptr]]}
+# CHECK: set_false_path -from {[[clk1_ptr]] [[clk1_port_ptr]]} -to {[[virtual_ptr]]}
 set_false_path -from clk1 -to virtual
 
 # CHECK: set_false_path -from {[[clk2_ptr]]} -to {[[virtual2_ptr]]}

@@ -194,7 +194,7 @@ class TimingObjectDatabase {
     /**
      * @brief Get the type of the given object ID.
      */
-    inline ObjectType get_object_type(ObjectId object_id) {
+    inline ObjectType get_object_type(ObjectId object_id) const {
         size_t id_val = static_cast<size_t>(object_id);
         if (!object_id.is_valid() || id_val >= object_type_.size()) {
             throw std::out_of_range("LibSDCParse: invalid object ID");
