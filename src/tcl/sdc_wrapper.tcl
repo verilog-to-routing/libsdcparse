@@ -777,7 +777,7 @@ proc libsdcparse_create_port {args} {
 
     set new_port [libsdcparse_create_port_internal [dict get $params port_name] [dict get $params -direction] [dict get $params -clock_driver]]
 
-    return [libsdcparse_get_object_id_value_internal $new_port]
+    return $new_port
 }
 
 proc libsdcparse_create_pin {args} {
@@ -797,7 +797,7 @@ proc libsdcparse_create_pin {args} {
     #       direction.
     set new_pin [libsdcparse_create_pin_internal [dict get $params pin_name] [dict get $params -clock_driver]]
 
-    return [libsdcparse_get_object_id_value_internal $new_pin]
+    return $new_pin
 }
 
 proc libsdcparse_create_cell {args} {
@@ -815,7 +815,7 @@ proc libsdcparse_create_cell {args} {
 
     set new_cell [libsdcparse_create_cell_internal [dict get $params cell_name]]
 
-    return [libsdcparse_get_object_id_value_internal $new_cell]
+    return $new_cell
 }
 
 proc libsdcparse_create_net {args} {
@@ -833,7 +833,7 @@ proc libsdcparse_create_net {args} {
 
     set new_net [libsdcparse_create_net_internal [dict get $params net_name]]
 
-    return [libsdcparse_get_object_id_value_internal $new_net]
+    return $new_net
 }
 
 proc libsdcparse_is_object_id_internal {obj} {

@@ -8,6 +8,7 @@
  */
 
 #include <cassert>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -126,7 +127,9 @@ class TimingObjectDatabase {
     inline ObjectId create_port_object(const std::string& port_name,
                                        PortDirection port_direction,
                                        bool is_clock_driver) {
-        assert(port_direction != PortDirection::UNKNOWN);
+        if (port_direction == PortDirection::UNKNOWN) {
+            throw std::invalid_argument("LibSDCParse: invalid port direction");
+        }
         ObjectId port_object_id = ObjectId(all_objects_.size());
         all_objects_.push_back(port_object_id);
         object_name_.push_back(port_name);
@@ -205,7 +208,9 @@ class TimingObjectDatabase {
      */
     const std::string& get_object_name(ObjectId object_id) const {
         size_t id_val = static_cast<size_t>(object_id);
-        assert(object_id.is_valid() && id_val < object_name_.size());
+        if (!object_id.is_valid() || id_val >= object_name_.size()) {
+            throw std::out_of_range("LibSDCParse: invalid object ID");
+        }
         return object_name_[id_val];
     }
 

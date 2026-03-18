@@ -19,7 +19,7 @@ puts [libsdcparse_create_port "A3" -direction INPUT]
 # CHECK-NEXT: [[A4_port_ptr:[0-9]+]]
 puts [libsdcparse_create_port "A4" -direction INPUT]
 
-# CHECK: create_clock -period {{1.0*}} -waveform {{{0.0*}} {{0.50*}}} {0}
+# CHECK: create_clock -period {{1.0*}} -waveform {{{0.0*}} {{0.50*}}} {[[clk1_port_ptr]]}
 create_clock -period 1.0 clk1
 
 # TODO: We should really be passing the pointer to the clock to the tool.

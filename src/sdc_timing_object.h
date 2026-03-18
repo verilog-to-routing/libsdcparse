@@ -52,8 +52,8 @@ inline ObjectType object_type_from_string(const std::string& object_type_str) {
 /**
  * @brief A strong identifier to an object.
  *
- * Objects are uniquely identified by a string of the format:
- *      __vtr_obj_<type>_<id>
+ * ObjectIds are stored internally as numeric values. When they cross the Tcl
+ * boundary they are serialized as "__vtr_obj_<id>" handles.
  */
 struct ObjectId {
     static constexpr ObjectId INVALID() noexcept { return ObjectId(); }
@@ -61,7 +61,7 @@ struct ObjectId {
     constexpr ObjectId() noexcept : value(-1) {}
 
     /**
-     * @brief Constructor using a string.
+     * @brief Constructor using the internal numeric value.
      *
      * This constructor is explicit to make this a strong id.
      */

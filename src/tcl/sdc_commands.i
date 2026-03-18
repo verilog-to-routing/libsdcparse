@@ -32,8 +32,9 @@
     // Convert TCL Handle to ObjectId
     static int Tcl_To_ObjectId(Tcl_Interp *interp, Tcl_Obj *obj, sdcparse::ObjectId *out) {
         Tcl_WideInt val;
+        int parsed = 0;
         char *str = Tcl_GetString(obj);
-        if (sscanf(str, "__vtr_obj_%lld", &val) != 1) {
+        if (sscanf(str, "__vtr_obj_%lld%n", &val, &parsed) != 1 || str[parsed] != '\0' || val < 0) {
             Tcl_SetObjResult(interp, Tcl_ObjPrintf("Invalid ObjectId handle: %s", str));
             return TCL_ERROR;
         }
