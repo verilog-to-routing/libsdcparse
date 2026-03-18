@@ -49,14 +49,16 @@ inline PortDirection from_string_to_port_dir(const std::string& port_type) {
 class TimingObjectDatabase {
   private:
     /// @brief A mapping between an object ID and its name.
-    std::unordered_map<ObjectId, std::string> object_name_;
+    std::vector<std::string> object_name_;
     /// @brief A mapping between an object ID and its type.
-    std::unordered_map<ObjectId, ObjectType> object_type_;
+    std::vector<ObjectType> object_type_;
     /// @brief A mapping between a port object and its direction.
     std::unordered_map<ObjectId, PortDirection> port_direction_;
     /// @brief A collection of all clock driver objects.
     std::vector<ObjectId> clock_driver_objects_;
 
+    /// @brief A collection of all objects that have been created.
+    ///        This is used to create the IDs.
     std::vector<ObjectId> all_objects_;
 
     /// @brief A collection of all cell objects.
@@ -86,10 +88,8 @@ class TimingObjectDatabase {
     inline ObjectId create_cell_object(const std::string& cell_name) {
         ObjectId cell_object_id = ObjectId(all_objects_.size());
         all_objects_.push_back(cell_object_id);
-        assert(object_name_.count(cell_object_id) == 0);
-        object_name_[cell_object_id] = cell_name;
-        assert(object_type_.count(cell_object_id) == 0);
-        object_type_[cell_object_id] = ObjectType::Cell;
+        object_name_.push_back(cell_name);
+        object_type_.push_back(ObjectType::Cell);
         cell_objects.push_back(cell_object_id);
         return cell_object_id;
     }
@@ -105,10 +105,8 @@ class TimingObjectDatabase {
     inline ObjectId create_clock_object(const std::string& clock_name) {
         ObjectId clock_object_id = ObjectId(all_objects_.size());
         all_objects_.push_back(clock_object_id);
-        assert(object_name_.count(clock_object_id) == 0);
-        object_name_[clock_object_id] = clock_name;
-        assert(object_type_.count(clock_object_id) == 0);
-        object_type_[clock_object_id] = ObjectType::Clock;
+        object_name_.push_back(clock_name);
+        object_type_.push_back(ObjectType::Clock);
         clock_objects.push_back(clock_object_id);
         return clock_object_id;
     }
@@ -126,15 +124,13 @@ class TimingObjectDatabase {
      *  @return The ID of the created object.
      */
     inline ObjectId create_port_object(const std::string& port_name,
-                                           PortDirection port_direction,
-                                           bool is_clock_driver) {
+                                       PortDirection port_direction,
+                                       bool is_clock_driver) {
         assert(port_direction != PortDirection::UNKNOWN);
         ObjectId port_object_id = ObjectId(all_objects_.size());
         all_objects_.push_back(port_object_id);
-        assert(object_name_.count(port_object_id) == 0);
-        object_name_[port_object_id] = port_name;
-        assert(object_type_.count(port_object_id) == 0);
-        object_type_[port_object_id] = ObjectType::Port;
+        object_name_.push_back(port_name);
+        object_type_.push_back(ObjectType::Port);
         port_direction_[port_object_id] = port_direction;
         port_objects.push_back(port_object_id);
         if (port_direction == PortDirection::INPUT || port_direction == PortDirection::INOUT)
@@ -160,13 +156,11 @@ class TimingObjectDatabase {
      *  @return The ID of the created object.
      */
     inline ObjectId create_pin_object(const std::string& pin_name,
-                                         bool is_clock_driver) {
+                                      bool is_clock_driver) {
         ObjectId pin_object_id = ObjectId(all_objects_.size());
         all_objects_.push_back(pin_object_id);
-        assert(object_name_.count(pin_object_id) == 0);
-        object_name_[pin_object_id] = pin_name;
-        assert(object_type_.count(pin_object_id) == 0);
-        object_type_[pin_object_id] = ObjectType::Pin;
+        object_name_.push_back(pin_name);
+        object_type_.push_back(ObjectType::Pin);
         pin_objects.push_back(pin_object_id);
 
         if (is_clock_driver) {
@@ -187,10 +181,8 @@ class TimingObjectDatabase {
     inline ObjectId create_net_object(const std::string& net_name) {
         ObjectId net_object_id = ObjectId(all_objects_.size());
         all_objects_.push_back(net_object_id);
-        assert(object_name_.count(net_object_id) == 0);
-        object_name_[net_object_id] = net_name;
-        assert(object_type_.count(net_object_id) == 0);
-        object_type_[net_object_id] = ObjectType::Net;
+        object_name_.push_back(net_name);
+        object_type_.push_back(ObjectType::Net);
         net_objects.push_back(net_object_id);
 
         return net_object_id;
@@ -199,20 +191,22 @@ class TimingObjectDatabase {
     /**
      * @brief Get the type of the given object ID.
      */
-    inline ObjectType get_object_type(const ObjectId& object_id) {
-        auto it = object_type_.find(object_id);
-        if (it != object_type_.end())
-            return it->second;
-        return ObjectType::Unknown;
+    inline ObjectType get_object_type(ObjectId object_id) {
+        if (!object_id.is_valid())
+            return ObjectType::Unknown;
+        size_t id_val = static_cast<size_t>(object_id);
+        if (id_val >= object_type_.size())
+            return ObjectType::Unknown;
+        return object_type_[id_val];
     }
 
     /**
      * @brief Get the name of the given object.
      */
-    const std::string& get_object_name(const ObjectId& object_id) const {
-        auto it = object_name_.find(object_id);
-        assert(it != object_name_.end());
-        return it->second;
+    const std::string& get_object_name(ObjectId object_id) const {
+        size_t id_val = static_cast<size_t>(object_id);
+        assert(object_id.is_valid() && id_val < object_name_.size());
+        return object_name_[id_val];
     }
 
     /**

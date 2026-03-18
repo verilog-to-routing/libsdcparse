@@ -26,7 +26,7 @@
 %fragment("ObjectIdHelpers", "header") {
     // Convert ObjectId to TCL Handle
     static Tcl_Obj* ObjectId_To_Tcl(Tcl_Interp */*interp*/, const sdcparse::ObjectId& id) {
-        return Tcl_ObjPrintf("__vtr_obj_%lld", static_cast<Tcl_WideInt>(id.value));
+        return Tcl_ObjPrintf("__vtr_obj_%lld", static_cast<Tcl_WideInt>((size_t)id));
     }
 
     // Convert TCL Handle to ObjectId
@@ -37,7 +37,7 @@
             Tcl_SetObjResult(interp, Tcl_ObjPrintf("Invalid ObjectId handle: %s", str));
             return TCL_ERROR;
         }
-        out->value = static_cast<size_t>(val);
+        *out = sdcparse::ObjectId(static_cast<size_t>(val));
         return TCL_OK;
     }
 }
@@ -63,7 +63,7 @@
         temp.push_back(id);
     }
     std::vector<sdcparse::ObjectId>* temp_ptr = &temp;
-    
+
     $1 = temp_ptr;
 }
 

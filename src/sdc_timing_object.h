@@ -80,12 +80,16 @@ struct ObjectId {
         return value < rhs.value;
     }
 
+    bool is_valid() const {
+        return *this != INVALID();
+    }
+
     explicit constexpr operator std::size_t() const { return value; }
 
     // This is used by the std hash function which uses the private members.
     friend std::hash<ObjectId>;
 
-//   private:
+  private:
     /// @brief The internal integer that is used by this ID.
     size_t value;
 };
