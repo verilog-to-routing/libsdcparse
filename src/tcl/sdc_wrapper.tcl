@@ -845,14 +845,3 @@ proc libsdcparse_is_object_id_internal {obj} {
     }
     return 0
 }
-
-proc libsdcparse_print_object_id_list_internal {obj_id_list} {
-    if {[llength $obj_id_list] == 0} {
-        puts ""
-        return
-    } else {
-        foreach obj_id $obj_id_list {
-            puts [libsdcparse_get_object_id_value_internal $obj_id]
-        }
-    }
-}

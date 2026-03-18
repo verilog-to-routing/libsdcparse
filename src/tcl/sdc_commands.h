@@ -133,5 +133,3 @@ sdcparse::ObjectId libsdcparse_create_pin_internal(const std::string& pin_name,
 sdcparse::ObjectId libsdcparse_create_cell_internal(const std::string& cell_name);
 
 sdcparse::ObjectId libsdcparse_create_net_internal(const std::string& net_name);
-
-size_t libsdcparse_get_object_id_value_internal(sdcparse::ObjectId object_id);

@@ -63,19 +63,19 @@ class TimingObjectDatabase {
     std::vector<ObjectId> all_objects_;
 
     /// @brief A collection of all cell objects.
-    std::vector<ObjectId> cell_objects;
+    std::vector<ObjectId> cell_objects_;
     /// @brief A collection of all clock objects.
-    std::vector<ObjectId> clock_objects;
+    std::vector<ObjectId> clock_objects_;
     /// @brief A collection of all port objects.
-    std::vector<ObjectId> port_objects;
+    std::vector<ObjectId> port_objects_;
     /// @brief A collection of all input port objects.
-    std::vector<ObjectId> input_port_objects;
+    std::vector<ObjectId> input_port_objects_;
     /// @brief A collection of all output port objects.
-    std::vector<ObjectId> output_port_objects;
+    std::vector<ObjectId> output_port_objects_;
     /// @brief A collection of all pin objects.
-    std::vector<ObjectId> pin_objects;
+    std::vector<ObjectId> pin_objects_;
     /// @brief A collection of all net objects.
-    std::vector<ObjectId> net_objects;
+    std::vector<ObjectId> net_objects_;
 
   public:
     /**
@@ -91,7 +91,7 @@ class TimingObjectDatabase {
         all_objects_.push_back(cell_object_id);
         object_name_.push_back(cell_name);
         object_type_.push_back(ObjectType::Cell);
-        cell_objects.push_back(cell_object_id);
+        cell_objects_.push_back(cell_object_id);
         return cell_object_id;
     }
 
@@ -108,7 +108,7 @@ class TimingObjectDatabase {
         all_objects_.push_back(clock_object_id);
         object_name_.push_back(clock_name);
         object_type_.push_back(ObjectType::Clock);
-        clock_objects.push_back(clock_object_id);
+        clock_objects_.push_back(clock_object_id);
         return clock_object_id;
     }
 
@@ -135,11 +135,11 @@ class TimingObjectDatabase {
         object_name_.push_back(port_name);
         object_type_.push_back(ObjectType::Port);
         port_direction_[port_object_id] = port_direction;
-        port_objects.push_back(port_object_id);
+        port_objects_.push_back(port_object_id);
         if (port_direction == PortDirection::INPUT || port_direction == PortDirection::INOUT)
-            input_port_objects.push_back(port_object_id);
+            input_port_objects_.push_back(port_object_id);
         if (port_direction == PortDirection::OUTPUT || port_direction == PortDirection::INOUT)
-            output_port_objects.push_back(port_object_id);
+            output_port_objects_.push_back(port_object_id);
 
         if (is_clock_driver) {
             clock_driver_objects_.push_back(port_object_id);
@@ -164,7 +164,7 @@ class TimingObjectDatabase {
         all_objects_.push_back(pin_object_id);
         object_name_.push_back(pin_name);
         object_type_.push_back(ObjectType::Pin);
-        pin_objects.push_back(pin_object_id);
+        pin_objects_.push_back(pin_object_id);
 
         if (is_clock_driver) {
             clock_driver_objects_.push_back(pin_object_id);
@@ -186,7 +186,7 @@ class TimingObjectDatabase {
         all_objects_.push_back(net_object_id);
         object_name_.push_back(net_name);
         object_type_.push_back(ObjectType::Net);
-        net_objects.push_back(net_object_id);
+        net_objects_.push_back(net_object_id);
 
         return net_object_id;
     }
@@ -195,11 +195,10 @@ class TimingObjectDatabase {
      * @brief Get the type of the given object ID.
      */
     inline ObjectType get_object_type(ObjectId object_id) {
-        if (!object_id.is_valid())
-            return ObjectType::Unknown;
         size_t id_val = static_cast<size_t>(object_id);
-        if (id_val >= object_type_.size())
-            return ObjectType::Unknown;
+        if (!object_id.is_valid() || id_val >= object_type_.size()) {
+            throw std::out_of_range("LibSDCParse: invalid object ID");
+        }
         return object_type_[id_val];
     }
 
@@ -218,42 +217,42 @@ class TimingObjectDatabase {
      * @brief Get a list of the IDs of all cell objects.
      */
     inline const std::vector<ObjectId>& get_cell_objects() const {
-        return cell_objects;
+        return cell_objects_;
     }
 
     /**
      * @brief Get a list of the IDs of all clock objects.
      */
     inline const std::vector<ObjectId>& get_clock_objects() const {
-        return clock_objects;
+        return clock_objects_;
     }
 
     /**
      * @brief Get a list of the IDs of all port objects.
      */
     inline const std::vector<ObjectId>& get_port_objects() const {
-        return port_objects;
+        return port_objects_;
     }
 
     /**
      * @brief Get a list of the IDs of all input/inout port objects.
      */
     inline const std::vector<ObjectId>& get_input_port_objects() const {
-        return input_port_objects;
+        return input_port_objects_;
     }
 
     /**
      * @brief Get a list of the IDs of all output/inout port objects.
      */
     inline const std::vector<ObjectId>& get_output_port_objects() const {
-        return output_port_objects;
+        return output_port_objects_;
     }
 
     /**
      * @brief Get a list of the IDs of all pin objects.
      */
     inline const std::vector<ObjectId>& get_pin_objects() const {
-        return pin_objects;
+        return pin_objects_;
     }
 
     /**
@@ -263,7 +262,7 @@ class TimingObjectDatabase {
      * parser.
      */
     inline const std::vector<ObjectId>& get_net_objects() const {
-        return net_objects;
+        return net_objects_;
     }
 
     /**

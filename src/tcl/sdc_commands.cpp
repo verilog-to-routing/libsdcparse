@@ -362,7 +362,3 @@ void libsdcparse_raise_warning(const std::string& msg) {
     check_g_callback_defined();
     sdcparse::g_callback->parse_warning(msg);
 }
-
-size_t libsdcparse_get_object_id_value_internal(sdcparse::ObjectId object_id) {
-    return static_cast<size_t>(object_id);
-}

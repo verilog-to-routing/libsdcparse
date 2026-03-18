@@ -1,6 +1,6 @@
 # RUN: %sdcparse-test %s 2>&1 | filecheck %s
 
-# CHECK: [[net1_ptr:[0-9]+]]
+# CHECK: [[net1_ptr:__vtr_obj_[0-9]+]]
 puts [libsdcparse_create_net {pll_noc_type2:\using_pll:use_noc_pll_2|altpll:altpll_component|pll_noc_type2_altpll:auto_generated|wire_pll1_clk[0]}]
 
 # CHECK: pll_noc_type2:\using_pll:use_noc_pll_2|altpll:altpll_component|pll_noc_type2_altpll:auto_generated|wire_pll1_clk[0]

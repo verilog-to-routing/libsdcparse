@@ -1,18 +1,18 @@
 # RUN: %sdcparse-test %s 2>&1 | filecheck %s
 
-# CHECK: [[in1_port_ptr:[0-9]+]]
+# CHECK: [[in1_port_ptr:__vtr_obj_[0-9]+]]
 puts [libsdcparse_create_port "in1" -direction INPUT]
-# CHECK-NEXT: [[in2_port_ptr:[0-9]+]]
+# CHECK-NEXT: [[in2_port_ptr:__vtr_obj_[0-9]+]]
 puts [libsdcparse_create_port "in2" -direction INPUT]
-# CHECK-NEXT: [[in3_port_ptr:[0-9]+]]
+# CHECK-NEXT: [[in3_port_ptr:__vtr_obj_[0-9]+]]
 puts [libsdcparse_create_port "in3" -direction INPUT]
-# CHECK-NEXT: [[out1_port_ptr:[0-9]+]]
+# CHECK-NEXT: [[out1_port_ptr:__vtr_obj_[0-9]+]]
 puts [libsdcparse_create_port "out1" -direction OUTPUT]
-# CHECK-NEXT: [[out2_port_ptr:[0-9]+]]
+# CHECK-NEXT: [[out2_port_ptr:__vtr_obj_[0-9]+]]
 puts [libsdcparse_create_port "out2" -direction OUTPUT]
-# CHECK-NEXT: [[clk_port_ptr:[0-9]+]]
+# CHECK-NEXT: [[clk_port_ptr:__vtr_obj_[0-9]+]]
 puts [libsdcparse_create_port "clk" -direction INPUT]
-# CHECK-NEXT: [[clk2_port_ptr:[0-9]+]]
+# CHECK-NEXT: [[clk2_port_ptr:__vtr_obj_[0-9]+]]
 puts [libsdcparse_create_port "clk2" -direction INPUT]
 
 # CHECK: create_clock -period {{3.0*}} -waveform {{{1.250*}} {{2.750*}}} {[[clk_port_ptr]]}
@@ -27,16 +27,16 @@ create_clock -period 1 -name input_clk
 # CHECK: create_clock -period {{0.0*}} -waveform {{{0.0*}} {{0.0*}}} -name output_clk
 create_clock -period 0 -name output_clk
 
-# CHECK: set_clock_groups -asynchronous -group {9} -group {8}
+# CHECK: set_clock_groups -asynchronous -group {__vtr_obj_9} -group {__vtr_obj_8}
 set_clock_groups -asynchronous -group input_clk -group clk2
 
-# CHECK: set_false_path -from {7} -to {10}
+# CHECK: set_false_path -from {__vtr_obj_7} -to {__vtr_obj_10}
 set_false_path -from [get_clocks {clk}] -to [get_clocks {output_clk}]
 
-# CHECK: set_max_delay {{17.0*}} -from {9} -to {10}
+# CHECK: set_max_delay {{17.0*}} -from {__vtr_obj_9} -to {__vtr_obj_10}
 set_max_delay 17 -from [get_clocks {input_clk}] -to [get_clocks {output_clk}]
 
-# CHECK: set_multicycle_path 3 -setup -from {7} -to {8}
+# CHECK: set_multicycle_path 3 -setup -from {__vtr_obj_7} -to {__vtr_obj_8}
 set_multicycle_path -setup -from [get_clocks {clk}] -to [get_clocks {clk2}] 3
 
 # TODO: The order here is not guaranteed.

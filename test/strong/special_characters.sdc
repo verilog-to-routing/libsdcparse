@@ -1,14 +1,14 @@
 # RUN: %sdcparse-test %s 2>&1 | filecheck %s
 
-# CHECK: [[LSB_ptr:[0-9]+]]
+# CHECK: [[LSB_ptr:__vtr_obj_[0-9]+]]
 puts [libsdcparse_create_port {Lsquare[bracket} -direction INPUT]
-# CHECK: [[RSB_ptr:[0-9]+]]
+# CHECK: [[RSB_ptr:__vtr_obj_[0-9]+]]
 puts [libsdcparse_create_port {Rsquare]bracket} -direction INPUT]
-# CHECK: [[SS_ptr:[0-9]+]]
+# CHECK: [[SS_ptr:__vtr_obj_[0-9]+]]
 puts [libsdcparse_create_port {slash/symbol} -direction INPUT]
-# CHECK: [[PS_ptr:[0-9]+]]
+# CHECK: [[PS_ptr:__vtr_obj_[0-9]+]]
 puts [libsdcparse_create_port {period.symbol} -direction INPUT]
-# CHECK: [[MM_ptr:[0-9]+]]
+# CHECK: [[MM_ptr:__vtr_obj_[0-9]+]]
 puts [libsdcparse_create_port {money$money} -direction INPUT]
 
 # CHECK-DAG: Lsquare[bracket
@@ -21,26 +21,26 @@ foreach port [get_ports *] {
 }
 
 # CHECK: [[LSB_ptr]]
-puts [libsdcparse_get_object_id_value_internal [get_ports Lsquare\[bracket]]
+puts [get_ports Lsquare\[bracket]
 # CHECK: [[RSB_ptr]]
-puts [libsdcparse_get_object_id_value_internal [get_ports Rsquare\]bracket]]
+puts [get_ports Rsquare\]bracket]
 # CHECK: [[SS_ptr]]
-puts [libsdcparse_get_object_id_value_internal [get_ports slash/symbol]]
+puts [get_ports slash/symbol]
 # CHECK: [[PS_ptr]]
-puts [libsdcparse_get_object_id_value_internal [get_ports period.symbol]]
+puts [get_ports period.symbol]
 # CHECK: [[MM_ptr]]
-puts [libsdcparse_get_object_id_value_internal [get_ports money\$money]]
+puts [get_ports money\$money]
 
 # CHECK: [[LSB_ptr]]
-puts [libsdcparse_get_object_id_value_internal [get_ports {Lsquare[bracket}]]
+puts [get_ports {Lsquare[bracket}]
 # CHECK: [[RSB_ptr]]
-puts [libsdcparse_get_object_id_value_internal [get_ports {Rsquare]bracket}]]
+puts [get_ports {Rsquare]bracket}]
 # CHECK: [[SS_ptr]]
-puts [libsdcparse_get_object_id_value_internal [get_ports {slash/symbol}]]
+puts [get_ports {slash/symbol}]
 # CHECK: [[PS_ptr]]
-puts [libsdcparse_get_object_id_value_internal [get_ports {period.symbol}]]
+puts [get_ports {period.symbol}]
 # CHECK: [[MM_ptr]]
-puts [libsdcparse_get_object_id_value_internal [get_ports {money$money}]]
+puts [get_ports {money$money}]
 
 # CHECK: create_clock -period {{1.0*}} -waveform {{{0.0*}} {{0.50*}}} {[[LSB_ptr]]}
 create_clock -period 1.0 Lsquare\[bracket

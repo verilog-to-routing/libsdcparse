@@ -1,49 +1,49 @@
 # RUN: %sdcparse-test %s &> %t
 # RUN: filecheck %s --input-file=%t
 
-# CHECK: [[cell1_ptr:[0-9]+]]
+# CHECK: [[cell1_ptr:__vtr_obj_[0-9]+]]
 puts [libsdcparse_create_cell "cell1"]
-# CHECK: [[cell2_ptr:[0-9]+]]
+# CHECK: [[cell2_ptr:__vtr_obj_[0-9]+]]
 puts [libsdcparse_create_cell "cell2"]
-# CHECK: [[cell3_ptr:[0-9]+]]
+# CHECK: [[cell3_ptr:__vtr_obj_[0-9]+]]
 puts [libsdcparse_create_cell "cell3"]
 
 # CHECK: [[cell1_ptr]]
-libsdcparse_print_object_id_list_internal [get_cells {cell1}]
+puts [get_cells {cell1}]
 
 # CHECK: [[cell2_ptr]]
-libsdcparse_print_object_id_list_internal [get_cells {cell2}]
+puts [get_cells {cell2}]
 
 # CHECK: [[cell3_ptr]]
-libsdcparse_print_object_id_list_internal [get_cells {cell3}]
+puts [get_cells {cell3}]
 
 # CHECK-DAG: [[cell1_ptr]]
 # CHECK-DAG: [[cell2_ptr]]
 # CHECK-DAG: [[cell3_ptr]]
 # CHECK-NEXT: DONE
-libsdcparse_print_object_id_list_internal [get_cells {cell*}]
+puts [get_cells {cell*}]
 puts "DONE"
 
 # CHECK-DAG: [[cell1_ptr]]
 # CHECK-DAG: [[cell2_ptr]]
 # CHECK-DAG: [[cell3_ptr]]
 # CHECK-NEXT: DONE
-libsdcparse_print_object_id_list_internal [get_cells -regexp {cell.*}]
+puts [get_cells -regexp {cell.*}]
 puts "DONE"
 
 # CHECK: [[cell1_ptr]]
-libsdcparse_print_object_id_list_internal [get_cells -nocase {CELL1}]
+puts [get_cells -nocase {CELL1}]
 
 # CHECK-DAG: [[cell1_ptr]]
 # CHECK-DAG: [[cell2_ptr]]
 # CHECK-DAG: [[cell3_ptr]]
 # CHECK-NEXT: DONE
-libsdcparse_print_object_id_list_internal [get_cells -regexp -nocase {CELL.*}]
+puts [get_cells -regexp -nocase {CELL.*}]
 puts "DONE"
 
 # CHECK-DAG: [[cell1_ptr]]
 # CHECK-DAG: [[cell2_ptr]]
 # CHECK-DAG: [[cell3_ptr]]
 # CHECK-NEXT: DONE
-libsdcparse_print_object_id_list_internal [get_cells *]
+puts [get_cells *]
 puts "DONE"

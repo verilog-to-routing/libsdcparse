@@ -78,27 +78,27 @@ std::vector<ObjectId> TimingObjectDatabase::query_pattern_match(const std::vecto
     for (ObjectType target_object_type : object_types) {
         switch (target_object_type) {
             case ObjectType::Cell:
-                for (ObjectId cell_object_id : cell_objects) {
+                for (ObjectId cell_object_id : cell_objects_) {
                     check_object(cell_object_id, get_object_name(cell_object_id));
                 }
                 break;
             case ObjectType::Clock:
-                for (ObjectId clock_object_id : clock_objects) {
+                for (ObjectId clock_object_id : clock_objects_) {
                     check_object(clock_object_id, get_object_name(clock_object_id));
                 }
                 break;
             case ObjectType::Net:
-                for (ObjectId net_object_id : net_objects) {
+                for (ObjectId net_object_id : net_objects_) {
                     check_object(net_object_id, get_object_name(net_object_id));
                 }
                 break;
             case ObjectType::Port:
-                for (ObjectId port_object_id : port_objects) {
+                for (ObjectId port_object_id : port_objects_) {
                     check_object(port_object_id, get_object_name(port_object_id));
                 }
                 break;
             case ObjectType::Pin:
-                for (ObjectId pin_object_id : pin_objects) {
+                for (ObjectId pin_object_id : pin_objects_) {
                     check_object(pin_object_id, get_object_name(pin_object_id));
                 }
                 break;

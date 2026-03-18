@@ -6,10 +6,10 @@ libsdcparse_create_port "clk2" -direction INPUT
 create_clock -period 1 clk1
 create_clock -period 1 clk2
 
-# CHECK: clk1: [[clk1_ptr:[0-9]+]]
-puts "clk1: [libsdcparse_get_object_id_value_internal [get_clocks clk1]]"
-# CHECK: clk2: [[clk2_ptr:[0-9]+]]
-puts "clk2: [libsdcparse_get_object_id_value_internal [get_clocks clk2]]"
+# CHECK: clk1: [[clk1_ptr:__vtr_obj_[0-9]+]]
+puts "clk1: [get_clocks clk1]"
+# CHECK: clk2: [[clk2_ptr:__vtr_obj_[0-9]+]]
+puts "clk2: [get_clocks clk2]"
 
 # CHECK: set_clock_uncertainty {{0.0250*}}
 set_clock_uncertainty 0.025

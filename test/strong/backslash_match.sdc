@@ -1,6 +1,6 @@
 # RUN: %sdcparse-test %s 2>&1 | filecheck %s
 
-# CHECK: [[net1_ptr:[0-9]+]]
+# CHECK: [[net1_ptr:__vtr_obj_[0-9]+]]
 puts [libsdcparse_create_net {\u}]
 
 # CHECK: \u
