@@ -36,10 +36,10 @@ static inline std::string glob_to_regex(const std::string& glob) {
 
 namespace sdcparse {
 
-std::vector<std::string> TimingObjectDatabase::query_pattern_match(const std::vector<std::string>& patterns,
-                                                                   bool is_case_insensitive,
-                                                                   bool is_regex,
-                                                                   const std::vector<ObjectType>& object_types) {
+std::vector<ObjectId> TimingObjectDatabase::query_pattern_match(const std::vector<std::string>& patterns,
+                                                                bool is_case_insensitive,
+                                                                bool is_regex,
+                                                                const std::vector<ObjectType>& object_types) {
 
     // Pre-process the patterns.
     std::vector<std::regex> regex_patterns;
@@ -63,13 +63,13 @@ std::vector<std::string> TimingObjectDatabase::query_pattern_match(const std::ve
         }
     }
 
-    std::vector<std::string> matches;
+    std::vector<ObjectId> matches;
 
     // Lambda to check an object against all patterns
-    auto check_object = [&matches, &regex_patterns](const ObjectId& object_id, const std::string& object_name) {
+    auto check_object = [&matches, &regex_patterns](ObjectId object_id, const std::string& object_name) {
         for (const std::regex& pattern : regex_patterns) {
             if (std::regex_match(object_name, pattern)) {
-                matches.push_back(object_id.to_string());
+                matches.push_back(object_id);
                 return; // Early exit once we find a match
             }
         }
@@ -78,27 +78,27 @@ std::vector<std::string> TimingObjectDatabase::query_pattern_match(const std::ve
     for (ObjectType target_object_type : object_types) {
         switch (target_object_type) {
             case ObjectType::Cell:
-                for (const CellObjectId& cell_object_id : cell_objects) {
+                for (ObjectId cell_object_id : cell_objects_) {
                     check_object(cell_object_id, get_object_name(cell_object_id));
                 }
                 break;
             case ObjectType::Clock:
-                for (const ClockObjectId& clock_object_id : clock_objects) {
+                for (ObjectId clock_object_id : clock_objects_) {
                     check_object(clock_object_id, get_object_name(clock_object_id));
                 }
                 break;
             case ObjectType::Net:
-                for (const NetObjectId& net_object_id : net_objects) {
+                for (ObjectId net_object_id : net_objects_) {
                     check_object(net_object_id, get_object_name(net_object_id));
                 }
                 break;
             case ObjectType::Port:
-                for (const PortObjectId& port_object_id : port_objects) {
+                for (ObjectId port_object_id : port_objects_) {
                     check_object(port_object_id, get_object_name(port_object_id));
                 }
                 break;
             case ObjectType::Pin:
-                for (const PinObjectId& pin_object_id : pin_objects) {
+                for (ObjectId pin_object_id : pin_objects_) {
                     check_object(pin_object_id, get_object_name(pin_object_id));
                 }
                 break;

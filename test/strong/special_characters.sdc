@@ -1,14 +1,14 @@
 # RUN: %sdcparse-test %s 2>&1 | filecheck %s
 
-# CHECK: [[LSB_ptr:__vtr_obj_port_[0-9]+]]
+# CHECK: [[LSB_ptr:__vtr_obj_[0-9]+]]
 puts [libsdcparse_create_port {Lsquare[bracket} -direction INPUT]
-# CHECK: [[RSB_ptr:__vtr_obj_port_[0-9]+]]
+# CHECK: [[RSB_ptr:__vtr_obj_[0-9]+]]
 puts [libsdcparse_create_port {Rsquare]bracket} -direction INPUT]
-# CHECK: [[SS_ptr:__vtr_obj_port_[0-9]+]]
+# CHECK: [[SS_ptr:__vtr_obj_[0-9]+]]
 puts [libsdcparse_create_port {slash/symbol} -direction INPUT]
-# CHECK: [[PS_ptr:__vtr_obj_port_[0-9]+]]
+# CHECK: [[PS_ptr:__vtr_obj_[0-9]+]]
 puts [libsdcparse_create_port {period.symbol} -direction INPUT]
-# CHECK: [[MM_ptr:__vtr_obj_port_[0-9]+]]
+# CHECK: [[MM_ptr:__vtr_obj_[0-9]+]]
 puts [libsdcparse_create_port {money$money} -direction INPUT]
 
 # CHECK-DAG: Lsquare[bracket

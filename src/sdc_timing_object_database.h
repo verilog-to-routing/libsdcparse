@@ -8,6 +8,7 @@
  */
 
 #include <cassert>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -49,22 +50,31 @@ inline PortDirection from_string_to_port_dir(const std::string& port_type) {
 class TimingObjectDatabase {
   private:
     /// @brief A mapping between an object ID and its name.
-    std::unordered_map<ObjectId, std::string> object_name_;
+    std::vector<std::string> object_name_;
+    /// @brief A mapping between an object ID and its type.
+    std::vector<ObjectType> object_type_;
     /// @brief A mapping between a port object and its direction.
-    std::unordered_map<PortObjectId, PortDirection> port_direction_;
+    std::unordered_map<ObjectId, PortDirection> port_direction_;
     /// @brief A collection of all clock driver objects.
     std::vector<ObjectId> clock_driver_objects_;
 
+    /// `@brief` Counter used to generate unique ObjectIds.
+    size_t next_object_id_ = 0;
+
     /// @brief A collection of all cell objects.
-    std::vector<CellObjectId> cell_objects;
+    std::vector<ObjectId> cell_objects_;
     /// @brief A collection of all clock objects.
-    std::vector<ClockObjectId> clock_objects;
+    std::vector<ObjectId> clock_objects_;
     /// @brief A collection of all port objects.
-    std::vector<PortObjectId> port_objects;
+    std::vector<ObjectId> port_objects_;
+    /// @brief A collection of all input port objects.
+    std::vector<ObjectId> input_port_objects_;
+    /// @brief A collection of all output port objects.
+    std::vector<ObjectId> output_port_objects_;
     /// @brief A collection of all pin objects.
-    std::vector<PinObjectId> pin_objects;
+    std::vector<ObjectId> pin_objects_;
     /// @brief A collection of all net objects.
-    std::vector<NetObjectId> net_objects;
+    std::vector<ObjectId> net_objects_;
 
   public:
     /**
@@ -75,11 +85,11 @@ class TimingObjectDatabase {
      *
      *  @return The ID of the created object.
      */
-    inline CellObjectId create_cell_object(const std::string& cell_name) {
-        CellObjectId cell_object_id = CellObjectId("__vtr_obj_cell_" + std::to_string(cell_objects.size()));
-        assert(object_name_.count(cell_object_id) == 0);
-        object_name_[cell_object_id] = cell_name;
-        cell_objects.push_back(cell_object_id);
+    inline ObjectId create_cell_object(const std::string& cell_name) {
+        ObjectId cell_object_id = ObjectId(next_object_id_++);
+        object_name_.push_back(cell_name);
+        object_type_.push_back(ObjectType::Cell);
+        cell_objects_.push_back(cell_object_id);
         return cell_object_id;
     }
 
@@ -91,11 +101,11 @@ class TimingObjectDatabase {
      *
      *  @return The ID of the created object.
      */
-    inline ClockObjectId create_clock_object(const std::string& clock_name) {
-        ClockObjectId clock_object_id = ClockObjectId("__vtr_obj_clock_" + std::to_string(clock_objects.size()));
-        assert(object_name_.count(clock_object_id) == 0);
-        object_name_[clock_object_id] = clock_name;
-        clock_objects.push_back(clock_object_id);
+    inline ObjectId create_clock_object(const std::string& clock_name) {
+        ObjectId clock_object_id = ObjectId(next_object_id_++);
+        object_name_.push_back(clock_name);
+        object_type_.push_back(ObjectType::Clock);
+        clock_objects_.push_back(clock_object_id);
         return clock_object_id;
     }
 
@@ -111,15 +121,21 @@ class TimingObjectDatabase {
      *
      *  @return The ID of the created object.
      */
-    inline PortObjectId create_port_object(const std::string& port_name,
-                                           PortDirection port_direction,
-                                           bool is_clock_driver) {
-        assert(port_direction != PortDirection::UNKNOWN);
-        PortObjectId port_object_id = PortObjectId("__vtr_obj_port_" + std::to_string(port_objects.size()));
-        assert(object_name_.count(port_object_id) == 0);
-        object_name_[port_object_id] = port_name;
+    inline ObjectId create_port_object(const std::string& port_name,
+                                       PortDirection port_direction,
+                                       bool is_clock_driver) {
+        if (port_direction == PortDirection::UNKNOWN) {
+            throw std::invalid_argument("LibSDCParse: invalid port direction");
+        }
+        ObjectId port_object_id = ObjectId(next_object_id_++);
+        object_name_.push_back(port_name);
+        object_type_.push_back(ObjectType::Port);
         port_direction_[port_object_id] = port_direction;
-        port_objects.push_back(port_object_id);
+        port_objects_.push_back(port_object_id);
+        if (port_direction == PortDirection::INPUT || port_direction == PortDirection::INOUT)
+            input_port_objects_.push_back(port_object_id);
+        if (port_direction == PortDirection::OUTPUT || port_direction == PortDirection::INOUT)
+            output_port_objects_.push_back(port_object_id);
 
         if (is_clock_driver) {
             clock_driver_objects_.push_back(port_object_id);
@@ -138,12 +154,12 @@ class TimingObjectDatabase {
      *
      *  @return The ID of the created object.
      */
-    inline PinObjectId create_pin_object(const std::string& pin_name,
-                                         bool is_clock_driver) {
-        PinObjectId pin_object_id = PinObjectId("__vtr_obj_pin_" + std::to_string(pin_objects.size()));
-        assert(object_name_.count(pin_object_id) == 0);
-        object_name_[pin_object_id] = pin_name;
-        pin_objects.push_back(pin_object_id);
+    inline ObjectId create_pin_object(const std::string& pin_name,
+                                      bool is_clock_driver) {
+        ObjectId pin_object_id = ObjectId(next_object_id_++);
+        object_name_.push_back(pin_name);
+        object_type_.push_back(ObjectType::Pin);
+        pin_objects_.push_back(pin_object_id);
 
         if (is_clock_driver) {
             clock_driver_objects_.push_back(pin_object_id);
@@ -160,158 +176,77 @@ class TimingObjectDatabase {
      *
      *  @return The ID of the created object.
      */
-    inline NetObjectId create_net_object(const std::string& net_name) {
-        NetObjectId net_object_id = NetObjectId("__vtr_obj_net_" + std::to_string(net_objects.size()));
-        assert(object_name_.count(net_object_id) == 0);
-        object_name_[net_object_id] = net_name;
-        net_objects.push_back(net_object_id);
+    inline ObjectId create_net_object(const std::string& net_name) {
+        ObjectId net_object_id = ObjectId(next_object_id_++);
+        object_name_.push_back(net_name);
+        object_type_.push_back(ObjectType::Net);
+        net_objects_.push_back(net_object_id);
 
         return net_object_id;
     }
 
     /**
-     * @brief Check if the given string represents an object.
-     *
-     * Since we are using strings to identify objects, we need to prepend all
-     * ID strings with a unique substring that will never appear in an actual
-     * netlist.
-     *
-     *  @param object_id
-     *      The string that we want to check.
-     *
-     *  @return True of the given string is an ID, false otherwise.
+     * @brief Get the type of the given object ID.
      */
-    static inline bool is_object_id(const std::string& object_id) {
-        if (object_id.rfind("__vtr_obj_", 0) == 0)
-            return true;
-        return false;
-    }
-
-    /**
-     * @brief The type of object ID that the given string identifies.
-     */
-    static inline ObjectType get_object_type(const std::string& object_id) {
-        if (object_id.rfind("__vtr_obj_cell_", 0) == 0)
-            return ObjectType::Cell;
-        if (object_id.rfind("__vtr_obj_clock_", 0) == 0)
-            return ObjectType::Clock;
-        if (object_id.rfind("__vtr_obj_port_", 0) == 0)
-            return ObjectType::Port;
-        if (object_id.rfind("__vtr_obj_pin_", 0) == 0)
-            return ObjectType::Pin;
-        if (object_id.rfind("__vtr_obj_net_", 0) == 0)
-            return ObjectType::Net;
-
-        return ObjectType::Unknown;
+    inline ObjectType get_object_type(ObjectId object_id) const {
+        size_t id_val = static_cast<size_t>(object_id);
+        if (!object_id.is_valid() || id_val >= object_type_.size()) {
+            throw std::out_of_range("LibSDCParse: invalid object ID");
+        }
+        return object_type_[id_val];
     }
 
     /**
      * @brief Get the name of the given object.
      */
-    const std::string& get_object_name(ObjectId object_id) const {
-        auto it = object_name_.find(object_id);
-        assert(it != object_name_.end());
-        return it->second;
+    inline const std::string& get_object_name(ObjectId object_id) const {
+        size_t id_val = static_cast<size_t>(object_id);
+        if (!object_id.is_valid() || id_val >= object_name_.size()) {
+            throw std::out_of_range("LibSDCParse: invalid object ID");
+        }
+        return object_name_[id_val];
     }
 
     /**
      * @brief Get a list of the IDs of all cell objects.
-     *
-     * This returns a vector of strings to make it more convenient for the
-     * parser.
      */
-    inline std::vector<std::string> get_cell_objects() const {
-        std::vector<std::string> all_cells;
-        all_cells.reserve(cell_objects.size());
-        for (const CellObjectId& cell_id : cell_objects) {
-            all_cells.push_back(cell_id.to_string());
-        }
-        return all_cells;
+    inline const std::vector<ObjectId>& get_cell_objects() const {
+        return cell_objects_;
     }
 
     /**
      * @brief Get a list of the IDs of all clock objects.
-     *
-     * This returns a vector of strings to make it more convenient for the
-     * parser.
      */
-    inline std::vector<std::string> get_clock_objects() const {
-        std::vector<std::string> all_clocks;
-        all_clocks.reserve(clock_objects.size());
-        for (const ClockObjectId& clock_id : clock_objects) {
-            all_clocks.push_back(clock_id.to_string());
-        }
-        return all_clocks;
+    inline const std::vector<ObjectId>& get_clock_objects() const {
+        return clock_objects_;
     }
 
     /**
      * @brief Get a list of the IDs of all port objects.
-     *
-     * This returns a vector of strings to make it more convenient for the
-     * parser.
      */
-    inline std::vector<std::string> get_port_objects() const {
-        std::vector<std::string> all_ports;
-        all_ports.reserve(port_objects.size());
-        for (const PortObjectId& port_id: port_objects) {
-            all_ports.push_back(port_id.to_string());
-        }
-        return all_ports;
+    inline const std::vector<ObjectId>& get_port_objects() const {
+        return port_objects_;
     }
 
     /**
      * @brief Get a list of the IDs of all input/inout port objects.
-     *
-     * This returns a vector of strings to make it more convenient for the
-     * parser.
      */
-    inline std::vector<std::string> get_input_port_objects() const {
-        std::vector<std::string> all_inputs;
-        all_inputs.reserve(port_objects.size());
-        for (const PortObjectId& input: port_objects) {
-            auto it = port_direction_.find(input);
-            assert(it != port_direction_.end());
-            if (it->second == PortDirection::INPUT || it->second == PortDirection::INOUT) {
-                all_inputs.push_back(input.to_string());
-            }
-        }
-
-        return all_inputs;
+    inline const std::vector<ObjectId>& get_input_port_objects() const {
+        return input_port_objects_;
     }
 
     /**
      * @brief Get a list of the IDs of all output/inout port objects.
-     *
-     * This returns a vector of strings to make it more convenient for the
-     * parser.
      */
-    inline std::vector<std::string> get_output_port_objects() const {
-        std::vector<std::string> all_outputs;
-        all_outputs.reserve(port_objects.size());
-        for (const PortObjectId& output: port_objects) {
-            auto it = port_direction_.find(output);
-            assert(it != port_direction_.end());
-            if (it->second == PortDirection::OUTPUT || it->second == PortDirection::INOUT) {
-                all_outputs.push_back(output.to_string());
-            }
-        }
-
-        return all_outputs;
+    inline const std::vector<ObjectId>& get_output_port_objects() const {
+        return output_port_objects_;
     }
 
     /**
      * @brief Get a list of the IDs of all pin objects.
-     *
-     * This returns a vector of strings to make it more convenient for the
-     * parser.
      */
-    inline std::vector<std::string> get_pin_objects() const {
-        std::vector<std::string> all_pins;
-        all_pins.reserve(pin_objects.size());
-        for (const PinObjectId& pin_id : pin_objects) {
-            all_pins.push_back(pin_id.to_string());
-        }
-        return all_pins;
+    inline const std::vector<ObjectId>& get_pin_objects() const {
+        return pin_objects_;
     }
 
     /**
@@ -320,28 +255,15 @@ class TimingObjectDatabase {
      * This returns a vector of strings to make it more convenient for the
      * parser.
      */
-    inline std::vector<std::string> get_net_objects() const {
-        std::vector<std::string> all_nets;
-        all_nets.reserve(net_objects.size());
-        for (const NetObjectId& net_id : net_objects) {
-            all_nets.push_back(net_id.to_string());
-        }
-        return all_nets;
+    inline const std::vector<ObjectId>& get_net_objects() const {
+        return net_objects_;
     }
 
     /**
      * @brief Get a list of the IDs of all clock driver objects.
-     *
-     * This returns a vector of strings to make it more convenient for the
-     * parser.
      */
-    inline std::vector<std::string> get_clock_driver_objects() const {
-        std::vector<std::string> all_clock_drivers;
-        all_clock_drivers.reserve(clock_driver_objects_.size());
-        for (const ObjectId& object_id : clock_driver_objects_) {
-            all_clock_drivers.push_back(object_id.to_string());
-        }
-        return all_clock_drivers;
+    inline const std::vector<ObjectId>& get_clock_driver_objects() const {
+        return clock_driver_objects_;
     }
 
     /**
@@ -355,10 +277,10 @@ class TimingObjectDatabase {
      *
      *  @return A list of object IDs that match the query.
      */
-    std::vector<std::string> query_pattern_match(const std::vector<std::string>& patterns,
-                                                 bool is_case_insensitive,
-                                                 bool is_regex,
-                                                 const std::vector<ObjectType>& object_types);
+    std::vector<ObjectId> query_pattern_match(const std::vector<std::string>& patterns,
+                                              bool is_case_insensitive,
+                                              bool is_regex,
+                                              const std::vector<ObjectType>& object_types);
 };
 
 } // namespace sdcparse

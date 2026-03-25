@@ -38,7 +38,7 @@ void libsdcparse_create_clock_internal(double period,
                                        const std::string& name,
                                        const std::vector<double>& waveform,
                                        bool add,
-                                       const std::vector<std::string>& targets) {
+                                       const std::vector<sdcparse::ObjectId>& targets) {
     sdcparse::CreateClock create_clock_cmd;
     create_clock_cmd.name = name;
     create_clock_cmd.period = period;
@@ -50,9 +50,7 @@ void libsdcparse_create_clock_internal(double period,
     else
         create_clock_cmd.is_virtual = false;
 
-    for (const std::string& target : targets) {
-        create_clock_cmd.targets.push_back(sdcparse::ObjectId(target));
-    }
+    create_clock_cmd.targets = targets;
 
     create_clock_cmd.add = add;
 
@@ -61,27 +59,24 @@ void libsdcparse_create_clock_internal(double period,
 }
 
 void libsdcparse_create_generated_clock_internal(const std::string& name,
-                                                 const std::string& source,
+                                                 sdcparse::ObjectId source,
                                                  int divide_by,
                                                  int multiply_by,
                                                  bool add,
-                                                 const std::vector<std::string>& targets) {
+                                                 const std::vector<sdcparse::ObjectId>& targets) {
     sdcparse::CreateGeneratedClock create_gen_clock_cmd;
     create_gen_clock_cmd.name = name;
-    create_gen_clock_cmd.source = sdcparse::ObjectId(source);
+    create_gen_clock_cmd.source = source;
     create_gen_clock_cmd.divide_by = divide_by;
     create_gen_clock_cmd.multiply_by = multiply_by;
     create_gen_clock_cmd.add = add;
-
-    for (const std::string& target : targets) {
-        create_gen_clock_cmd.targets.push_back(sdcparse::ObjectId(target));
-    }
+    create_gen_clock_cmd.targets = targets;
 
     check_g_callback_defined();
     sdcparse::g_callback->create_generated_clock(create_gen_clock_cmd);
 }
 
-void libsdcparse_set_clock_groups_internal(const std::vector<std::string>& clock_list,
+void libsdcparse_set_clock_groups_internal(const std::vector<sdcparse::ObjectId>& clock_list,
                                            const std::vector<int>& clock_group_start_pos,
                                            bool is_logically_exclusive,
                                            bool is_physically_exclusive,
@@ -91,7 +86,7 @@ void libsdcparse_set_clock_groups_internal(const std::vector<std::string>& clock
     for (size_t i = 0; i < clock_group_start_pos.size() - 1; i++) {
         std::vector<sdcparse::ObjectId> new_group;
         for (size_t j = clock_group_start_pos[i]; j < (size_t)clock_group_start_pos[i + 1]; j++) {
-            new_group.push_back(sdcparse::ObjectId(clock_list[j]));
+            new_group.push_back(clock_list[j]);
         }
         set_clock_groups_cmd.clock_groups.push_back(std::move(new_group));
     }
@@ -109,49 +104,37 @@ void libsdcparse_set_clock_groups_internal(const std::vector<std::string>& clock
     sdcparse::g_callback->set_clock_groups(set_clock_groups_cmd);
 }
 
-void libsdcparse_set_false_path_internal(const std::vector<std::string>& from_list,
-                                         const std::vector<std::string>& to_list) {
+void libsdcparse_set_false_path_internal(const std::vector<sdcparse::ObjectId>& from_list,
+                                         const std::vector<sdcparse::ObjectId>& to_list) {
     sdcparse::SetFalsePath set_false_path_cmd;
-    for (const std::string& from_target : from_list) {
-        set_false_path_cmd.from.push_back(sdcparse::ObjectId(from_target));
-    }
-    for (const std::string& to_target : to_list) {
-        set_false_path_cmd.to.push_back(sdcparse::ObjectId(to_target));
-    }
+    set_false_path_cmd.from = from_list;
+    set_false_path_cmd.to = to_list;
 
     check_g_callback_defined();
     sdcparse::g_callback->set_false_path(set_false_path_cmd);
 }
 
 void libsdcparse_set_min_delay_internal(double delay,
-                                        const std::vector<std::string>& from_list,
-                                        const std::vector<std::string>& to_list) {
+                                        const std::vector<sdcparse::ObjectId>& from_list,
+                                        const std::vector<sdcparse::ObjectId>& to_list) {
     sdcparse::SetMinMaxDelay set_min_delay_cmd;
     set_min_delay_cmd.type = sdcparse::MinMaxType::MIN;
     set_min_delay_cmd.value = delay;
-    for (const std::string& from_target : from_list) {
-        set_min_delay_cmd.from.push_back(sdcparse::ObjectId(from_target));
-    }
-    for (const std::string& to_target : to_list) {
-        set_min_delay_cmd.to.push_back(sdcparse::ObjectId(to_target));
-    }
+    set_min_delay_cmd.from = from_list;
+    set_min_delay_cmd.to = to_list;
 
     check_g_callback_defined();
     sdcparse::g_callback->set_min_max_delay(set_min_delay_cmd);
 }
 
 void libsdcparse_set_max_delay_internal(double delay,
-                                        const std::vector<std::string>& from_list,
-                                        const std::vector<std::string>& to_list) {
+                                        const std::vector<sdcparse::ObjectId>& from_list,
+                                        const std::vector<sdcparse::ObjectId>& to_list) {
     sdcparse::SetMinMaxDelay set_max_delay_cmd;
     set_max_delay_cmd.type = sdcparse::MinMaxType::MAX;
     set_max_delay_cmd.value = delay;
-    for (const std::string& from_target : from_list) {
-        set_max_delay_cmd.from.push_back(sdcparse::ObjectId(from_target));
-    }
-    for (const std::string& to_target : to_list) {
-        set_max_delay_cmd.to.push_back(sdcparse::ObjectId(to_target));
-    }
+    set_max_delay_cmd.from = from_list;
+    set_max_delay_cmd.to = to_list;
 
     check_g_callback_defined();
     sdcparse::g_callback->set_min_max_delay(set_max_delay_cmd);
@@ -159,18 +142,14 @@ void libsdcparse_set_max_delay_internal(double delay,
 
 void libsdcparse_set_multicycle_path_internal(bool is_setup,
                                               bool is_hold,
-                                              const std::vector<std::string>& from_list,
-                                              const std::vector<std::string>& to_list,
+                                              const std::vector<sdcparse::ObjectId>& from_list,
+                                              const std::vector<sdcparse::ObjectId>& to_list,
                                               int path_multiplier) {
     sdcparse::SetMulticyclePath set_multicycle_path_cmd;
     set_multicycle_path_cmd.is_setup = is_setup;
     set_multicycle_path_cmd.is_hold = is_hold;
-    for (const std::string& from_target : from_list) {
-        set_multicycle_path_cmd.from.push_back(sdcparse::ObjectId(from_target));
-    }
-    for (const std::string& to_target : to_list) {
-        set_multicycle_path_cmd.to.push_back(sdcparse::ObjectId(to_target));
-    }
+    set_multicycle_path_cmd.from = from_list;
+    set_multicycle_path_cmd.to = to_list;
     set_multicycle_path_cmd.mcp_value = path_multiplier;
 
     check_g_callback_defined();
@@ -181,16 +160,14 @@ void libsdcparse_set_input_delay_internal(bool max_delay_flag,
                                           bool min_delay_flag,
                                           const std::string& clock_name,
                                           double delay,
-                                          const std::vector<std::string>& targets) {
+                                          const std::vector<sdcparse::ObjectId>& targets) {
 
     sdcparse::SetIoDelay set_input_delay_cmd;
     set_input_delay_cmd.is_max = max_delay_flag;
     set_input_delay_cmd.is_min = min_delay_flag;
     set_input_delay_cmd.clock_name = clock_name;
     set_input_delay_cmd.delay = delay;
-    for (const std::string& target_port : targets) {
-        set_input_delay_cmd.target_ports.push_back(sdcparse::ObjectId(target_port));
-    }
+    set_input_delay_cmd.target_ports = targets;
     set_input_delay_cmd.type = sdcparse::IoDelayType::INPUT;
 
     check_g_callback_defined();
@@ -201,16 +178,14 @@ void libsdcparse_set_output_delay_internal(bool max_delay_flag,
                                            bool min_delay_flag,
                                            const std::string& clock_name,
                                            double delay,
-                                           const std::vector<std::string>& targets) {
+                                           const std::vector<sdcparse::ObjectId>& targets) {
 
     sdcparse::SetIoDelay set_output_delay_cmd;
     set_output_delay_cmd.is_max = max_delay_flag;
     set_output_delay_cmd.is_min = min_delay_flag;
     set_output_delay_cmd.clock_name = clock_name;
     set_output_delay_cmd.delay = delay;
-    for (const std::string& target_port : targets) {
-        set_output_delay_cmd.target_ports.push_back(sdcparse::ObjectId(target_port));
-    }
+    set_output_delay_cmd.target_ports = targets;
     set_output_delay_cmd.type = sdcparse::IoDelayType::OUTPUT;
 
     check_g_callback_defined();
@@ -219,18 +194,14 @@ void libsdcparse_set_output_delay_internal(bool max_delay_flag,
 
 void libsdcparse_set_clock_uncertainty_internal(bool is_setup,
                                                 bool is_hold,
-                                                const std::vector<std::string>& from_list,
-                                                const std::vector<std::string>& to_list,
+                                                const std::vector<sdcparse::ObjectId>& from_list,
+                                                const std::vector<sdcparse::ObjectId>& to_list,
                                                 double uncertainty) {
     sdcparse::SetClockUncertainty set_clock_uncertainty_cmd;
     set_clock_uncertainty_cmd.is_setup = is_setup;
     set_clock_uncertainty_cmd.is_hold = is_hold;
-    for (const std::string& from_target : from_list) {
-        set_clock_uncertainty_cmd.from.push_back(sdcparse::ObjectId(from_target));
-    }
-    for (const std::string& to_target : to_list) {
-        set_clock_uncertainty_cmd.to.push_back(sdcparse::ObjectId(to_target));
-    }
+    set_clock_uncertainty_cmd.from = from_list;
+    set_clock_uncertainty_cmd.to = to_list;
     set_clock_uncertainty_cmd.value = uncertainty;
 
     check_g_callback_defined();
@@ -241,7 +212,7 @@ void libsdcparse_set_clock_latency_internal(bool is_source,
                                             bool is_early,
                                             bool is_late,
                                             double latency,
-                                            const std::vector<std::string>& targets) {
+                                            const std::vector<sdcparse::ObjectId>& targets) {
     sdcparse::SetClockLatency set_clock_latency_cmd;
     if (is_source) {
         set_clock_latency_cmd.type = sdcparse::ClockLatencyType::SOURCE;
@@ -251,23 +222,17 @@ void libsdcparse_set_clock_latency_internal(bool is_source,
     set_clock_latency_cmd.is_early = is_early;
     set_clock_latency_cmd.is_late = is_late;
     set_clock_latency_cmd.value = latency;
-    for (const std::string& target : targets) {
-        set_clock_latency_cmd.target_clocks.push_back(sdcparse::ObjectId(target));
-    }
+    set_clock_latency_cmd.target_clocks = targets;
 
     check_g_callback_defined();
     sdcparse::g_callback->set_clock_latency(set_clock_latency_cmd);
 }
 
-void libsdcparse_set_disable_timing_internal(const std::vector<std::string>& from_list,
-                                              const std::vector<std::string>& to_list) {
+void libsdcparse_set_disable_timing_internal(const std::vector<sdcparse::ObjectId>& from_list,
+                                             const std::vector<sdcparse::ObjectId>& to_list) {
     sdcparse::SetDisableTiming set_disable_timing_cmd;
-    for (const std::string& from_target : from_list) {
-        set_disable_timing_cmd.from.push_back(sdcparse::ObjectId(from_target));
-    }
-    for (const std::string& to_target : to_list) {
-        set_disable_timing_cmd.to.push_back(sdcparse::ObjectId(to_target));
-    }
+    set_disable_timing_cmd.from = from_list;
+    set_disable_timing_cmd.to = to_list;
 
     check_g_callback_defined();
     sdcparse::g_callback->set_disable_timing(set_disable_timing_cmd);
@@ -278,81 +243,74 @@ void libsdcparse_set_timing_derate_internal(bool is_early,
                                             bool derate_nets,
                                             bool derate_cells,
                                             double derate,
-                                            const std::vector<std::string>& targets) {
+                                            const std::vector<sdcparse::ObjectId>& targets) {
     sdcparse::SetTimingDerate set_timing_derate_cmd;
     set_timing_derate_cmd.is_early = is_early;
     set_timing_derate_cmd.is_late = is_late;
     set_timing_derate_cmd.derate_nets = derate_nets;
     set_timing_derate_cmd.derate_cells = derate_cells;
     set_timing_derate_cmd.value = derate;
-    for (const std::string& target : targets) {
-        set_timing_derate_cmd.cell_targets.push_back(sdcparse::ObjectId(target));
-    }
+    set_timing_derate_cmd.cell_targets = targets;
 
     check_g_callback_defined();
     sdcparse::g_callback->set_timing_derate(set_timing_derate_cmd);
 }
 
-std::vector<std::string> libsdcparse_all_ports_internal() {
+std::vector<sdcparse::ObjectId> libsdcparse_all_ports_internal() {
     check_g_callback_defined();
     return sdcparse::g_callback->obj_database.get_port_objects();
 }
 
-std::vector<std::string> libsdcparse_all_clocks_internal() {
+std::vector<sdcparse::ObjectId> libsdcparse_all_clocks_internal() {
     check_g_callback_defined();
     return sdcparse::g_callback->obj_database.get_clock_objects();
 }
 
-std::vector<std::string> libsdcparse_all_inputs_internal() {
+std::vector<sdcparse::ObjectId> libsdcparse_all_inputs_internal() {
     check_g_callback_defined();
     return sdcparse::g_callback->obj_database.get_input_port_objects();
 }
 
-std::vector<std::string> libsdcparse_all_outputs_internal() {
+std::vector<sdcparse::ObjectId> libsdcparse_all_outputs_internal() {
     check_g_callback_defined();
     return sdcparse::g_callback->obj_database.get_output_port_objects();
 }
 
-std::vector<std::string> libsdcparse_all_pins_internal() {
+std::vector<sdcparse::ObjectId> libsdcparse_all_pins_internal() {
     check_g_callback_defined();
     return sdcparse::g_callback->obj_database.get_pin_objects();
 }
 
-std::vector<std::string> libsdcparse_all_cells_internal() {
+std::vector<sdcparse::ObjectId> libsdcparse_all_cells_internal() {
     check_g_callback_defined();
     return sdcparse::g_callback->obj_database.get_cell_objects();
 }
 
-std::vector<std::string> libsdcparse_all_clock_drivers_internal() {
+std::vector<sdcparse::ObjectId> libsdcparse_all_clock_drivers_internal() {
     check_g_callback_defined();
     return sdcparse::g_callback->obj_database.get_clock_driver_objects();
 }
 
-std::vector<std::string> libsdcparse_all_nets_internal() {
+std::vector<sdcparse::ObjectId> libsdcparse_all_nets_internal() {
     check_g_callback_defined();
     return sdcparse::g_callback->obj_database.get_net_objects();
 }
 
-std::string libsdcparse_get_name_internal(const std::string& object_id) {
+std::string libsdcparse_get_name_internal(sdcparse::ObjectId object_id) {
     check_g_callback_defined();
-    return sdcparse::g_callback->obj_database.get_object_name(sdcparse::ObjectId(object_id));
+    return sdcparse::g_callback->obj_database.get_object_name(object_id);
 }
 
-bool libsdcparse_is_object_id_internal(const std::string& object_id) {
-    check_g_callback_defined();
-    return sdcparse::g_callback->obj_database.is_object_id(object_id);
-}
-
-std::string libsdcparse_get_object_type_internal(const std::string& object_id) {
+std::string libsdcparse_get_object_type_internal(sdcparse::ObjectId object_id) {
     check_g_callback_defined();
     sdcparse::ObjectType object_type = sdcparse::g_callback->obj_database.get_object_type(object_id);
     return sdcparse::to_string(object_type);
 }
 
-std::vector<std::string> libsdcparse_query_pattern_match_internal(const std::vector<std::string>& patterns,
-                                                                  bool nocase,
-                                                                  bool regexp,
-                                                                  const std::vector<std::string>& object_types) {
+std::vector<sdcparse::ObjectId> libsdcparse_query_pattern_match_internal(const std::vector<std::string>& patterns,
+                                                                         bool nocase,
+                                                                         bool regexp,
+                                                                         const std::vector<std::string>& object_types) {
     check_g_callback_defined();
 
     // Collect a list of object types to parse.
@@ -374,30 +332,30 @@ std::vector<std::string> libsdcparse_query_pattern_match_internal(const std::vec
     return sdcparse::g_callback->obj_database.query_pattern_match(patterns, nocase, regexp, target_object_types);
 }
 
-std::string libsdcparse_create_port_internal(const std::string& port_name,
-                                             const std::string& port_dir_str,
-                                             bool is_clock_driver) {
+sdcparse::ObjectId libsdcparse_create_port_internal(const std::string& port_name,
+                                                    const std::string& port_dir_str,
+                                                    bool is_clock_driver) {
     sdcparse::PortDirection port_dir = sdcparse::from_string_to_port_dir(port_dir_str);
     assert(port_dir != sdcparse::PortDirection::UNKNOWN);
 
     check_g_callback_defined();
-    return sdcparse::g_callback->obj_database.create_port_object(port_name, port_dir, is_clock_driver).to_string();
+    return sdcparse::g_callback->obj_database.create_port_object(port_name, port_dir, is_clock_driver);
 }
 
-std::string libsdcparse_create_pin_internal(const std::string& pin_name,
-                                            bool is_clock_driver) {
+sdcparse::ObjectId libsdcparse_create_pin_internal(const std::string& pin_name,
+                                                   bool is_clock_driver) {
     check_g_callback_defined();
-    return sdcparse::g_callback->obj_database.create_pin_object(pin_name, is_clock_driver).to_string();
+    return sdcparse::g_callback->obj_database.create_pin_object(pin_name, is_clock_driver);
 }
 
-std::string libsdcparse_create_cell_internal(const std::string& cell_name) {
+sdcparse::ObjectId libsdcparse_create_cell_internal(const std::string& cell_name) {
     check_g_callback_defined();
-    return sdcparse::g_callback->obj_database.create_cell_object(cell_name).to_string();
+    return sdcparse::g_callback->obj_database.create_cell_object(cell_name);
 }
 
-std::string libsdcparse_create_net_internal(const std::string& net_name) {
+sdcparse::ObjectId libsdcparse_create_net_internal(const std::string& net_name) {
     check_g_callback_defined();
-    return sdcparse::g_callback->obj_database.create_net_object(net_name).to_string();
+    return sdcparse::g_callback->obj_database.create_net_object(net_name);
 }
 
 void libsdcparse_raise_warning(const std::string& msg) {

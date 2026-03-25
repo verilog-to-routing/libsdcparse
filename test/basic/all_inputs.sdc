@@ -7,13 +7,13 @@ puts "START"
 puts [all_inputs]
 puts "END"
 
-# CHECK: [[in1_ptr:__vtr_obj_port_[0-9]+]]
+# CHECK: [[in1_ptr:__vtr_obj_[0-9]+]]
 puts [libsdcparse_create_port "in1" -direction INPUT]
 
 # CHECK: [[in1_ptr]]
 puts [all_inputs]
 
-# CHECK: [[in2_ptr:__vtr_obj_port_[0-9]+]]
+# CHECK: [[in2_ptr:__vtr_obj_[0-9]+]]
 puts [libsdcparse_create_port "in2" -direction INPUT]
 
 # CHECK-DAG: [[in1_ptr]]
@@ -30,7 +30,7 @@ puts [libsdcparse_create_port "out1" -direction OUTPUT]
 puts [all_inputs]
 puts DONE
 
-# CHECK: [[inout1_ptr:__vtr_obj_port_[0-9]+]]
+# CHECK: [[inout1_ptr:__vtr_obj_[0-9]+]]
 puts [libsdcparse_create_port "inout1" -direction INOUT]
 
 # CHECK-DAG: [[inout1_ptr]]

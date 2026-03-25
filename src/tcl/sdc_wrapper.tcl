@@ -775,7 +775,9 @@ proc libsdcparse_create_port {args} {
 
     set params [libsdcparse_generic_sdc_parser "create_port" $spec $args]
 
-    return [libsdcparse_create_port_internal [dict get $params port_name] [dict get $params -direction] [dict get $params -clock_driver]]
+    set new_port [libsdcparse_create_port_internal [dict get $params port_name] [dict get $params -direction] [dict get $params -clock_driver]]
+
+    return $new_port
 }
 
 proc libsdcparse_create_pin {args} {
@@ -793,7 +795,9 @@ proc libsdcparse_create_pin {args} {
 
     # NOTE: Right now we ignore the pin direction. Eventually we will need the
     #       direction.
-    return [libsdcparse_create_pin_internal [dict get $params pin_name] [dict get $params -clock_driver]]
+    set new_pin [libsdcparse_create_pin_internal [dict get $params pin_name] [dict get $params -clock_driver]]
+
+    return $new_pin
 }
 
 proc libsdcparse_create_cell {args} {
@@ -809,7 +813,9 @@ proc libsdcparse_create_cell {args} {
 
     set params [libsdcparse_generic_sdc_parser "create_cell" $spec $args]
 
-    return [libsdcparse_create_cell_internal [dict get $params cell_name]]
+    set new_cell [libsdcparse_create_cell_internal [dict get $params cell_name]]
+
+    return $new_cell
 }
 
 proc libsdcparse_create_net {args} {
@@ -825,5 +831,17 @@ proc libsdcparse_create_net {args} {
 
     set params [libsdcparse_generic_sdc_parser "create_net" $spec $args]
 
-    return [libsdcparse_create_net_internal [dict get $params net_name]]
+    set new_net [libsdcparse_create_net_internal [dict get $params net_name]]
+
+    return $new_net
+}
+
+proc libsdcparse_is_object_id_internal {obj} {
+    # Checks if the object ID is of the form:
+    #       __vtr_obj_<ID>
+    if {[string equal -length 10 "__vtr_obj_" $obj] && \
+        [string is wideinteger -strict [string range $obj 10 end]]} {
+        return 1
+    }
+    return 0
 }

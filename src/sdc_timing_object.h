@@ -52,16 +52,20 @@ inline ObjectType object_type_from_string(const std::string& object_type_str) {
 /**
  * @brief A strong identifier to an object.
  *
- * Objects are uniquely identified by a string of the format:
- *      __vtr_obj_<type>_<id>
+ * ObjectIds are stored internally as numeric values. When they cross the Tcl
+ * boundary they are serialized as "__vtr_obj_<id>" handles.
  */
 struct ObjectId {
+    static constexpr ObjectId INVALID() noexcept { return ObjectId(); }
+
+    constexpr ObjectId() noexcept : value(-1) {}
+
     /**
-     * @brief Constructor using a string.
+     * @brief Constructor using the internal numeric value.
      *
      * This constructor is explicit to make this a strong id.
      */
-    explicit ObjectId(const std::string& v) noexcept
+    explicit ObjectId(size_t v) noexcept
         : value(v) {}
 
     bool operator==(const ObjectId& rhs) const {
@@ -76,52 +80,18 @@ struct ObjectId {
         return value < rhs.value;
     }
 
-    std::string to_string() const {
-        return value;
+    bool is_valid() const {
+        return *this != INVALID();
     }
+
+    explicit constexpr operator std::size_t() const { return value; }
 
     // This is used by the std hash function which uses the private members.
     friend std::hash<ObjectId>;
 
   private:
-    /// @brief The internal string that is used by this ID.
-    // TODO: Consider changing this to be an integer and a type.
-    std::string value;
-};
-
-/**
- * @brief A strong identifier to a cell object.
- */
-struct CellObjectId final : ObjectId {
-    using ObjectId::ObjectId;
-};
-
-/**
- * @brief A strong identifier to a clock object.
- */
-struct ClockObjectId final : ObjectId {
-    using ObjectId::ObjectId;
-};
-
-/**
- * @brief A strong identifier to a port object.
- */
-struct PortObjectId final : ObjectId {
-    using ObjectId::ObjectId;
-};
-
-/**
- * @brief A strong identifier to a pin object.
- */
-struct PinObjectId final : ObjectId {
-    using ObjectId::ObjectId;
-};
-
-/**
- * @brief A strong identifier to a net object.
- */
-struct NetObjectId final : ObjectId {
-    using ObjectId::ObjectId;
+    /// @brief The internal integer that is used by this ID.
+    size_t value;
 };
 
 } // namespace sdcparse
@@ -133,37 +103,7 @@ namespace std {
 template<>
 struct hash<sdcparse::ObjectId> {
     std::size_t operator()(const sdcparse::ObjectId& obj) const noexcept {
-        return std::hash<std::string>{}(obj.to_string());
-    }
-};
-template<>
-struct hash<sdcparse::CellObjectId> {
-    std::size_t operator()(const sdcparse::CellObjectId& obj) const noexcept {
-        return std::hash<std::string>{}(obj.to_string());
-    }
-};
-template<>
-struct hash<sdcparse::ClockObjectId> {
-    std::size_t operator()(const sdcparse::ClockObjectId& obj) const noexcept {
-        return std::hash<std::string>{}(obj.to_string());
-    }
-};
-template<>
-struct hash<sdcparse::PortObjectId> {
-    std::size_t operator()(const sdcparse::PortObjectId& obj) const noexcept {
-        return std::hash<std::string>{}(obj.to_string());
-    }
-};
-template<>
-struct hash<sdcparse::PinObjectId> {
-    std::size_t operator()(const sdcparse::PinObjectId& obj) const noexcept {
-        return std::hash<std::string>{}(obj.to_string());
-    }
-};
-template<>
-struct hash<sdcparse::NetObjectId> {
-    std::size_t operator()(const sdcparse::NetObjectId& obj) const noexcept {
-        return std::hash<std::string>{}(obj.to_string());
+        return std::hash<size_t>{}(obj.value);
     }
 };
 

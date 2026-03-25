@@ -1,11 +1,11 @@
 # RUN: %sdcparse-test %s &> %t
 # RUN: filecheck %s --input-file=%t
 
-# CHECK: [[net1_ptr:__vtr_obj_net_[0-9]+]]
+# CHECK: [[net1_ptr:__vtr_obj_[0-9]+]]
 puts [libsdcparse_create_net "net1"]
-# CHECK: [[net2_ptr:__vtr_obj_net_[0-9]+]]
+# CHECK: [[net2_ptr:__vtr_obj_[0-9]+]]
 puts [libsdcparse_create_net "net2"]
-# CHECK: [[net3_ptr:__vtr_obj_net_[0-9]+]]
+# CHECK: [[net3_ptr:__vtr_obj_[0-9]+]]
 puts [libsdcparse_create_net "net3"]
 
 # CHECK: [[net1_ptr]]

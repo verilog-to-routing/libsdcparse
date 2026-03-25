@@ -1,11 +1,11 @@
 # RUN: %sdcparse-test %s &> %t
 # RUN: filecheck %s --input-file=%t
 
-# CHECK: [[cell1_ptr:__vtr_obj_cell_[0-9]+]]
+# CHECK: [[cell1_ptr:__vtr_obj_[0-9]+]]
 puts [libsdcparse_create_cell "cell1"]
-# CHECK: [[cell2_ptr:__vtr_obj_cell_[0-9]+]]
+# CHECK: [[cell2_ptr:__vtr_obj_[0-9]+]]
 puts [libsdcparse_create_cell "cell2"]
-# CHECK: [[cell3_ptr:__vtr_obj_cell_[0-9]+]]
+# CHECK: [[cell3_ptr:__vtr_obj_[0-9]+]]
 puts [libsdcparse_create_cell "cell3"]
 
 # CHECK: [[cell1_ptr]]
