@@ -26,7 +26,8 @@
 %fragment("ObjectIdHelpers", "header") {
     // Convert ObjectId to TCL Handle
     static Tcl_Obj* ObjectId_To_Tcl(Tcl_Interp */*interp*/, const sdcparse::ObjectId& id) {
-        return Tcl_ObjPrintf("__vtr_obj_%lld", static_cast<Tcl_WideInt>((size_t)id));
+        size_t id_val = static_cast<size_t>(id);
+        return Tcl_ObjPrintf("__vtr_obj_%lld", static_cast<Tcl_WideInt>(id_val));
     }
 
     // Convert TCL Handle to ObjectId

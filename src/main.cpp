@@ -303,7 +303,8 @@ void print_object_id_vec(const std::vector<ObjectId>& object_ids) {
 
     flushing_printf("{");
     for (size_t i = 0; i < object_ids.size(); ++i) {
-        flushing_printf("__vtr_obj_%lld", static_cast<long long int>((size_t)object_ids[i]));
+        size_t object_id_val = static_cast<size_t>(object_ids[i]);
+        flushing_printf("__vtr_obj_%lld", static_cast<long long int>(object_id_val));
 
         if (i != object_ids.size() - 1) {
             flushing_printf(" ");
