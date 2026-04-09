@@ -64,8 +64,8 @@ set_target_properties(libsdcparse PROPERTIES PREFIX "") #Avoid extra 'lib' prefi
 
 target_link_libraries(libsdcparse
     PRIVATE
-    ${TCL_LIBRARY}
     sdc_commands
+    ${TCL_LIBRARY}
 )
 
 target_include_directories(libsdcparse
@@ -77,7 +77,15 @@ target_include_directories(libsdcparse
 
 #Create the test executable
 add_executable(sdcparse_test src/main.cpp)
-target_link_libraries(sdcparse_test libsdcparse)
+# note that we explicitly add sdc_commands to the dependencies below
+# so that we can ensure that TCL_LIBRARY is linked at the end, otherwise
+# CMake seems to add the sdc_commands implicit dependency after the TCL_LIBRARY
+# leading to linking errors on windows (mingw64-cmake)
+target_link_libraries(sdcparse_test
+    PRIVATE
+    libsdcparse
+    sdc_commands
+    ${TCL_LIBRARY})
 
 #Suppress IPO link warnings
 get_target_property(USES_IPO sdcparse_test INTERPROCEDURAL_OPTIMIZATION)

@@ -92,9 +92,11 @@ extern int Sdc_commands_SafeInit(Tcl_Interp* interp);
 
 // Wrap all functions in a try-catch block to allow errors to be thrown from
 // within the interface functions.
+// $function is no longer recognized, and is replaced by $action
+// ref: https://swig.org/Release/CHANGES#:~:text=2025-06-09:%20olly%20The%20$function%20variable
 %exception {
     try {
-        $function;
+        $action;
     } catch (const std::out_of_range& oor) {
         SWIG_exception(SWIG_IndexError, oor.what());
     } catch (const std::exception& e) {
