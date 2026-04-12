@@ -30,7 +30,7 @@ create_generated_clock -name gen_clk_custom_name -source clk1 -multiply_by 6 gen
 # CHECK: create_generated_clock -name gen_clk4 -source {[[clk1_port_ptr]]} -multiply_by 8 -add {[[gen_clk2_port_ptr]]}
 create_generated_clock -name gen_clk4 -source clk1 -multiply_by 8 gen_clk2 -add
 
-# CHECK: create_generated_clock -name gen_clk5 -source {[[clk1_port_ptr]]}
+# CHECK: create_generated_clock -name gen_clk5 -source {[[clk1_port_ptr]]} -divide_by 2
 create_generated_clock -name gen_clk5 -source clk1 -divide_by 2
 
 # CHECK: create_generated_clock -source {[[clk4_port_ptr]] [[clk4_net_ptr]]} -divide_by 2 {[[gen_clk1_port_ptr]]}
