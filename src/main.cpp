@@ -27,6 +27,7 @@
 
 using namespace sdcparse;
 
+void print_object_id(ObjectId object_id);
 void print_object_id_vec(const std::vector<ObjectId>& group);
 void print_from_to_object_id_vec(const std::vector<ObjectId>& from, const std::vector<ObjectId>& to);
 
@@ -81,8 +82,8 @@ public:
             flushing_printf(" -name %s",
                    cmd.name.c_str());
         }
-        std::string source_name = obj_database.get_object_name(ObjectId(cmd.source));
-        flushing_printf(" -source %s", source_name.c_str());
+        flushing_printf(" -source ");
+        print_object_id_vec(cmd.sources);
         if (cmd.divide_by != sdcparse::UNINITIALIZED_INT)
             flushing_printf(" -divide_by %d", cmd.divide_by);
         if (cmd.multiply_by != sdcparse::UNINITIALIZED_INT)
@@ -297,14 +298,18 @@ int main(int argc, char **argv) {
     return 0;
 }
 
+void print_object_id(ObjectId object_id) {
+    size_t object_id_val = static_cast<size_t>(object_id);
+    flushing_printf("__vtr_obj_%lld", static_cast<long long int>(object_id_val));
+}
+
 void print_object_id_vec(const std::vector<ObjectId>& object_ids) {
     if (object_ids.empty())
         return;
 
     flushing_printf("{");
     for (size_t i = 0; i < object_ids.size(); ++i) {
-        size_t object_id_val = static_cast<size_t>(object_ids[i]);
-        flushing_printf("__vtr_obj_%lld", static_cast<long long int>(object_id_val));
+        print_object_id(object_ids[i]);
 
         if (i != object_ids.size() - 1) {
             flushing_printf(" ");
