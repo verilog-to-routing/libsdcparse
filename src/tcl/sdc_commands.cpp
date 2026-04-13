@@ -59,14 +59,14 @@ void libsdcparse_create_clock_internal(double period,
 }
 
 void libsdcparse_create_generated_clock_internal(const std::string& name,
-                                                 sdcparse::ObjectId source,
+                                                 const std::vector<sdcparse::ObjectId>& sources,
                                                  int divide_by,
                                                  int multiply_by,
                                                  bool add,
                                                  const std::vector<sdcparse::ObjectId>& targets) {
     sdcparse::CreateGeneratedClock create_gen_clock_cmd;
     create_gen_clock_cmd.name = name;
-    create_gen_clock_cmd.source = source;
+    create_gen_clock_cmd.sources = sources;
     create_gen_clock_cmd.divide_by = divide_by;
     create_gen_clock_cmd.multiply_by = multiply_by;
     create_gen_clock_cmd.add = add;

@@ -271,7 +271,7 @@ proc create_generated_clock {args} {
         flags   {-name -source -divide_by -multiply_by}
         bools   {-add}
         pos     {targets}
-        require {-source targets}
+        require {-source}
         types   {-divide_by integer -multiply_by integer}
     }
 
@@ -279,10 +279,7 @@ proc create_generated_clock {args} {
 
     set name [dict get $params -name]
 
-    set src [libsdcparse_convert_to_objects "create_generated_clock" [dict get $params -source] {port pin net}]
-    if {[llength $src] != 1} {
-        error "create_generated_clock: Only one source can be defined, found: '$src'"
-    }
+    set id_sources [libsdcparse_convert_to_objects "create_generated_clock" [dict get $params -source] {port pin net}]
 
     set divide_by [dict get $params -divide_by]
     if {$divide_by == ""} {
@@ -303,9 +300,9 @@ proc create_generated_clock {args} {
 
     set add [dict get $params -add]
 
-    set id_targets [libsdcparse_convert_to_objects "create_generated_clock" [dict get $params targets] {port}]
+    set id_targets [libsdcparse_convert_to_objects "create_generated_clock" [dict get $params targets] {port pin net}]
 
-    libsdcparse_create_generated_clock_internal $name $src $divide_by $multiply_by $add $id_targets
+    libsdcparse_create_generated_clock_internal $name $id_sources $divide_by $multiply_by $add $id_targets
 }
 
 proc set_clock_groups {args} {
