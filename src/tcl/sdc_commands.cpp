@@ -158,14 +158,14 @@ void libsdcparse_set_multicycle_path_internal(bool is_setup,
 
 void libsdcparse_set_input_delay_internal(bool max_delay_flag,
                                           bool min_delay_flag,
-                                          const std::string& clock_name,
+                                          const std::vector<sdcparse::ObjectId>& associated_clocks,
                                           double delay,
                                           const std::vector<sdcparse::ObjectId>& targets) {
 
     sdcparse::SetIoDelay set_input_delay_cmd;
     set_input_delay_cmd.is_max = max_delay_flag;
     set_input_delay_cmd.is_min = min_delay_flag;
-    set_input_delay_cmd.clock_name = clock_name;
+    set_input_delay_cmd.associated_clocks = associated_clocks;
     set_input_delay_cmd.delay = delay;
     set_input_delay_cmd.target_ports = targets;
     set_input_delay_cmd.type = sdcparse::IoDelayType::INPUT;
@@ -176,14 +176,14 @@ void libsdcparse_set_input_delay_internal(bool max_delay_flag,
 
 void libsdcparse_set_output_delay_internal(bool max_delay_flag,
                                            bool min_delay_flag,
-                                           const std::string& clock_name,
+                                           const std::vector<sdcparse::ObjectId>& associated_clocks,
                                            double delay,
                                            const std::vector<sdcparse::ObjectId>& targets) {
 
     sdcparse::SetIoDelay set_output_delay_cmd;
     set_output_delay_cmd.is_max = max_delay_flag;
     set_output_delay_cmd.is_min = min_delay_flag;
-    set_output_delay_cmd.clock_name = clock_name;
+    set_output_delay_cmd.associated_clocks = associated_clocks;
     set_output_delay_cmd.delay = delay;
     set_output_delay_cmd.target_ports = targets;
     set_output_delay_cmd.type = sdcparse::IoDelayType::OUTPUT;

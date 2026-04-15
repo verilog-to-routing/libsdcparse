@@ -8,6 +8,9 @@ puts [libsdcparse_create_port "in3" -direction INPUT]
 puts [libsdcparse_create_port "out1" -direction OUTPUT]
 puts [libsdcparse_create_port "out2" -direction OUTPUT]
 
+create_clock -period 10.0 -name input_clk
+create_clock -period 20.0 -name output_clk
+
 #I/O Delay
 set_input_delay -clock input_clk -max -min 0.5 [get_ports {in1 in2 in3}]
 set_output_delay -clock output_clk -max -min 1 [get_ports {out*}]

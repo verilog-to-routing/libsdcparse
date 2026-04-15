@@ -198,7 +198,7 @@ proc libsdcparse_convert_to_objects {cmd_name targets object_type_list} {
     }
 
     if {[llength $targets] != 0 && [llength $id_targets] == 0} {
-        error "$cmd_name: Unknown target(s): $targets. Expected target(s) of type $object_type_list."
+        error "$cmd_name: Unknown target(s): $targets. Expected target(s) of type $object_type_list, found none."
     }
 
     return $id_targets
@@ -443,7 +443,9 @@ proc set_input_delay {args} {
 
     set id_targets [libsdcparse_convert_to_objects "set_input_delay" [dict get $params targets] {port pin}]
 
-    libsdcparse_set_input_delay_internal [dict get $params -max] [dict get $params -min] [dict get $params -clock] [dict get $params delay] $id_targets
+    set associated_clocks [libsdcparse_convert_to_objects "set_input_delay" [dict get $params -clock] {clock}]
+
+    libsdcparse_set_input_delay_internal [dict get $params -max] [dict get $params -min] $associated_clocks [dict get $params delay] $id_targets
 }
 
 proc set_output_delay {args} {
@@ -461,7 +463,9 @@ proc set_output_delay {args} {
 
     set id_targets [libsdcparse_convert_to_objects "set_output_delay" [dict get $params targets] {port pin}]
 
-    libsdcparse_set_output_delay_internal [dict get $params -max] [dict get $params -min] [dict get $params -clock] [dict get $params delay] $id_targets
+    set associated_clocks [libsdcparse_convert_to_objects "set_output_delay" [dict get $params -clock] {clock}]
+
+    libsdcparse_set_output_delay_internal [dict get $params -max] [dict get $params -min] $associated_clocks [dict get $params delay] $id_targets
 }
 
 proc set_clock_uncertainty {args} {
