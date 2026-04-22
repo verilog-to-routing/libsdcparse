@@ -65,16 +65,16 @@ void libsdcparse_set_multicycle_path_internal(bool is_setup,
                                                int path_multiplier);
 
 void libsdcparse_set_input_delay_internal(bool max_delay_flag,
-                                           bool min_delay_flag,
-                                           const std::string& clock_name,
-                                           double delay,
-                                           const std::vector<sdcparse::ObjectId>& targets);
+                                          bool min_delay_flag,
+                                          const std::vector<sdcparse::ObjectId>& associated_clocks,
+                                          double delay,
+                                          const std::vector<sdcparse::ObjectId>& targets);
 
 void libsdcparse_set_output_delay_internal(bool max_delay_flag,
-                                            bool min_delay_flag,
-                                            const std::string& clock_name,
-                                            double delay,
-                                            const std::vector<sdcparse::ObjectId>& targets);
+                                           bool min_delay_flag,
+                                           const std::vector<sdcparse::ObjectId>& associated_clocks,
+                                           double delay,
+                                           const std::vector<sdcparse::ObjectId>& targets);
 
 void libsdcparse_set_clock_uncertainty_internal(bool is_setup,
                                                  bool is_hold,

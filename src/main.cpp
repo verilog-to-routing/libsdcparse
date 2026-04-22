@@ -119,11 +119,13 @@ public:
             flushing_printf("set_output_delay");
         }
 
-        // The clock name can be empty, meaning the arrival time is
+        // The associated clocks can be empty, meaning the arrival time is
         // with respect to all clocks that arrive at the reference
         // pin.
-        if (!cmd.clock_name.empty())
-            flushing_printf(" -clock %s", cmd.clock_name.c_str());
+        if (!cmd.associated_clocks.empty()) {
+            flushing_printf(" -clock ");
+            print_object_id_vec(cmd.associated_clocks);
+        }
 
         if (cmd.is_max) {
             flushing_printf(" -max");

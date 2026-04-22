@@ -142,4 +142,4 @@ clk4} \
 #Spaced Comments
 
 #Non-empty line at end of file
-set_output_delay -clock eof_test -max 1.7293 [ get_ports {eof_test_port*} ]
+set_output_delay -clock input_clk -max 1.7293 [ get_ports {eof_test_port*} ]
