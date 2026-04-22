@@ -352,6 +352,10 @@ proc create_generated_clock {args} {
 
     set id_targets [libsdcparse_convert_to_objects "create_generated_clock" [dict get $params targets] {port pin net}]
 
+    if {$name == "" && [llength $id_targets] == 0} {
+        error "create_generated_clock: Either name or target must be provided"
+    }
+
     libsdcparse_create_generated_clock_internal $name $id_sources $divide_by $multiply_by $add $edges $edge_shift $invert $duty_cycle $id_targets
 }
 
