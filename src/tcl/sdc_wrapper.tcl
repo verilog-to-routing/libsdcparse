@@ -329,6 +329,10 @@ proc create_generated_clock {args} {
         }
     }
 
+    if {$edges != "" && ($divide_by != -1 || $multiply_by != -1)} {
+        error "create_generated_clock: -edges cannot be used with -divide_by or -multiply_by"
+    }
+
     set edge_shift [dict get $params -edge_shift]
     if {$edge_shift != "" && [llength $edge_shift] != [llength $edges]} {
         error "create_generated_clock: -edge_shift list expected to be the same length as -edges, given $edge_shift"
