@@ -197,6 +197,10 @@ struct CreateGeneratedClock {
     int divide_by = UNINITIALIZED_INT;
     int multiply_by = UNINITIALIZED_INT;
     bool add = false;
+    std::vector<double> edges;
+    std::vector<double> edge_shift;
+    bool invert = false;
+    double duty_cycle = UNINITIALIZED_FLOAT;
     std::vector<ObjectId> targets;
 };
 

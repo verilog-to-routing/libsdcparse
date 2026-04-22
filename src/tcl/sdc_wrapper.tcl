@@ -268,11 +268,11 @@ proc create_generated_clock {args} {
     libsdcparse_set_lineno
 
     set spec {
-        flags   {-name -source -divide_by -multiply_by}
-        bools   {-add}
+        flags   {-name -source -divide_by -multiply_by -edges -edge_shift -duty_cycle}
+        bools   {-add -invert}
         pos     {targets}
         require {-source}
-        types   {-divide_by integer -multiply_by integer}
+        types   {-divide_by integer -multiply_by integer -duty_cycle double}
     }
 
     set params [libsdcparse_generic_sdc_parser "create_generated_clock" $spec $args]
@@ -286,23 +286,73 @@ proc create_generated_clock {args} {
         # TODO: This should be made non-magic.
         #       This is UNINITIALIZED_INT
         set divide_by -1
+    } else {
+        if {$divide_by < 1} {
+            error "create_generated_clock: -divide_by must not be less than 1"
+        }
     }
 
     set multiply_by [dict get $params -multiply_by]
     if {$multiply_by == ""} {
         # TODO: This should be made non-magic.
         set multiply_by -1
+    } else {
+        if {$multiply_by < 1} {
+            error "create_generated_clock: -multiply_by must not be less than 1"
+        }
     }
 
-    if {$divide_by == -1 && $multiply_by == -1} {
-        error "create_generated_clock: Either -multiply_by or -divide_by is required."
+    if {$divide_by != -1 && $multiply_by != -1} {
+        error "create_generated_clock: cannot specify both -divide_by and -multiply_by"
+    }
+
+    set duty_cycle [dict get $params -duty_cycle]
+    if {$duty_cycle == ""} {
+        # TODO: This should be made non-magic.
+        set duty_cycle -1.0
+    } else {
+        if {$duty_cycle < 0.0 || $duty_cycle > 100.0} {
+            error "create_generated_clock: -duty_cycle expected to be a percentage from 0.0 to 100.0, given $duty_cycle"
+        }
+        if {$multiply_by == -1} {
+            error "create_generated_clock: -duty_cycle can only be used for clock multiplication"
+        }
+    }
+
+    set edges [dict get $params -edges]
+    if {$edges != "" && [llength $edges] != 3} {
+        error "create_generated_clock: -edges expected to be a list of 3 elements, given $edges"
+    }
+    foreach edge $edges {
+        if {![string is double -strict $edge]} {
+            error "create_generated_clock: -edges expected to be a list of doubles, given a non-double edge: $edge"
+        }
+    }
+
+    set edge_shift [dict get $params -edge_shift]
+    if {$edge_shift != "" && [llength $edge_shift] != [llength $edges]} {
+        error "create_generated_clock: -edge_shift list expected to be the same length as -edges, given $edge_shift"
+    }
+    foreach shift $edge_shift {
+        if {![string is double -strict $shift]} {
+            error "create_generated_clock: -edge_shift expected to be a list of doubles, given a non-double shift: $shift"
+        }
+    }
+
+    if {$divide_by == -1 && $multiply_by == -1 && $edges == ""} {
+        error "create_generated_clock: One of -divide_by, -multiply_by, or -edges must be provided"
     }
 
     set add [dict get $params -add]
 
+    set invert [dict get $params -invert]
+    if {$invert && $multiply_by == -1 && $divide_by == -1} {
+        error "create_generated_clock: -invert can only be used for clock division and multiplication"
+    }
+
     set id_targets [libsdcparse_convert_to_objects "create_generated_clock" [dict get $params targets] {port pin net}]
 
-    libsdcparse_create_generated_clock_internal $name $id_sources $divide_by $multiply_by $add $id_targets
+    libsdcparse_create_generated_clock_internal $name $id_sources $divide_by $multiply_by $add $edges $edge_shift $invert $duty_cycle $id_targets
 }
 
 proc set_clock_groups {args} {

@@ -39,6 +39,10 @@ void libsdcparse_create_generated_clock_internal(const std::string& name,
                                                  int divide_by,
                                                  int multiply_by,
                                                  bool add,
+                                                 const std::vector<double>& edges,
+                                                 const std::vector<double>& edge_shift,
+                                                 bool invert,
+                                                 double duty_cycle,
                                                  const std::vector<sdcparse::ObjectId>& targets);
 
 void libsdcparse_set_clock_groups_internal(const std::vector<sdcparse::ObjectId>& clock_list,

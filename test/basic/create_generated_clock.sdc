@@ -35,3 +35,15 @@ create_generated_clock -name gen_clk5 -source clk1 -divide_by 2
 
 # CHECK: create_generated_clock -source {[[clk4_port_ptr]] [[clk4_net_ptr]]} -divide_by 2 {[[gen_clk1_port_ptr]]}
 create_generated_clock -source clk4 -divide_by 2 gen_clk1
+
+# CHECK: create_generated_clock -source {[[clk1_port_ptr]]} -edges {{{1.0*}} {{3.0*}} {{5.0*}}} {[[gen_clk1_port_ptr]]}
+create_generated_clock -source clk1 -edges {1 3 5} gen_clk1
+
+# CHECK: create_generated_clock -source {[[clk1_port_ptr]]} -edges {{{1.0*}} {{3.0*}} {{5.0*}}} -edge_shift {{{1.0*}} {{0.0*}} {{-0.50*}}} {[[gen_clk1_port_ptr]]}
+create_generated_clock -source clk1 -edges {1 3 5} -edge_shift {1.0 0.0 -0.5} gen_clk1
+
+# CHECK: create_generated_clock -source {[[clk1_port_ptr]]} -divide_by 2 -invert {[[gen_clk1_port_ptr]]}
+create_generated_clock -source clk1 -divide_by 2 -invert gen_clk1
+
+# CHECK: create_generated_clock -source {[[clk1_port_ptr]]} -multiply_by 2 -duty_cycle {{25.0*}} {[[gen_clk1_port_ptr]]}
+create_generated_clock -source clk1 -multiply_by 2 -duty_cycle 25.0 gen_clk1

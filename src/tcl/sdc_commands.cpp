@@ -63,6 +63,10 @@ void libsdcparse_create_generated_clock_internal(const std::string& name,
                                                  int divide_by,
                                                  int multiply_by,
                                                  bool add,
+                                                 const std::vector<double>& edges,
+                                                 const std::vector<double>& edge_shift,
+                                                 bool invert,
+                                                 double duty_cycle,
                                                  const std::vector<sdcparse::ObjectId>& targets) {
     sdcparse::CreateGeneratedClock create_gen_clock_cmd;
     create_gen_clock_cmd.name = name;
@@ -70,6 +74,14 @@ void libsdcparse_create_generated_clock_internal(const std::string& name,
     create_gen_clock_cmd.divide_by = divide_by;
     create_gen_clock_cmd.multiply_by = multiply_by;
     create_gen_clock_cmd.add = add;
+    create_gen_clock_cmd.edges = edges;
+    create_gen_clock_cmd.edge_shift = edge_shift;
+    create_gen_clock_cmd.invert = invert;
+    if (duty_cycle == -1) {
+        create_gen_clock_cmd.duty_cycle = sdcparse::UNINITIALIZED_FLOAT;
+    } else {
+        create_gen_clock_cmd.duty_cycle = duty_cycle;
+    }
     create_gen_clock_cmd.targets = targets;
 
     check_g_callback_defined();
