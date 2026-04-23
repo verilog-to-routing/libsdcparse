@@ -87,7 +87,7 @@
 %{
 #include "sdc_commands.h"
 #include "sdc_timing_object.h"
-extern int Sdc_commands_SafeInit(Tcl_Interp* interp);
+SWIGEXPORT int Sdc_commands_SafeInit(Tcl_Interp* interp);
 %}
 
 // Wrap all functions in a try-catch block to allow errors to be thrown from
