@@ -24,8 +24,8 @@ create_clock -period 2.5 -name virtual_io_clock
 
 # TODO: This is not technically correct. We need to produce warnings and only
 #       set the input delays on the input ports.
-# CHECK: set_input_delay -clock virtual_io_clock -max {{1.0*}} {[[in1_port_ptr]] [[in2_port_ptr]] [[out1_port_ptr]] [[out2_port_ptr]] [[clk_port_ptr]] [[clk2_port_ptr]]}
+# CHECK: set_input_delay -clock {{{__vtr_obj_[0-9]+}}} -max {{1.0*}} {[[in1_port_ptr]] [[in2_port_ptr]] [[out1_port_ptr]] [[out2_port_ptr]] [[clk_port_ptr]] [[clk2_port_ptr]]}
 set_input_delay -clock virtual_io_clock -max 1 [get_ports {*}]
 
-# CHECK: set_output_delay -clock virtual_io_clock -max {{0.50*}} {[[in1_port_ptr]] [[in2_port_ptr]] [[out1_port_ptr]] [[out2_port_ptr]] [[clk_port_ptr]] [[clk2_port_ptr]]}
+# CHECK: set_output_delay -clock {{{__vtr_obj_[0-9]+}}} -max {{0.50*}} {[[in1_port_ptr]] [[in2_port_ptr]] [[out1_port_ptr]] [[out2_port_ptr]] [[clk_port_ptr]] [[clk2_port_ptr]]}
 set_output_delay -clock virtual_io_clock -max 0.5 [get_ports {*}]

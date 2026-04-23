@@ -214,7 +214,7 @@ struct SetIoDelay {
                                                     // provided, it is up to the application to handle the case 
                                                     // where both are left unspecified (which SDC treats as 
                                                     // implicitly specifying both)
-    std::string clock_name = "";                    //Name of the clock this constraint is associated with
+    std::vector<ObjectId> associated_clocks;        //The clocks this constraint is associated with
     double delay = UNINITIALIZED_FLOAT;             //The maximum input delay allowed on the target ports
     std::vector<ObjectId> target_ports;             //The target ports
 };
