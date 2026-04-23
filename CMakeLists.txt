@@ -35,11 +35,13 @@ target_include_directories(sdc_commands
 # NOTE: This also suppresses the warnings for sdc_commands.cpp. May want to undo
 #       that if possible.
 set(SWIG_SUPPRESS_FLAGS "-Wno-cast-qual")
-target_compile_options(sdc_commands
-    PRIVATE
-    -Wno-cast-qual
-    -Wno-shadow
-)
+if(NOT MSVC)
+    target_compile_options(sdc_commands
+        PRIVATE
+        -Wno-cast-qual
+        -Wno-shadow
+    )
+endif()
 
 # Convert the SDC Wrapper TCL file into a C-string which is directly loaded
 # into the TCL interpreter. This improves the portability of this application
