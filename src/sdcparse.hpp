@@ -194,9 +194,9 @@ struct CreateClock {
 struct CreateGeneratedClock {
     std::string name = "";                      //Name of the generated clock
     std::vector<ObjectId> sources;              //The master clock pin(s)/port(s) this clock is derived from
-    int divide_by = UNINITIALIZED_INT;          //Divide the master clock period by this integer (UNINITIALIZED_INT if unset)
-    int multiply_by = UNINITIALIZED_INT;        //Multiply the master clock period by this integer (UNINITIALIZED_INT if unset)
-                                                // Note: divide_by and multiply_by are mutually exclusive; exactly one of
+    int divide_by = UNINITIALIZED_INT;          //Divide the master clock frequency by this integer (UNINITIALIZED_INT if unset)
+    int multiply_by = UNINITIALIZED_INT;        //Multiply the master clock frequency by this integer (UNINITIALIZED_INT if unset)
+                                                // Note: divide_by, multiply_by, and edges are mutually exclusive; exactly one of
                                                 // divide_by, multiply_by, or edges must be provided
     bool add = false;                           //If true, add this clock to any existing clocks on the target rather
                                                 // than replacing them
