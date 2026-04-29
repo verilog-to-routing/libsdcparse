@@ -192,12 +192,23 @@ struct CreateClock {
 };
 
 struct CreateGeneratedClock {
-    std::string name = "";
-    std::vector<ObjectId> sources;
-    int divide_by = UNINITIALIZED_INT;
-    int multiply_by = UNINITIALIZED_INT;
-    bool add = false;
-    std::vector<ObjectId> targets;
+    std::string name = "";                      //Name of the generated clock
+    std::vector<ObjectId> sources;              //The master clock pin(s)/port(s) this clock is derived from
+    int divide_by = UNINITIALIZED_INT;          //Divide the master clock frequency by this integer (UNINITIALIZED_INT if unset)
+    int multiply_by = UNINITIALIZED_INT;        //Multiply the master clock frequency by this integer (UNINITIALIZED_INT if unset)
+                                                // Note: divide_by, multiply_by, and edges are mutually exclusive; exactly one of
+                                                // divide_by, multiply_by, or edges must be provided
+    bool add = false;                           //If true, add this clock to any existing clocks on the target rather
+                                                // than replacing them
+    std::vector<double> edges;                  //List of 3 master-clock edge indices that define the rising edge,
+                                                // falling edge, and next rising edge of the generated clock waveform
+    std::vector<double> edge_shift;             //Per-edge time offset (in the master clock period) applied to each
+                                                // edge in the edges list; must be the same length as edges
+    bool invert = false;                        //If true, invert the generated clock signal relative to the master clock;
+                                                // only valid with divide_by or multiply_by
+    double duty_cycle = UNINITIALIZED_FLOAT;    //Duty cycle as a percentage (0.0–100.0) for the generated clock when
+                                                // using multiply_by (UNINITIALIZED_FLOAT if unset)
+    std::vector<ObjectId> targets;              //The netlist objects (ports/pins/nets) on which the generated clock is created
 };
 
 struct SetIoDelay {

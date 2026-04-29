@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <cmath>
 #include "sdcparse.hpp"
 
 // The TCL parser uses its own buffers when printing to stdout. This means that
@@ -90,6 +91,32 @@ public:
             flushing_printf(" -multiply_by %d", cmd.multiply_by);
         if (cmd.add) {
             flushing_printf(" -add");
+        }
+        if (!cmd.edges.empty()) {
+            flushing_printf(" -edges {");
+            for (size_t i = 0; i < cmd.edges.size(); i++) {
+                if (i != 0) {
+                    flushing_printf(" ");
+                }
+                flushing_printf("%f", cmd.edges[i]);
+            }
+            flushing_printf("}");
+        }
+        if (!cmd.edge_shift.empty()) {
+            flushing_printf(" -edge_shift {");
+            for (size_t i = 0; i < cmd.edge_shift.size(); i++) {
+                if (i != 0) {
+                    flushing_printf(" ");
+                }
+                flushing_printf("%f", cmd.edge_shift[i]);
+            }
+            flushing_printf("}");
+        }
+        if (cmd.invert) {
+            flushing_printf(" -invert");
+        }
+        if (!std::isnan(cmd.duty_cycle)) {
+            flushing_printf(" -duty_cycle %f", cmd.duty_cycle);
         }
         if (!cmd.targets.empty()) {
             flushing_printf(" ");
