@@ -268,11 +268,11 @@ proc create_generated_clock {args} {
     libsdcparse_set_lineno
 
     set spec {
-        flags   {-name -source -divide_by -multiply_by -edges -edge_shift -duty_cycle}
+        flags   {-name -source -master_clock -divide_by -multiply_by -edges -edge_shift -duty_cycle -phase -offset}
         bools   {-add -invert}
         pos     {targets}
         require {-source}
-        types   {-divide_by integer -multiply_by integer -duty_cycle double}
+        types   {-divide_by integer -multiply_by integer -duty_cycle double -phase double -offset double}
     }
 
     set params [libsdcparse_generic_sdc_parser "create_generated_clock" $spec $args]
@@ -280,6 +280,15 @@ proc create_generated_clock {args} {
     set name [dict get $params -name]
 
     set id_sources [libsdcparse_convert_to_objects "create_generated_clock" [dict get $params -source] {port pin net}]
+
+    set master_clock_str [dict get $params -master_clock]
+    set id_master_clock {}
+    if {$master_clock_str != ""} {
+        set id_master_clock [libsdcparse_convert_to_objects "create_generated_clock" $master_clock_str {clock}]
+        if {[llength $id_master_clock] != 1} {
+            error "create_generated_clock: -master_clock must match exactly one clock, found [llength $id_master_clock]"
+        }
+    }
 
     set divide_by [dict get $params -divide_by]
     if {$divide_by == ""} {
@@ -343,15 +352,31 @@ proc create_generated_clock {args} {
         }
     }
 
-    if {$divide_by == -1 && $multiply_by == -1 && $edges == ""} {
-        error "create_generated_clock: One of -divide_by, -multiply_by, or -edges must be provided"
+    set phase_str [dict get $params -phase]
+    set phase_set [expr {$phase_str != ""}]
+    set phase [expr {$phase_set ? $phase_str : 0.0}]
+
+    set offset_str [dict get $params -offset]
+    set offset_set [expr {$offset_str != ""}]
+    set offset [expr {$offset_set ? $offset_str : 0.0}]
+
+    if {$phase_set && $offset_set} {
+        error "create_generated_clock: cannot specify both -phase and -offset"
+    }
+
+    if {$edges != "" && ($phase_set || $offset_set)} {
+        error "create_generated_clock: -phase and -offset cannot be used with -edges"
+    }
+
+    if {$divide_by == -1 && $multiply_by == -1 && $edges == "" && !$phase_set && !$offset_set} {
+        error "create_generated_clock: One of -divide_by, -multiply_by, -edges, -phase, or -offset must be provided"
     }
 
     set add [dict get $params -add]
 
     set invert [dict get $params -invert]
-    if {$invert && $multiply_by == -1 && $divide_by == -1} {
-        error "create_generated_clock: -invert can only be used for clock division and multiplication"
+    if {$invert && $multiply_by == -1 && $divide_by == -1 && !$phase_set && !$offset_set} {
+        error "create_generated_clock: -invert can only be used for clock division, multiplication, or phase shifting"
     }
 
     set id_targets [libsdcparse_convert_to_objects "create_generated_clock" [dict get $params targets] {port pin net}]
@@ -360,7 +385,7 @@ proc create_generated_clock {args} {
         error "create_generated_clock: Either name or target must be provided"
     }
 
-    libsdcparse_create_generated_clock_internal $name $id_sources $divide_by $multiply_by $add $edges $edge_shift $invert $duty_cycle $id_targets
+    libsdcparse_create_generated_clock_internal $name $id_sources $id_master_clock $divide_by $multiply_by $add $edges $edge_shift $invert $duty_cycle $phase_set $phase $offset_set $offset $id_targets
 }
 
 proc set_clock_groups {args} {

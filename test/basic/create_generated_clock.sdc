@@ -47,3 +47,30 @@ create_generated_clock -source clk1 -divide_by 2 -invert gen_clk1
 
 # CHECK: create_generated_clock -source {[[clk1_port_ptr]]} -multiply_by 2 -duty_cycle {{25.0*}} {[[gen_clk1_port_ptr]]}
 create_generated_clock -source clk1 -multiply_by 2 -duty_cycle 25.0 gen_clk1
+
+# CHECK: [[clk1_clock_ptr:__vtr_obj_[0-9]+]]
+puts [get_clocks clk1]
+
+# CHECK: create_generated_clock -source {[[clk1_port_ptr]]} -master_clock [[clk1_clock_ptr]] -divide_by 2 {[[gen_clk1_port_ptr]]}
+create_generated_clock -source clk1 -master_clock clk1 -divide_by 2 gen_clk1
+
+# CHECK: create_generated_clock -source {[[clk1_port_ptr]]} -phase {{90.0*}} {[[gen_clk1_port_ptr]]}
+create_generated_clock -source clk1 -phase 90.0 gen_clk1
+
+# CHECK: create_generated_clock -source {[[clk1_port_ptr]]} -offset {{2.50*}} {[[gen_clk1_port_ptr]]}
+create_generated_clock -source clk1 -offset 2.5 gen_clk1
+
+# CHECK: create_generated_clock -source {[[clk1_port_ptr]]} -divide_by 2 -phase {{-45.0*}} {[[gen_clk1_port_ptr]]}
+create_generated_clock -source clk1 -divide_by 2 -phase -45.0 gen_clk1
+
+# CHECK: create_generated_clock -source {[[clk1_port_ptr]]} -invert -phase {{180.0*}} {[[gen_clk1_port_ptr]]}
+create_generated_clock -source clk1 -phase 180.0 -invert gen_clk1
+
+# CHECK: create_generated_clock -source {[[clk1_port_ptr]]} -phase {{-1.0*}} {[[gen_clk1_port_ptr]]}
+create_generated_clock -source clk1 -phase -1 gen_clk1
+
+# CHECK: create_generated_clock -source {[[clk1_port_ptr]]} -offset {{-1.0*}} {[[gen_clk1_port_ptr]]}
+create_generated_clock -source clk1 -offset -1 gen_clk1
+
+# CHECK: create_generated_clock -source {[[clk1_port_ptr]]} -divide_by 2 -offset {{0.0*}} {[[gen_clk1_port_ptr]]}
+create_generated_clock -source clk1 -divide_by 2 -offset 0 gen_clk1

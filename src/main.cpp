@@ -85,6 +85,10 @@ public:
         }
         flushing_printf(" -source ");
         print_object_id_vec(cmd.sources);
+        if (cmd.master_clock.is_valid()) {
+            flushing_printf(" -master_clock ");
+            print_object_id(cmd.master_clock);
+        }
         if (cmd.divide_by != sdcparse::UNINITIALIZED_INT)
             flushing_printf(" -divide_by %d", cmd.divide_by);
         if (cmd.multiply_by != sdcparse::UNINITIALIZED_INT)
@@ -117,6 +121,12 @@ public:
         }
         if (!std::isnan(cmd.duty_cycle)) {
             flushing_printf(" -duty_cycle %f", cmd.duty_cycle);
+        }
+        if (!std::isnan(cmd.phase)) {
+            flushing_printf(" -phase %f", cmd.phase);
+        }
+        if (!std::isnan(cmd.offset)) {
+            flushing_printf(" -offset %f", cmd.offset);
         }
         if (!cmd.targets.empty()) {
             flushing_printf(" ");
