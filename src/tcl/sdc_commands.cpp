@@ -60,6 +60,7 @@ void libsdcparse_create_clock_internal(double period,
 
 void libsdcparse_create_generated_clock_internal(const std::string& name,
                                                  const std::vector<sdcparse::ObjectId>& sources,
+                                                 const std::vector<sdcparse::ObjectId>& master_clock,
                                                  int divide_by,
                                                  int multiply_by,
                                                  bool add,
@@ -67,10 +68,15 @@ void libsdcparse_create_generated_clock_internal(const std::string& name,
                                                  const std::vector<double>& edge_shift,
                                                  bool invert,
                                                  double duty_cycle,
+                                                 bool phase_set,
+                                                 double phase,
+                                                 bool offset_set,
+                                                 double offset,
                                                  const std::vector<sdcparse::ObjectId>& targets) {
     sdcparse::CreateGeneratedClock create_gen_clock_cmd;
     create_gen_clock_cmd.name = name;
     create_gen_clock_cmd.sources = sources;
+    create_gen_clock_cmd.master_clock = master_clock.empty() ? sdcparse::ObjectId::INVALID() : master_clock[0];
     create_gen_clock_cmd.divide_by = divide_by;
     create_gen_clock_cmd.multiply_by = multiply_by;
     create_gen_clock_cmd.add = add;
@@ -82,6 +88,8 @@ void libsdcparse_create_generated_clock_internal(const std::string& name,
     } else {
         create_gen_clock_cmd.duty_cycle = duty_cycle;
     }
+    create_gen_clock_cmd.phase = phase_set ? phase : sdcparse::UNINITIALIZED_FLOAT;
+    create_gen_clock_cmd.offset = offset_set ? offset : sdcparse::UNINITIALIZED_FLOAT;
     create_gen_clock_cmd.targets = targets;
 
     check_g_callback_defined();

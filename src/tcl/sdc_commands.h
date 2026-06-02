@@ -36,6 +36,7 @@ void libsdcparse_create_clock_internal(double period,
 
 void libsdcparse_create_generated_clock_internal(const std::string& name,
                                                  const std::vector<sdcparse::ObjectId>& sources,
+                                                 const std::vector<sdcparse::ObjectId>& master_clock,
                                                  int divide_by,
                                                  int multiply_by,
                                                  bool add,
@@ -43,6 +44,10 @@ void libsdcparse_create_generated_clock_internal(const std::string& name,
                                                  const std::vector<double>& edge_shift,
                                                  bool invert,
                                                  double duty_cycle,
+                                                 bool phase_set,
+                                                 double phase,
+                                                 bool offset_set,
+                                                 double offset,
                                                  const std::vector<sdcparse::ObjectId>& targets);
 
 void libsdcparse_set_clock_groups_internal(const std::vector<sdcparse::ObjectId>& clock_list,
